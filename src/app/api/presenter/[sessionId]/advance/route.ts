@@ -1,0 +1,85 @@
+import { getAdmin, broadcast } from '@/lib/supabase/admin';
+import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
+import type { Phase, SessionStatus, Slide } from '@/lib/types';
+
+export const runtime = 'nodejs';
+
+interface AdvanceBody {
+  index?: number; // jump to slide index (resets phase — see AUTO_OPEN_KINDS)
+  phase?: Phase; // set activity phase ('open' stamps phase_opened_at)
+  status?: SessionStatus; // 'ended' to close the session
+}
+
+// Kinds where voting auto-opens the moment the slide comes up (the audience
+// expects to respond immediately — Mentimeter behavior). Quizzes stay manual:
+// the countdown must start when the presenter says go, not on navigation.
+// Opt out per session with settings.autoOpenVoting === false.
+const AUTO_OPEN_KINDS = new Set(['poll', 'wordcloud', 'scale', 'ranking', 'open_text']);
+
+// POST /api/presenter/[sessionId]/advance
+// The single mutation point for live session state. Broadcasts `state` after commit.
+export async function POST(req: Request, ctx: { params: Promise<{ sessionId: string }> }) {
+  const { sessionId } = await ctx.params;
+  const key = req.headers.get('x-presenter-key');
+  const deckId = await verifySessionKey(sessionId, key);
+  if (!deckId) return unauthorized();
+
+  const body = (await req.json().catch(() => ({}))) as AdvanceBody;
+  const admin = getAdmin();
+
+  const patch: Record<string, unknown> = {};
+  if (typeof body.index === 'number') {
+    const index = Math.max(0, Math.floor(body.index));
+    patch.current_slide_index = index;
+    patch.phase = 'show';
+    patch.phase_opened_at = null;
+
+    // Auto-open voting on arrival (single choke point: covers the phone remote,
+    // stage keyboard, and the PowerPoint add-in alike).
+    if (!body.phase) {
+      const { data: row } = await admin
+        .from('sessions')
+        .select('deck_snapshot, settings')
+        .eq('id', sessionId)
+        .single();
+      const slide = (row?.deck_snapshot as { slides?: Slide[] } | null)?.slides?.[index];
+      const autoOpen =
+        (row?.settings as { autoOpenVoting?: boolean } | null)?.autoOpenVoting !== false;
+      if (slide && autoOpen && AUTO_OPEN_KINDS.has(slide.kind)) {
+        patch.phase = 'open';
+        patch.phase_opened_at = new Date().toISOString();
+      }
+    }
+  }
+  if (body.phase) {
+    patch.phase = body.phase;
+    if (body.phase === 'open') patch.phase_opened_at = new Date().toISOString();
+  }
+  if (body.status) {
+    patch.status = body.status;
+    if (body.status === 'ended') patch.ended_at = new Date().toISOString();
+  }
+  if (Object.keys(patch).length === 0) {
+    return Response.json({ error: 'no_op' }, { status: 400 });
+  }
+
+  const { data: session, error } = await admin
+    .from('sessions')
+    .update(patch)
+    .eq('id', sessionId)
+    .select('id, status, current_slide_index, phase, phase_opened_at, settings')
+    .single();
+  if (error || !session) return Response.json({ error: error?.message }, { status: 500 });
+
+  const state = {
+    id: session.id,
+    status: session.status,
+    currentSlideIndex: session.current_slide_index,
+    phase: session.phase,
+    phaseOpenedAt: session.phase_opened_at,
+    settings: session.settings,
+    serverTime: new Date().toISOString(),
+  };
+  await broadcast(sessionId, 'state', state);
+  return Response.json({ ok: true, state });
+}

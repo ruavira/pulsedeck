@@ -1,0 +1,318 @@
+@import "tailwindcss";
+
+@theme {
+  /* PulseDeck × RCI theme system.
+     Default = "Ice & Azure" (bright light mode). Alternates override the same
+     semantic tokens under [data-theme=...], so every surface re-skins instantly.
+     Anchor color across all themes: RCI deep teal-navy #0A3D62. */
+  --color-ink: #f5f9fc;          /* app/stage background */
+  --color-panel: #ffffff;        /* cards */
+  --color-panel-2: #edf4f9;      /* raised/inset surfaces */
+  --color-edge: #d8e6f0;         /* borders */
+  --color-fg: #0a3d62;           /* primary text = RCI navy */
+  --color-fg-dim: #5c7a93;       /* secondary text */
+  --color-accent: #1e88d2;       /* azure primary actions */
+  --color-accent-soft: #dcedf9;  /* soft accent fill */
+  --color-cyan: #0f9ba0;         /* live signal / join codes (teal) */
+  --color-amber: #e8940f;        /* gold highlight */
+  --color-emerald: #109e6e;      /* success/correct */
+  --color-rose: #d55a90;
+  --color-slate: #7a93a8;
+  --color-red: #d8402f;
+  --color-lime: #6da33b;
+
+  --radius-card: 12px;
+
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  /* Elevation: shadows are tinted with the theme's ink so they feel native
+     on light themes (navy-tinted) and dark themes (deep black). */
+  --shadow-tint: 10, 61, 98;
+  --shadow-soft: 0 1px 2px rgba(var(--shadow-tint), 0.06), 0 4px 16px rgba(var(--shadow-tint), 0.08);
+  --shadow-pop: 0 8px 32px rgba(var(--shadow-tint), 0.16);
+  --shadow-modal: 0 24px 80px rgba(var(--shadow-tint), 0.28);
+  --chart-1: #1e88d2;
+  --chart-2: #0f9ba0;
+  --chart-3: #e8940f;
+  --chart-4: #109e6e;
+  --chart-5: #d55a90;
+  --chart-6: #7a93a8;
+  --chart-7: #d8402f;
+  --chart-8: #6da33b;
+}
+
+/* ---------- Sky Navy: luminous mid-blue, white text (great in dim rooms) ---------- */
+[data-theme='sky'] {
+  color-scheme: dark;
+  --shadow-tint: 4, 26, 45;
+  --shadow-soft: 0 1px 2px rgba(var(--shadow-tint), 0.25), 0 4px 16px rgba(var(--shadow-tint), 0.35);
+  --shadow-pop: 0 8px 32px rgba(var(--shadow-tint), 0.45);
+  --shadow-modal: 0 24px 80px rgba(var(--shadow-tint), 0.55);
+  --color-ink: #10527f;
+  --color-panel: #1668a0;
+  --color-panel-2: #1c74b0;
+  --color-edge: #3b8ac4;
+  --color-fg: #ffffff;
+  --color-fg-dim: #b7d4e8;
+  --color-accent: #53c1f0;
+  --color-accent-soft: #0e4a73;
+  --color-cyan: #3ed3c4;
+  --color-amber: #ffc55c;
+  --color-emerald: #4ade9e;
+  --color-rose: #f09bc0;
+  --color-slate: #a8c4d8;
+  --color-red: #ff7a6e;
+  --color-lime: #b8e06a;
+  --chart-1: #53c1f0; --chart-2: #3ed3c4; --chart-3: #ffc55c; --chart-4: #4ade9e;
+  --chart-5: #f09bc0; --chart-6: #a8c4d8; --chart-7: #ff7a6e; --chart-8: #b8e06a;
+}
+
+/* ---------- Teal Fresh: light, healthcare-teal energy ---------- */
+[data-theme='teal'] {
+  color-scheme: light;
+  --color-ink: #f0faf9;
+  --color-panel: #ffffff;
+  --color-panel-2: #e3f4f1;
+  --color-edge: #cbe9e5;
+  --color-fg: #0a3d62;
+  --color-fg-dim: #57837d;
+  --color-accent: #109d8d;
+  --color-accent-soft: #d3f1ec;
+  --color-cyan: #2e86c9;
+  --color-amber: #f07a4f;
+  --color-emerald: #109e6e;
+  --color-rose: #d55a90;
+  --color-slate: #7a93a8;
+  --color-red: #d8402f;
+  --color-lime: #6da33b;
+  --chart-1: #109d8d; --chart-2: #2e86c9; --chart-3: #f07a4f; --chart-4: #109e6e;
+  --chart-5: #d55a90; --chart-6: #7a93a8; --chart-7: #d8402f; --chart-8: #6da33b;
+}
+
+/* ---------- Sunrise: warm white + gold-led accents ---------- */
+[data-theme='sunrise'] {
+  color-scheme: light;
+  --color-ink: #fdfaf3;
+  --color-panel: #ffffff;
+  --color-panel-2: #f7f0df;
+  --color-edge: #ede3ce;
+  --color-fg: #0a3d62;
+  --color-fg-dim: #8a7b5e;
+  --color-accent: #d97a06;
+  --color-accent-soft: #fbecd2;
+  --color-cyan: #0f9ba0;
+  --color-amber: #2e86c9;
+  --color-emerald: #109e6e;
+  --color-rose: #d55a90;
+  --color-slate: #9a8f78;
+  --color-red: #d8402f;
+  --color-lime: #6da33b;
+  --chart-1: #d97a06; --chart-2: #2e86c9; --chart-3: #0f9ba0; --chart-4: #109e6e;
+  --chart-5: #d55a90; --chart-6: #9a8f78; --chart-7: #d8402f; --chart-8: #6da33b;
+}
+
+/* ---------- Deep Navy: the dark-stage original (for dark venues) ---------- */
+[data-theme='navy'] {
+  color-scheme: dark;
+  --shadow-tint: 0, 0, 0;
+  --shadow-soft: 0 1px 2px rgba(var(--shadow-tint), 0.25), 0 4px 16px rgba(var(--shadow-tint), 0.35);
+  --shadow-pop: 0 8px 32px rgba(var(--shadow-tint), 0.45);
+  --shadow-modal: 0 24px 80px rgba(var(--shadow-tint), 0.55);
+  --color-ink: #061826;
+  --color-panel: #0a2438;
+  --color-panel-2: #0e2c44;
+  --color-edge: #1b4059;
+  --color-fg: #f2f7fb;
+  --color-fg-dim: #8ba3b8;
+  --color-accent: #2f86c9;
+  --color-accent-soft: #0a3d62;
+  --color-cyan: #35c4c8;
+  --color-amber: #f0a93b;
+  --color-emerald: #2fbf8f;
+  --color-rose: #e77ca4;
+  --color-slate: #94a3b8;
+  --color-red: #e4574b;
+  --color-lime: #a3d65c;
+  --chart-1: #4aa3e0; --chart-2: #35c4c8; --chart-3: #f0a93b; --chart-4: #2fbf8f;
+  --chart-5: #e77ca4; --chart-6: #94a3b8; --chart-7: #e4574b; --chart-8: #a3d65c;
+}
+
+/* ---------- Aurora: deep indigo + luminous violet (premium keynote look) ---------- */
+[data-theme='aurora'] {
+  color-scheme: dark;
+  --shadow-tint: 12, 8, 42;
+  --shadow-soft: 0 1px 2px rgba(var(--shadow-tint), 0.30), 0 4px 16px rgba(var(--shadow-tint), 0.42);
+  --shadow-pop: 0 8px 32px rgba(var(--shadow-tint), 0.52);
+  --shadow-modal: 0 24px 80px rgba(var(--shadow-tint), 0.62);
+  --color-ink: #14123c;
+  --color-panel: #1e1b57;
+  --color-panel-2: #262168;
+  --color-edge: #3d387f;
+  --color-fg: #ffffff;
+  --color-fg-dim: #bcb8ea;
+  --color-accent: #8b7cf6;
+  --color-accent-soft: #241f5c;
+  --color-cyan: #43d6e4;
+  --color-amber: #ffc861;
+  --color-emerald: #4ade9e;
+  --color-rose: #f472b6;
+  --color-slate: #a7a4d4;
+  --color-red: #ff7a8a;
+  --color-lime: #bfe673;
+  --chart-1: #8b7cf6; --chart-2: #43d6e4; --chart-3: #ffc861; --chart-4: #4ade9e;
+  --chart-5: #f472b6; --chart-6: #a7a4d4; --chart-7: #ff7a8a; --chart-8: #bfe673;
+}
+
+/* ---------- Sand: warm editorial light, terracotta on soft cream ---------- */
+[data-theme='sand'] {
+  color-scheme: light;
+  --shadow-tint: 61, 47, 36;
+  --color-ink: #faf6f0;
+  --color-panel: #ffffff;
+  --color-panel-2: #f3ebe0;
+  --color-edge: #e6dccb;
+  --color-fg: #3d2f24;
+  --color-fg-dim: #8a7660;
+  --color-accent: #c2653c;
+  --color-accent-soft: #f6e4d8;
+  --color-cyan: #2f8f83;
+  --color-amber: #d99a1e;
+  --color-emerald: #3f8f5c;
+  --color-rose: #c76b8e;
+  --color-slate: #9a8b78;
+  --color-red: #c94f3a;
+  --color-lime: #7fa03f;
+  --chart-1: #c2653c; --chart-2: #2f8f83; --chart-3: #d99a1e; --chart-4: #3f8f5c;
+  --chart-5: #c76b8e; --chart-6: #9a8b78; --chart-7: #c94f3a; --chart-8: #7fa03f;
+}
+
+/* ---------- Pop: bright white + vivid, high-energy accents (events/engagement) ---------- */
+[data-theme='pop'] {
+  color-scheme: light;
+  --shadow-tint: 47, 51, 235;
+  --color-ink: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-2: #f1f4ff;
+  --color-edge: #dbe1ff;
+  --color-fg: #16204b;
+  --color-fg-dim: #6b74a6;
+  --color-accent: #4f46e5;      /* vivid indigo */
+  --color-accent-soft: #e6e6ff;
+  --color-cyan: #06b6d4;        /* vivid cyan */
+  --color-amber: #f59e0b;
+  --color-emerald: #10b981;
+  --color-rose: #ec4899;        /* vivid pink */
+  --color-slate: #7c86b8;
+  --color-red: #ef4444;
+  --color-lime: #84cc16;
+  --chart-1: #4f46e5; --chart-2: #06b6d4; --chart-3: #f59e0b; --chart-4: #10b981;
+  --chart-5: #ec4899; --chart-6: #8b5cf6; --chart-7: #ef4444; --chart-8: #84cc16;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  font-size: 16.5px;
+  letter-spacing: 0.005em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visibility (WCAG) */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- global fidelity layer ---------- */
+
+/* Reusable elevation classes (theme-aware) */
+.shadow-soft { box-shadow: var(--shadow-soft); }
+.shadow-pop { box-shadow: var(--shadow-pop); }
+.shadow-modal { box-shadow: var(--shadow-modal); }
+.shadow-accent-glow { box-shadow: 0 4px 24px color-mix(in srgb, var(--color-accent) 35%, transparent); }
+.ring-accent-soft { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent); }
+
+/* Text selection in brand color */
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+/* Slim, theme-aware scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-edge);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-edge) 60%, var(--color-fg-dim));
+}
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Gentle depth wash behind everything (barely-there, lifts panels off the page) */
+body {
+  background-image: radial-gradient(
+    1200px 600px at 50% -10%,
+    color-mix(in srgb, var(--color-accent) 5%, transparent),
+    transparent 70%
+  );
+  transition: background-color 0.25s ease;
+}
+
+/* Crisp numerals wherever numbers live */
+.tabular-nums, [class*='font-mono'] { font-variant-numeric: tabular-nums; }
+
+/* Print styles for /report PDF export */
+@media print {
+  html,
+  body {
+    background: #fff;
+    color: #10222f;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Brand kit: apply the deck's Google-Fonts pairing. Body font on the container,
+   heading font on headings. Vars are set inline by the renderer per deck. */
+.pd-brandfont {
+  font-family: var(--font-body, inherit);
+}
+.pd-brandfont :is(h1, h2, h3) {
+  font-family: var(--font-heading, inherit);
+}
+
+/* Participant accessibility: manual high-contrast + reduce-motion (audience app).
+   Contrast darkens text + strengthens borders on the light audience theme. */
+.pd-contrast {
+  --color-fg: #041b30;
+  --color-fg-dim: #33475c;
+  --color-edge: #8fa8bd;
+}
+.pd-reduce-motion,
+.pd-reduce-motion *,
+.pd-reduce-motion *::before,
+.pd-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

@@ -1,0 +1,16 @@
+(1) SHARPEST CRITIQUES — from the stage
+
+- Mentimeter: the only one that treats realtime as an engineering problem (Ably after their previous provider died at 35k) — copy that respect. But its quiz waiting-room at 2,000 is exactly the on-stage humiliation you never want: audience sees "please wait" while you sweat. Its 8-digit codes that expire ~2 days after use have burned speakers who printed QR codes into their decks a week early. Static-image import means your carefully built PPT loses every animation — audiences notice.
+- Kahoot!: speed-based scoring silently punishes the back of the room on weak wifi — participants think they answered fast, score low, disengage. "Kahoot smashers" bot-flooding is real at public events. Lobby music/characters read as clownish to a professional 300-person room. Host cannot recover a session cleanly if their own laptop drops.
+- AhaSlides: reviewer-observed connection drops needing manual reload at ~40 simultaneous joins is disqualifying for 300. No preview/test mode means your first run is live. The "Reconnecting…" banner (2025) is an admission, not a fix.
+- Wooclap: 1,000 hard cap with word-cloud rendering degrading *before* the cap — you'll hit visible lag at exactly the stress-test target. No phone presenter remote; you're chained to the podium. SMS fallback is the one genuinely smart resilience idea in the whole set.
+
+(2) MUST DO / MUST AVOID
+
+MUST: permanent join codes + QR baked into slide 1 that never expire; join page under 50KB, loads in <2s on one bar of LTE, zero account, zero app. Auto-reconnect with client-side state resume (participant rejoins mid-quiz to the current question, score intact — Supabase realtime channel resubscribe + a "current_state" row fetched on connect, never rely on replayed events). Presenter session survives presenter-laptop death: state lives in Postgres, any browser with the host token resumes instantly. Phone-as-remote for the presenter (Mentimote-style) with next/prev/reveal. Accuracy-based scoring mode (Kahoot's Aug 2025 concession) as default for adults; speed scoring optional. Server-timestamped quiz windows so slow networks aren't cheated. Aggregate on the server: broadcast counts, not 300 individual events, to every screen (this is what kills word clouds at scale). Preview/test mode before doors open. Q&A moderation on by default with a separate moderator URL. Export everything (results xlsx, deck PDF) — locked-in data is the #1 resentment.
+
+MUST AVOID: participant caps that trigger mid-session; anything that requires the audience to reload; animations promised then flattened; AI in the live path (AI is authoring-time only); lobby gimmicks default-on.
+
+(3) TRADE-OFFS I'D ACCEPT
+
+Fewer question types (6–7 solid ones) over Wooclap's 20 flaky ones. Throttled/sampled word-cloud updates (500ms batches) over per-keystroke liveness. Polished-but-limited theming over a design editor built in a day. No offline mode (unbuildable today) — but demand the reconnect path be bulletproof and rehearse a hotspot failover tomorrow morning. Server-authoritative everything, even if it adds 200ms perceived latency: at 300 people, correctness and recoverability beat snappiness every single time.

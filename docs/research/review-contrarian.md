@@ -1,0 +1,7 @@
+CONTRARIAN REVIEW
+
+(1) Strongest: **F** and **G**. F is the only response that names the actual failure point — Supabase Realtime quotas, postgres_changes fan-out, Presence payload blowup, thundering-herd reconnects, QR-scan burst — with concrete mitigations (HTTPS POST votes, idempotent upsert keys, jittered backoff, polling fallback). G converts critique into a build order with hours-based stress tests and the one guarantee that matters ("answers land in Postgres = nothing is ever lost"). Everyone else lists features; these two engineer the night.
+
+(2) Biggest blind spot: **J**. Recap links, MCP servers, API-first positioning, "2027 distribution channel" — for an event tomorrow. It's strategy cosplay that, if heeded tonight, steals hours from the reconnect path. Its "lock-in is their churn engine" thesis is also unfalsified. Runner-up blind spot: only L questions whether the scope is buildable at all, and even L still assumes the stack holds.
+
+(3) What ALL missed: nobody defined the abort criteria or the non-software fallback. What happens at minute 12 if Supabase's region has an incident, Vercel throttles, or venue Wi-Fi NATs 300 phones behind one IP and rate-limiting (which A and F both demand) locks the whole room out? One shared egress IP defeats naive rate limits and vote dedup — test that. And no one asked: has the presenter rehearsed the failure script, not just the happy path?
