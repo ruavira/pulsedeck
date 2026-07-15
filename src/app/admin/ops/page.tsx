@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
@@ -12,10 +13,27 @@ export const metadata: Metadata = {
 };
 
 type AdminRole = 'owner' | 'admin';
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const BUG_STATUSES = ['new', 'triaged', 'in_progress', 'waiting', 'resolved', 'closed', 'wont_fix'] as const;
+const ERROR_STATUSES = ['new', 'triaged', 'resolved', 'ignored'] as const;
+const ALL_STATUSES = ['new', 'triaged', 'in_progress', 'waiting', 'resolved', 'closed', 'wont_fix', 'ignored'] as const;
+const SEVERITIES = ['low', 'medium', 'high', 'critical', 'info', 'warning', 'error', 'fatal'] as const;
+
+type BugStatus = (typeof BUG_STATUSES)[number];
+type ErrorStatus = (typeof ERROR_STATUSES)[number];
+
+type OpsFilters = {
+  status: string;
+  severity: string;
+  feature: string;
+  q: string;
+};
 
 type BugReport = {
   id: string;
   title: string;
+  description: string | null;
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: string;
   category: string;
@@ -75,6 +93,30 @@ type FeatureHealth = {
   last_event_at: string | null;
 };
 
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function parseFilters(params: Record<string, string | string[] | undefined> | undefined): OpsFilters {
+  const status = first(params?.status) ?? '';
+  const severity = first(params?.severity) ?? '';
+  const feature = first(params?.feature) ?? '';
+  const q = (first(params?.q) ?? '').trim().slice(0, 80);
+
+  return {
+    status: ALL_STATUSES.includes(status as (typeof ALL_STATUSES)[number]) ? status : '',
+    severity: SEVERITIES.includes(severity as (typeof SEVERITIES)[number]) ? severity : '',
+    feature: feature.replace(/[^a-z0-9_.:-]/gi, '').slice(0, 80),
+    q,
+  };
+}
+
+function matchesSearch(values: Array<string | null | undefined>, q: string) {
+  if (!q) return true;
+  const needle = q.toLowerCase();
+  return values.some((value) => value?.toLowerCase().includes(needle));
+}
+
 const fmt = new Intl.DateTimeFormat('en-CA', {
   month: 'short',
   day: 'numeric',
@@ -118,6 +160,73 @@ function QueryWarning({ errors }: { errors: string[] }) {
   );
 }
 
+async function requireAdminSupabase() {
+  const user = await getSessionUser();
+  if (!user) redirect('/login?next=/admin/ops');
+
+  const supabase = await createSupabaseServer();
+  const { data: admin } = await supabase
+    .from('admin_users')
+    .select('role')
+    .eq('user_id', user.id)
+    .maybeSingle<{ role: AdminRole }>();
+
+  if (!admin) redirect('/studio');
+  return { supabase, admin };
+}
+
+async function updateBugStatus(formData: FormData) {
+  'use server';
+
+  const id = String(formData.get('id') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!id || !BUG_STATUSES.includes(status as BugStatus)) return;
+
+  const { supabase } = await requireAdminSupabase();
+  const terminal = ['resolved', 'closed', 'wont_fix'].includes(status);
+  const { error } = await supabase
+    .from('bug_reports')
+    .update({ status, resolved_at: terminal ? new Date().toISOString() : null })
+    .eq('id', id);
+
+  if (error) throw new Error('Could not update bug report status.');
+  revalidatePath('/admin/ops');
+}
+
+async function updateErrorStatus(formData: FormData) {
+  'use server';
+
+  const id = String(formData.get('id') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!id || !ERROR_STATUSES.includes(status as ErrorStatus)) return;
+
+  const { supabase } = await requireAdminSupabase();
+  const { error } = await supabase
+    .from('client_errors')
+    .update({ status })
+    .eq('id', id);
+
+  if (error) throw new Error('Could not update error status.');
+  revalidatePath('/admin/ops');
+}
+
+async function updateErrorGroupStatus(formData: FormData) {
+  'use server';
+
+  const fingerprint = String(formData.get('fingerprint') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!fingerprint || !ERROR_STATUSES.includes(status as ErrorStatus)) return;
+
+  const { supabase } = await requireAdminSupabase();
+  const { error } = await supabase
+    .from('client_errors')
+    .update({ status })
+    .eq('fingerprint', fingerprint);
+
+  if (error) throw new Error('Could not update grouped error status.');
+  revalidatePath('/admin/ops');
+}
+
 function StatCard({
   label,
   value,
@@ -136,8 +245,46 @@ function StatCard({
   );
 }
 
-async function loadOpsData() {
+async function loadOpsData(filters: OpsFilters) {
   const supabase = await createSupabaseServer();
+
+  let bugQuery = supabase
+    .from('bug_reports')
+    .select('id, title, description, severity, status, category, route, reporter_email, created_at');
+  if (filters.status && BUG_STATUSES.includes(filters.status as BugStatus)) bugQuery = bugQuery.eq('status', filters.status);
+  if (filters.severity && ['low', 'medium', 'high', 'critical'].includes(filters.severity)) {
+    bugQuery = bugQuery.eq('severity', filters.severity);
+  }
+
+  let errorQuery = supabase
+    .from('client_errors')
+    .select('id, message, route, source, severity, status, occurred_at');
+  if (filters.status && ERROR_STATUSES.includes(filters.status as ErrorStatus)) {
+    errorQuery = errorQuery.eq('status', filters.status);
+  }
+  if (filters.severity && ['info', 'warning', 'error', 'fatal'].includes(filters.severity)) {
+    errorQuery = errorQuery.eq('severity', filters.severity);
+  }
+
+  let groupQuery = supabase
+    .from('ops_error_groups')
+    .select('fingerprint, message_sample, route, source, severity, status, occurrence_count, first_seen_at, last_seen_at');
+  if (filters.status && ERROR_STATUSES.includes(filters.status as ErrorStatus)) {
+    groupQuery = groupQuery.eq('status', filters.status);
+  }
+  if (filters.severity && ['info', 'warning', 'error', 'fatal'].includes(filters.severity)) {
+    groupQuery = groupQuery.eq('severity', filters.severity);
+  }
+
+  let eventQuery = supabase
+    .from('app_events')
+    .select('id, event_name, feature_key, route, event_source, occurred_at');
+  if (filters.feature) eventQuery = eventQuery.eq('feature_key', filters.feature);
+
+  let dailyQuery = supabase
+    .from('ops_event_daily')
+    .select('event_date, feature_key, event_name, event_count, signed_in_users');
+  if (filters.feature) dailyQuery = dailyQuery.eq('feature_key', filters.feature);
 
   const [
     bugs,
@@ -147,29 +294,19 @@ async function loadOpsData() {
     daily,
     features,
   ] = await Promise.all([
-    supabase
-      .from('bug_reports')
-      .select('id, title, severity, status, category, route, reporter_email, created_at')
+    bugQuery
       .order('created_at', { ascending: false })
-      .limit(25),
-    supabase
-      .from('client_errors')
-      .select('id, message, route, source, severity, status, occurred_at')
-      .order('occurred_at', { ascending: false })
-      .limit(25),
-    supabase
-      .from('ops_error_groups')
-      .select('fingerprint, message_sample, route, source, severity, status, occurrence_count, first_seen_at, last_seen_at')
-      .order('last_seen_at', { ascending: false })
-      .limit(20),
-    supabase
-      .from('app_events')
-      .select('id, event_name, feature_key, route, event_source, occurred_at')
+      .limit(50),
+    errorQuery
       .order('occurred_at', { ascending: false })
       .limit(50),
-    supabase
-      .from('ops_event_daily')
-      .select('event_date, feature_key, event_name, event_count, signed_in_users')
+    groupQuery
+      .order('last_seen_at', { ascending: false })
+      .limit(20),
+    eventQuery
+      .order('occurred_at', { ascending: false })
+      .limit(50),
+    dailyQuery
       .order('event_date', { ascending: false })
       .limit(50),
     supabase
@@ -191,29 +328,26 @@ async function loadOpsData() {
 
   return {
     queryErrors,
-    bugs: (bugs.data ?? []) as BugReport[],
-    errors: (errors.data ?? []) as ClientError[],
-    groups: (groups.data ?? []) as ErrorGroup[],
+    bugs: ((bugs.data ?? []) as BugReport[]).filter((bug) =>
+      matchesSearch([bug.title, bug.description, bug.route, bug.reporter_email], filters.q),
+    ),
+    errors: ((errors.data ?? []) as ClientError[]).filter((error) =>
+      matchesSearch([error.message, error.route, error.source], filters.q),
+    ),
+    groups: ((groups.data ?? []) as ErrorGroup[]).filter((group) =>
+      matchesSearch([group.message_sample, group.route, group.source], filters.q),
+    ),
     events: (events.data ?? []) as AppEvent[],
     daily: (daily.data ?? []) as EventDaily[],
     features: (features.data ?? []) as FeatureHealth[],
   };
 }
 
-export default async function OpsDashboardPage() {
-  const user = await getSessionUser();
-  if (!user) redirect('/login?next=/admin/ops');
+export default async function OpsDashboardPage({ searchParams }: { searchParams?: SearchParams }) {
+  const { admin } = await requireAdminSupabase();
+  const filters = parseFilters(await searchParams);
 
-  const supabase = await createSupabaseServer();
-  const { data: admin } = await supabase
-    .from('admin_users')
-    .select('role')
-    .eq('user_id', user.id)
-    .maybeSingle<{ role: AdminRole }>();
-
-  if (!admin) redirect('/studio');
-
-  const data = await loadOpsData();
+  const data = await loadOpsData(filters);
   const openBugs = data.bugs.filter((bug) => !['resolved', 'closed', 'wont_fix'].includes(bug.status)).length;
   const activeErrorGroups = data.groups.filter((group) => group.status !== 'resolved' && group.status !== 'ignored').length;
   const events7d = sum(data.features, (feature) => feature.events_7d);
@@ -244,6 +378,79 @@ export default async function OpsDashboardPage() {
 
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <QueryWarning errors={data.queryErrors} />
+
+        <Card className="p-5">
+          <form className="grid gap-4 lg:grid-cols-[1fr_180px_180px_220px_auto]">
+            <label className="grid gap-2 text-sm font-semibold text-fg">
+              Search
+              <input
+                name="q"
+                defaultValue={filters.q}
+                placeholder="Title, message, route, reporter"
+                className="min-h-[44px] rounded-lg border border-edge bg-panel-2 px-3 text-sm font-normal text-fg outline-none transition-colors placeholder:text-fg-dim/70 focus:border-accent"
+              />
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-fg">
+              Status
+              <select
+                name="status"
+                defaultValue={filters.status}
+                className="min-h-[44px] rounded-lg border border-edge bg-panel-2 px-3 text-sm font-normal text-fg outline-none transition-colors focus:border-accent"
+              >
+                <option value="">All statuses</option>
+                {ALL_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-fg">
+              Severity
+              <select
+                name="severity"
+                defaultValue={filters.severity}
+                className="min-h-[44px] rounded-lg border border-edge bg-panel-2 px-3 text-sm font-normal text-fg outline-none transition-colors focus:border-accent"
+              >
+                <option value="">All severities</option>
+                {SEVERITIES.map((severity) => (
+                  <option key={severity} value={severity}>
+                    {severity}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-fg">
+              Feature
+              <select
+                name="feature"
+                defaultValue={filters.feature}
+                className="min-h-[44px] rounded-lg border border-edge bg-panel-2 px-3 text-sm font-normal text-fg outline-none transition-colors focus:border-accent"
+              >
+                <option value="">All features</option>
+                {data.features.map((feature) => (
+                  <option key={feature.feature_key} value={feature.feature_key}>
+                    {feature.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex items-end gap-2">
+              <button
+                type="submit"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition-all hover:brightness-110"
+              >
+                Apply
+              </button>
+              <Link
+                href="/admin/ops"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-edge px-4 text-sm font-semibold text-fg-dim transition-colors hover:border-accent/50 hover:text-fg"
+              >
+                Reset
+              </Link>
+            </div>
+          </form>
+        </Card>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Open bugs" value={n(openBugs)} hint="Recent reports still needing review." />
@@ -277,8 +484,22 @@ export default async function OpsDashboardPage() {
                       <p className="mt-1 break-words text-xs text-fg-dim">
                         {bug.route ?? 'Unknown route'} · {bug.reporter_email ?? 'No reporter email'}
                       </p>
+                      {bug.description ? (
+                        <p className="mt-2 line-clamp-3 break-words text-xs leading-relaxed text-fg-dim">
+                          {bug.description}
+                        </p>
+                      ) : null}
                     </div>
-                    <time className="text-xs tabular-nums text-fg-dim">{when(bug.created_at)}</time>
+                    <div className="grid gap-3 justify-items-start md:justify-items-end">
+                      <time className="text-xs tabular-nums text-fg-dim">{when(bug.created_at)}</time>
+                      <StatusForm
+                        id={bug.id}
+                        current={bug.status}
+                        statuses={BUG_STATUSES}
+                        action={updateBugStatus}
+                        fieldName="id"
+                      />
+                    </div>
                   </article>
                 ))
               )}
@@ -306,6 +527,15 @@ export default async function OpsDashboardPage() {
                     <p className="mt-1 break-words text-xs text-fg-dim">
                       {group.route ?? 'Unknown route'} · {group.source} · last {when(group.last_seen_at)}
                     </p>
+                    <div className="mt-3">
+                      <StatusForm
+                        id={group.fingerprint}
+                        current={group.status}
+                        statuses={ERROR_STATUSES}
+                        action={updateErrorGroupStatus}
+                        fieldName="fingerprint"
+                      />
+                    </div>
                   </article>
                 ))
               )}
@@ -393,6 +623,15 @@ export default async function OpsDashboardPage() {
                     </div>
                     <h3 className="mt-2 break-words text-sm font-bold text-fg">{error.message}</h3>
                     <p className="mt-1 break-words text-xs text-fg-dim">{error.route ?? 'Unknown route'} · {error.source}</p>
+                    <div className="mt-3">
+                      <StatusForm
+                        id={error.id}
+                        current={error.status}
+                        statuses={ERROR_STATUSES}
+                        action={updateErrorStatus}
+                        fieldName="id"
+                      />
+                    </div>
                   </article>
                 ))
               )}
@@ -444,4 +683,42 @@ export default async function OpsDashboardPage() {
 
 function EmptyState({ label }: { label: string }) {
   return <p className="px-5 py-8 text-center text-sm text-fg-dim">{label}</p>;
+}
+
+function StatusForm({
+  id,
+  current,
+  statuses,
+  action,
+  fieldName,
+}: {
+  id: string;
+  current: string;
+  statuses: readonly string[];
+  action: (formData: FormData) => Promise<void>;
+  fieldName: 'id' | 'fingerprint';
+}) {
+  return (
+    <form action={action} className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+      <input type="hidden" name={fieldName} value={id} />
+      <select
+        name="status"
+        defaultValue={current}
+        aria-label="Status"
+        className="min-h-[36px] rounded-lg border border-edge bg-panel-2 px-2 text-xs font-semibold text-fg outline-none transition-colors focus:border-accent"
+      >
+        {statuses.map((status) => (
+          <option key={status} value={status}>
+            {status}
+          </option>
+        ))}
+      </select>
+      <button
+        type="submit"
+        className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-edge px-3 text-xs font-semibold text-fg-dim transition-colors hover:border-accent/50 hover:text-fg"
+      >
+        Update
+      </button>
+    </form>
+  );
 }
