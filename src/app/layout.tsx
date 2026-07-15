@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { PwaRegister } from '@/components/shared/pwa';
+import { OpsTelemetry } from '@/components/ops/ops-telemetry';
 import './globals.css';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -39,6 +40,7 @@ export default function RootLayout({
           }}
         />
         <PwaRegister />
+        <OpsTelemetry />
         {children}
       </body>
     </html>
