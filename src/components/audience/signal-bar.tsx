@@ -3,7 +3,7 @@
 // presenter "slow down / I'm lost / raise hand". Anonymous, throttled, ephemeral
 // (broadcast only — never stored). The stage aggregates these into a live mood.
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { haptic } from './bits';
 
 const SIGNALS: { kind: string; emoji: string; label: string }[] = [
@@ -24,7 +24,7 @@ export function SignalBar({ broadcast }: { broadcast: (event: string, payload: u
 
   useEffect(() => () => clearTimeout(sentTimer.current), []);
 
-  const tap = (kind: string, label: string) => {
+  const tap = useCallback((kind: string, label: string) => {
     const now = Date.now();
     if (now - last.current < THROTTLE_MS) return;
     last.current = now;
@@ -34,7 +34,7 @@ export function SignalBar({ broadcast }: { broadcast: (event: string, payload: u
     clearTimeout(sentTimer.current);
     sentTimer.current = setTimeout(() => setSent(null), 1600);
     setOpen(false);
-  };
+  }, [broadcast]);
 
   return (
     <div className="fixed bottom-24 left-4 z-30 flex flex-col items-start gap-2">

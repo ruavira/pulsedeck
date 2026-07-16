@@ -38,7 +38,6 @@ const CONTENT_W = A4.w - MARGIN * 2;
 const INK = rgb(0.09, 0.09, 0.13);
 const DIM = rgb(0.42, 0.42, 0.5);
 const ACCENT = rgb(0.39, 0.4, 0.95); // PulseDeck violet
-const RULE = rgb(0.86, 0.86, 0.9);
 const ZEBRA = rgb(0.96, 0.96, 0.98);
 
 interface Ctx {

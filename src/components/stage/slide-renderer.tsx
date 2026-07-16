@@ -62,11 +62,6 @@ function renderText(text: string): React.ReactNode[] {
   ));
 }
 
-function youtubeId(url: string): string | null {
-  const m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,20})/);
-  return m ? m[1] : null;
-}
-
 // ---------- element build animations ----------
 
 // Per-element staggered entrance, used when a slide's `buildAnimation` is on.
@@ -308,7 +303,6 @@ function FitBox({ fitKey, children }: { fitKey: string; children: React.ReactNod
       o.removeEventListener('load', schedule, true);
       ro.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
 
   return (
