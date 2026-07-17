@@ -1,0 +1,18 @@
+DATA-PRIVACY & ENTERPRISE-IT REVIEW
+
+(1) Sharpest critiques
+- Mentimeter: anonymity is its trust engine, yet "optional participant names" (2024) and SSO-verified participants quietly erode it — nothing in the audience UI reliably signals which mode is live. Custom data retention is Enterprise-only, so every Free/Basic/Pro deck accumulates response data indefinitely. Realtime rides Ably: a second processor corporate DPAs must cover, and WebSockets over wss:// on non-443-friendly proxies get blocked in locked-down venues.
+- Kahoot!: nickname "anonymity" is fake — speed-scored per-player results exported to .xlsx are pseudonymous personal data under GDPR the moment nicknames are guessable (they are, in a 30-person room). "Kahoot smashers" prove join codes are enumerable; 2-step join is an opt-in patch, not a design fix. kahoot.it is on many school/corporate blocklists precisely because it's categorized as "games."
+- AhaSlides: audience authentication only at Pro, SSO only Enterprise, and no documented retention controls or regional data-residency story — this fails procurement questionnaires outright. The v4 "request-only, ~10-min refresh" export means participant data sits in a vendor pipeline you can't audit.
+- Wooclap: best GDPR posture (EU-based, no-training pledge), but SMS participation leaks phone numbers to a telco processor and is rightly disabled by default; moderator links and per-participant analytics on a tool marketed as "anonymous" is a contradiction nobody surfaces to the audience.
+- All four: participant consent is implicit-by-joining; none shows a privacy notice at the QR scan moment.
+
+(2) MUST do / MUST avoid
+MUST: anonymity by default with a visible on-screen badge ("responses are anonymous" vs "names collected") on every participant screen; random per-session participant IDs, no cookies beyond a session token, no fingerprinting; hard TTL — auto-purge raw responses (e.g. 30 days default, presenter-configurable to 0 = purge at session end); export = aggregate by default, per-participant export an explicit toggle; non-guessable join codes (6+ chars, rate-limited joins, room lock button for the presenter); profanity filter + kill-switch to hide any submission instantly; pin Supabase project to one region and say which; AI features off by default with a one-line disclosure that prompts go to Anthropic (zero-retention API config), and never send participant free-text to AI without the presenter explicitly invoking it; everything over 443 with SSE/long-poll fallback because venue firewalls kill raw WebSockets.
+MUST AVOID: accounts for the audience (any signup = 10x drop-off + a data-subject-rights liability you don't want for a one-day event); storing IP/user-agent against responses; SMS fallback (telco processor, phone-number retention); third-party analytics/trackers on the participant page (breaks CSP-strict corporate proxies and poisons "anonymous").
+
+(3) Trade-offs I'd accept
+- No per-participant learning analytics at launch: it's the market's most-cited gap, but it converts you from "anonymous poll tool" to "data controller of assessment records" overnight. Ship aggregate-only tomorrow.
+- Duplicate voting is possible without auth — accept ballot-stuffing risk at 300 people, mitigate with one-vote-per-session-token, rather than device fingerprinting.
+- Session-end purge default may frustrate presenters who forget to export; acceptable — prompt "export before closing?" instead of silent retention.
+- Anthropic as a sub-processor for optional AI is fine given everything-works-without-AI; a DPA-blocked buyer just leaves AI off.

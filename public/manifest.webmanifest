@@ -1,0 +1,22 @@
+{
+  "name": "PulseDeck — Presentations with a pulse",
+  "short_name": "PulseDeck",
+  "description": "All-in-one interactive presentations: live polls, word clouds, quizzes, Q&A and slides your audience joins from their phones in seconds.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#061826",
+  "theme_color": "#0a3d62",
+  "categories": ["productivity", "business", "education"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Open Studio", "url": "/studio", "description": "Create and edit decks" },
+    { "name": "Join a session", "url": "/j", "description": "Enter a join code" }
+  ]
+}

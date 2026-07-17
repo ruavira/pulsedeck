@@ -1,0 +1,20 @@
+## 1. Sharpest critiques (distributed-systems lens)
+
+**Mentimeter** is the only one that took realtime infra seriously — and only after their previous provider *fell over at ~35k concurrent connections*. Lesson: they outsourced fan-out to Ably rather than self-hosting. Yet even they cap quizzes at 2,000 with a waiting room, because quiz mode is the hard mode: synchronized countdown + burst writes + leaderboard recompute is a fundamentally different workload than a drip-fed word cloud. **Kahoot!**'s speed-based scoring makes network latency a gameplay variable — participants on bad WiFi lose points, which is a fairness bug shipped as a feature; their 2-step join exists because unauthenticated join codes invite bot floods ("Kahoot smashers"). **AhaSlides** reportedly drops connections needing manual reload at ~40 simultaneous joins and only added a reconnect UI in Jan 2025 — that's a client that never had reconnection state machines from day one. **Wooclap**'s 1,000 hard cap with "display can lag near it" tells you their answer-aggregation path does per-vote fan-out to the presenter view. None of the four has offline/degraded modes; Wooclap's SMS fallback is the only degradation story in the field.
+
+## 2. MUST do / MUST avoid for tomorrow's build
+
+MUST:
+- **One realtime channel per session, broadcast-only, presenter-driven.** Participants never subscribe to each other. Supabase Realtime free/pro tiers cap concurrent connections (~200 default, configurable to 500+; verify your project's quota TODAY and raise it) and messages/sec — 300 participants on one channel receiving `slide_changed` events is fine; 300 participants each on postgres_changes subscriptions is not.
+- **Votes go over HTTPS POST (Next.js route → Postgres), never over the realtime socket.** Writes must be idempotent: `UNIQUE(session_id, question_id, participant_id)` with upsert. Client retries with the same key are then free.
+- **Aggregate server-side, broadcast deltas on a throttle** (250–500ms tick, or DB trigger → single broadcast of counts). Presenter renders counts, never raw rows.
+- **Participant identity = UUID in localStorage** minted at QR scan; survives refresh, dedupes votes, no auth friction.
+- **Reconnection with jittered exponential backoff + full state resync on reconnect** (fetch current slide/phase via REST, don't replay missed events). The venue WiFi *will* blip; 300 clients reconnecting simultaneously without jitter is your self-inflicted thundering herd.
+- **QR-scan burst handling:** the join page must be static/edge-cached, tiny, no heavy JS bundle; session state fetched after paint. 300 scans in 10 seconds is the spikiest moment of the event.
+- **Server-authoritative quiz timing:** broadcast `question_open` with server deadline timestamp; score on server receive-time vs deadline, with generous slack — do not let client clocks or Kahoot-style raw speed scoring decide winners.
+- **Presenter degradation path:** if realtime dies, participants poll a cached REST endpoint every 3–5s. Ship this fallback tomorrow, not later.
+
+MUST AVOID: postgres_changes subscriptions per participant; per-vote broadcasts; Supabase Presence for 300 users on one channel (presence sync payloads blow up — use a heartbeat row + periodic count instead); client-computed scores; join codes without rate limiting on the vote endpoint.
+
+## 3. Trade-offs I accept
+Accept 300–500ms aggregate staleness for stability. Accept accuracy-based (not speed-based) scoring — fairer and cheaper. Accept "one live session at a time" — single presenter, so shard nothing. Accept losing per-keystroke word-cloud animation. Skip SMS fallback (no time), but not the polling fallback. Load-test the QR-join burst and the simultaneous-quiz-answer burst tonight with a k6 script at 1,000 virtual users — those two moments are the whole risk surface.

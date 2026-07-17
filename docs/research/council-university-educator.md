@@ -1,0 +1,15 @@
+**LECTURER'S VERDICT (30–300 students, weekly use)**
+
+**(1) Sharpest critiques**
+- **Mentimeter:** 50 participants/month free with a 30-day lockout is hostile to teaching; annual-only billing punishes term-based use. Only ~2 quiz formats — useless for real formative assessment. No per-student analytics: I can see the word cloud, not who's lost.
+- **Kahoot!:** speed-based scoring is pedagogically corrupt — it rewards fast thumbs, not understanding, and penalizes students on weak campus Wi-Fi. Everything except MCQ/True-False paywalled; 20-char type-answer cap blocks anything beyond vocabulary recall. "Kahoot smashers" bot-flooding is a real lecture-hall failure mode. Accuracy mode (Aug 2025) is Kahoot admitting the core mechanic was broken.
+- **AhaSlides:** best value, but 5 quiz + 3 poll questions free per deck kills a 50-minute lecture; no undo in the editor is terrifying live; single-reviewer reports of connection drops at ~40 simultaneous joins are disqualifying at 300.
+- **Wooclap:** the only one that takes pedagogy seriously (fill-in-blanks, matching, LaTeX, SCT, "I'm confused" button) — but the free tier collapsed to 5 active questions/30 days, and per-presenter licensing means my department can't afford it across staff.
+
+**(2) MUST do / MUST avoid**
+MUST: Wooclap's question breadth (≥12 types incl. fill-in-blanks, matching, ordering, numeric-with-tolerance, LaTeX) inside Mentimeter's polish; **scoring modes as a toggle** — speed, accuracy-only, confidence-weighted — default accuracy; **per-participant CSV export** (name-optional) mapping every response to a session identity, because gradebook credit is why I export at all; anonymous-by-default with per-question anonymity toggle; Q&A upvoting with a moderation queue I can run from my phone while presenting; "I'm confused" ambient signal; participation-equity view (who hasn't answered anything in 20 minutes); rejoin grace — a student whose phone sleeps must resume with score intact via a stable device token, not a fresh nickname; QR + short code + plain URL simultaneously; profanity filter on ALL free-text (word clouds project onto a 10-meter screen — one slur is a disciplinary incident); AI strictly optional and never in the live path.
+
+MUST AVOID: participant caps that trip mid-session (Mentimeter's lockout is the single worst pattern in the category); per-seat pricing; question-count caps; speed scoring as default; character limits under ~250 on open responses; static-image-only slide import with no text fallback.
+
+**(3) Trade-offs I'd accept**
+Drop team mode, music, avatars, and fancy theming for launch. Accept static-image PPT import IF markdown authoring is first-class. Accept 1,000-participant ceiling (Wooclap proves it's livable) in exchange for guaranteed stability at 300 — throttle word-cloud rerender to 1–2s batches rather than per-keystroke realtime; nobody perceives the difference, and it's what keeps Supabase realtime alive under burst load when 300 phones answer in the same 5 seconds.
