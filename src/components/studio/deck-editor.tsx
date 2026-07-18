@@ -13,6 +13,7 @@ import { CanvasDropzone } from './canvas-dropzone';
 import { EditorTopBar } from './editor-top-bar';
 import { ParticipantPreview } from './participant-preview';
 import { SessionHistoryModal } from './session-history-modal';
+import { LmsBridgeModal } from './lms-bridge-modal';
 import { FirstRun } from './first-run';
 import { GoLiveModal } from './go-live-modal';
 import { FileImportModal, MarkdownImportModal, type ImportResult } from './import-modals';
@@ -38,6 +39,7 @@ type StudioModal =
   | { type: 'kind' }
   | { type: 'markdown' }
   | { type: 'sessions' }
+  | { type: 'lms' }
   | { type: 'file'; kind: 'pptx' | 'pdf'; file: File };
 
 export function DeckEditor({ deckId }: { deckId: string }) {
@@ -407,6 +409,7 @@ function EditorShell({
         onOpenAi={() => setModal({ type: 'ai' })}
         onOpenMarkdown={() => setModal({ type: 'markdown' })}
         onOpenSessions={() => setModal({ type: 'sessions' })}
+        onOpenLms={() => setModal({ type: 'lms' })}
         onTogglePreview={() => setPreviewOpen((o) => !o)}
         onPickPptx={(file) => setModal({ type: 'file', kind: 'pptx', file })}
         onPickPdf={(file) => setModal({ type: 'file', kind: 'pdf', file })}
@@ -591,6 +594,12 @@ function EditorShell({
       />
       <SessionHistoryModal
         open={modal?.type === 'sessions'}
+        onClose={() => setModal(null)}
+        deckId={deckId}
+        presenterKey={presenterKey}
+      />
+      <LmsBridgeModal
+        open={modal?.type === 'lms'}
         onClose={() => setModal(null)}
         deckId={deckId}
         presenterKey={presenterKey}

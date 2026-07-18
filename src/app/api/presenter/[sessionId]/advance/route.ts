@@ -1,5 +1,6 @@
 import { getAdmin, broadcast } from '@/lib/supabase/admin';
 import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
+import { parseLmsConfig, pushSessionToLms } from '@/lib/server/lms-bridge';
 import type { Phase, SessionStatus, Slide } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -81,5 +82,19 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
     serverTime: new Date().toISOString(),
   };
   await broadcast(sessionId, 'state', state);
+
+  // LMS bridge auto-push: when the session ends and the deck has a webhook
+  // configured with autoPush on, deliver results before returning (serverless
+  // runtimes don't survive un-awaited work; delivery caps itself at 6s and
+  // never throws). The response stays `ok` regardless — delivery status is
+  // recorded on the session for the report page.
+  if (body.status === 'ended') {
+    const { data: deckRow } = await admin.from('decks').select('lms').eq('id', deckId).single();
+    const cfg = parseLmsConfig(deckRow?.lms);
+    if (cfg.url && cfg.autoPush !== false) {
+      await pushSessionToLms(admin, sessionId, 'session_end');
+    }
+  }
+
   return Response.json({ ok: true, state });
 }

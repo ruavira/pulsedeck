@@ -37,6 +37,16 @@ export interface SessionReport {
   slides: ReportSlide[];
   leaderboard: LeaderboardEntry[];
   questions: ReportQuestion[];
+  lms?: {
+    configured: boolean;
+    lastDelivery: {
+      at: string;
+      ok: boolean;
+      status: number | null;
+      trigger: string;
+      error?: string;
+    } | null;
+  };
 }
 
 export interface QaSummary {

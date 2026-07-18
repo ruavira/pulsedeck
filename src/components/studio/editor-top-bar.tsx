@@ -48,6 +48,7 @@ export function EditorTopBar({
   onOpenAi,
   onOpenMarkdown,
   onOpenSessions,
+  onOpenLms,
   onTogglePreview,
   onPickPptx,
   onPickPdf,
@@ -72,6 +73,7 @@ export function EditorTopBar({
   onOpenAi: () => void;
   onOpenMarkdown: () => void;
   onOpenSessions: () => void;
+  onOpenLms: () => void;
   onTogglePreview: () => void;
   onPickPptx: (file: File) => void;
   onPickPdf: (file: File) => void;
@@ -346,6 +348,9 @@ export function EditorTopBar({
       <span className="ml-auto flex flex-wrap items-center gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={onOpenSessions}>
           <IconHistory width={14} height={14} /> Sessions
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onOpenLms}>
+          LMS
         </Button>
         <Button
           type="button"
