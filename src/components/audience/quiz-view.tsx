@@ -66,7 +66,7 @@ function CountdownRing({ remainingMs, totalMs }: { remainingMs: number; totalMs:
       <span
         aria-hidden="true"
         className={`absolute inset-0 flex items-center justify-center font-mono text-xl font-bold ${
-          low ? 'text-amber' : 'text-fg'
+          low ? 'text-red' : 'text-fg'
         }`}
       >
         {secs}

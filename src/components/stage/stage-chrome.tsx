@@ -52,7 +52,7 @@ export function StageChrome({
           className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest backdrop-blur-sm ${
             connected
               ? 'border-emerald/50 bg-panel/90 text-emerald'
-              : 'border-amber/50 bg-panel/90 text-amber'
+              : 'border-amber/50 bg-panel/90 text-fg'
           }`}
           role="status"
         >

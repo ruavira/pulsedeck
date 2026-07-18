@@ -139,7 +139,7 @@ export function CanvasDropzone({
           <p
             role="alert"
             className={`flex items-center gap-2 rounded-xl border bg-panel px-4 py-2 text-sm shadow-pop ${
-              notice.tone === 'error' ? 'border-red/40 text-red' : 'border-amber/40 text-amber'
+              notice.tone === 'error' ? 'border-red/40 text-red' : 'border-amber/40 text-fg'
             }`}
           >
             {notice.text}

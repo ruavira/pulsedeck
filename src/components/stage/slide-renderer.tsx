@@ -519,7 +519,7 @@ function PhasePill({ phase }: { phase: Phase }) {
   const map: Record<Phase, { label: string; cls: string; pulse?: boolean }> = {
     show: { label: 'Get ready', cls: 'border-edge text-fg-dim' },
     open: { label: 'Voting open', cls: 'border-emerald/60 text-emerald', pulse: true },
-    closed: { label: 'Voting closed', cls: 'border-amber/60 text-amber' },
+    closed: { label: 'Voting closed', cls: 'border-amber/60 text-fg' },
     reveal: { label: 'Results', cls: 'border-accent/60 text-accent' },
   };
   const { label, cls, pulse } = map[phase];

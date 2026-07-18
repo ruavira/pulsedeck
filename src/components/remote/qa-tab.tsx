@@ -148,7 +148,7 @@ export function QaTab({
     <div className="flex flex-col gap-4">
       {moderated && (
         <Card className="border-amber/40 p-3.5">
-          <p className="text-sm font-semibold text-amber">Moderation is on</p>
+          <p className="text-sm font-semibold text-fg">Moderation is on</p>
           <p className="mt-0.5 text-xs leading-relaxed text-fg-dim">
             New questions wait in a pending queue before appearing here. The pending
             queue isn&apos;t available on the remote yet — approve from the studio, or

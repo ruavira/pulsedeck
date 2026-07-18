@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowser } from '@/lib/supabase/browser';
 import { Button, Input } from '@/components/shared/ui';
 
@@ -13,6 +13,24 @@ export function ReportIssueButton({ reporterEmail }: { reporterEmail?: string | 
   const [severity, setSeverity] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
   const [category, setCategory] = useState<'bug' | 'feedback' | 'feature_request' | 'question' | 'performance'>('bug');
   const [state, setState] = useState<SubmitState>('idle');
+  const titleRef = useRef<HTMLInputElement>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+
+  // Dialog a11y: focus the first field on open, restore the trigger on close,
+  // and close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    restoreRef.current = document.activeElement as HTMLElement | null;
+    titleRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      restoreRef.current?.focus?.();
+    };
+  }, [open]);
 
   const reset = () => {
     setTitle('');
@@ -65,14 +83,22 @@ export function ReportIssueButton({ reporterEmail }: { reporterEmail?: string | 
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 px-4 py-5 sm:items-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 py-5 sm:items-center">
+          <div
+            className="absolute inset-0 bg-black/35"
+            onClick={close}
+            aria-hidden="true"
+          />
           <form
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="report-issue-title"
             onSubmit={(event) => void submit(event)}
-            className="w-full max-w-lg rounded-2xl border border-edge bg-panel p-5 shadow-modal"
+            className="relative w-full max-w-lg rounded-2xl border border-edge bg-panel p-5 shadow-modal"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-fg">Report issue</h2>
+                <h2 id="report-issue-title" className="text-lg font-bold text-fg">Report issue</h2>
                 <p className="mt-1 text-sm text-fg-dim">This goes straight into the PulseDeck ops dashboard.</p>
               </div>
               <button
@@ -98,6 +124,7 @@ export function ReportIssueButton({ reporterEmail }: { reporterEmail?: string | 
                 <label className="mt-5 block">
                   <span className="text-sm font-semibold text-fg">Title</span>
                   <Input
+                    ref={titleRef}
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     placeholder="What went wrong?"

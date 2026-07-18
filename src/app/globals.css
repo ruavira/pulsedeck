@@ -10,20 +10,21 @@
   --color-panel-2: #edf4f9;      /* raised/inset surfaces */
   --color-edge: #d8e6f0;         /* borders */
   --color-fg: #0a3d62;           /* primary text = RCI navy */
-  --color-fg-dim: #5c7a93;       /* secondary text */
+  --color-fg-dim: #56728a;       /* secondary text */
   --color-accent: #1e88d2;       /* azure primary actions */
   --color-accent-soft: #dcedf9;  /* soft accent fill */
   --color-cyan: #0f9ba0;         /* live signal / join codes (teal) */
   --color-amber: #e8940f;        /* gold highlight */
-  --color-emerald: #109e6e;      /* success/correct */
+  --color-emerald: #0d825b;      /* success/correct */
   --color-rose: #d55a90;
   --color-slate: #7a93a8;
-  --color-red: #d8402f;
+  --color-red: #d33928;
   --color-lime: #6da33b;
 
   --radius-card: 12px;
 
   --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --bar-halo: rgba(255, 255, 255, 0.55); /* halo behind bar labels (a11y) */
 }
 
 :root {
@@ -56,18 +57,19 @@
   --color-panel-2: #1c74b0;
   --color-edge: #3b8ac4;
   --color-fg: #ffffff;
-  --color-fg-dim: #b7d4e8;
+  --color-fg-dim: #ecf4f9;
   --color-accent: #53c1f0;
   --color-accent-soft: #0e4a73;
   --color-cyan: #3ed3c4;
-  --color-amber: #ffc55c;
-  --color-emerald: #4ade9e;
+  --color-amber: #ffdb9a;
+  --color-emerald: #a6efcf;
   --color-rose: #f09bc0;
   --color-slate: #a8c4d8;
-  --color-red: #ff7a6e;
+  --color-red: #ffd6d1;
   --color-lime: #b8e06a;
   --chart-1: #53c1f0; --chart-2: #3ed3c4; --chart-3: #ffc55c; --chart-4: #4ade9e;
   --chart-5: #f09bc0; --chart-6: #a8c4d8; --chart-7: #ff7a6e; --chart-8: #b8e06a;
+  --bar-halo: rgba(4, 26, 45, 0.6);
 }
 
 /* ---------- Teal Fresh: light, healthcare-teal energy ---------- */
@@ -78,15 +80,15 @@
   --color-panel-2: #e3f4f1;
   --color-edge: #cbe9e5;
   --color-fg: #0a3d62;
-  --color-fg-dim: #57837d;
+  --color-fg-dim: #4e7570;
   --color-accent: #109d8d;
   --color-accent-soft: #d3f1ec;
   --color-cyan: #2e86c9;
   --color-amber: #f07a4f;
-  --color-emerald: #109e6e;
+  --color-emerald: #0d825b;
   --color-rose: #d55a90;
   --color-slate: #7a93a8;
-  --color-red: #d8402f;
+  --color-red: #d33928;
   --color-lime: #6da33b;
   --chart-1: #109d8d; --chart-2: #2e86c9; --chart-3: #f07a4f; --chart-4: #109e6e;
   --chart-5: #d55a90; --chart-6: #7a93a8; --chart-7: #d8402f; --chart-8: #6da33b;
@@ -100,15 +102,15 @@
   --color-panel-2: #f7f0df;
   --color-edge: #ede3ce;
   --color-fg: #0a3d62;
-  --color-fg-dim: #8a7b5e;
+  --color-fg-dim: #7a6c53;
   --color-accent: #d97a06;
   --color-accent-soft: #fbecd2;
   --color-cyan: #0f9ba0;
-  --color-amber: #2e86c9;
-  --color-emerald: #109e6e;
+  --color-amber: #2978b5;
+  --color-emerald: #0d805a;
   --color-rose: #d55a90;
   --color-slate: #9a8f78;
-  --color-red: #d8402f;
+  --color-red: #d13727;
   --color-lime: #6da33b;
   --chart-1: #d97a06; --chart-2: #2e86c9; --chart-3: #0f9ba0; --chart-4: #109e6e;
   --chart-5: #d55a90; --chart-6: #9a8f78; --chart-7: #d8402f; --chart-8: #6da33b;
@@ -134,10 +136,11 @@
   --color-emerald: #2fbf8f;
   --color-rose: #e77ca4;
   --color-slate: #94a3b8;
-  --color-red: #e4574b;
+  --color-red: #e55c50;
   --color-lime: #a3d65c;
   --chart-1: #4aa3e0; --chart-2: #35c4c8; --chart-3: #f0a93b; --chart-4: #2fbf8f;
   --chart-5: #e77ca4; --chart-6: #94a3b8; --chart-7: #e4574b; --chart-8: #a3d65c;
+  --bar-halo: rgba(0, 0, 0, 0.6);
 }
 
 /* ---------- Aurora: deep indigo + luminous violet (premium keynote look) ---------- */
@@ -164,6 +167,7 @@
   --color-lime: #bfe673;
   --chart-1: #8b7cf6; --chart-2: #43d6e4; --chart-3: #ffc861; --chart-4: #4ade9e;
   --chart-5: #f472b6; --chart-6: #a7a4d4; --chart-7: #ff7a8a; --chart-8: #bfe673;
+  --bar-halo: rgba(12, 8, 42, 0.6);
 }
 
 /* ---------- Sand: warm editorial light, terracotta on soft cream ---------- */
@@ -175,15 +179,15 @@
   --color-panel-2: #f3ebe0;
   --color-edge: #e6dccb;
   --color-fg: #3d2f24;
-  --color-fg-dim: #8a7660;
+  --color-fg-dim: #7a6855;
   --color-accent: #c2653c;
   --color-accent-soft: #f6e4d8;
   --color-cyan: #2f8f83;
   --color-amber: #d99a1e;
-  --color-emerald: #3f8f5c;
+  --color-emerald: #387f52;
   --color-rose: #c76b8e;
   --color-slate: #9a8b78;
-  --color-red: #c94f3a;
+  --color-red: #c24a35;
   --color-lime: #7fa03f;
   --chart-1: #c2653c; --chart-2: #2f8f83; --chart-3: #d99a1e; --chart-4: #3f8f5c;
   --chart-5: #c76b8e; --chart-6: #9a8b78; --chart-7: #c94f3a; --chart-8: #7fa03f;
@@ -198,15 +202,15 @@
   --color-panel-2: #f1f4ff;
   --color-edge: #dbe1ff;
   --color-fg: #16204b;
-  --color-fg-dim: #6b74a6;
+  --color-fg-dim: #646da1;
   --color-accent: #4f46e5;      /* vivid indigo */
   --color-accent-soft: #e6e6ff;
   --color-cyan: #06b6d4;        /* vivid cyan */
   --color-amber: #f59e0b;
-  --color-emerald: #10b981;
+  --color-emerald: #0c875e;
   --color-rose: #ec4899;        /* vivid pink */
   --color-slate: #7c86b8;
-  --color-red: #ef4444;
+  --color-red: #e02424;
   --color-lime: #84cc16;
   --chart-1: #4f46e5; --chart-2: #06b6d4; --chart-3: #f59e0b; --chart-4: #10b981;
   --chart-5: #ec4899; --chart-6: #8b5cf6; --chart-7: #ef4444; --chart-8: #84cc16;

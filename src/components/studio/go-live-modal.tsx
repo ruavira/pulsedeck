@@ -106,7 +106,7 @@ export function GoLiveModal({
             affect the running show. {deck.slides.length} slide{deck.slides.length === 1 ? '' : 's'} ready.
           </p>
           {deck.slides.length === 0 && (
-            <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-sm text-amber">
+            <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-sm text-fg">
               This deck has no slides yet — the stage will be empty.
             </p>
           )}

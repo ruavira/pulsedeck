@@ -202,7 +202,7 @@ export function QaPanel({
             notice.tone === 'ok'
               ? 'bg-emerald/15 text-emerald'
               : notice.tone === 'warn'
-                ? 'bg-amber/15 text-amber'
+                ? 'bg-amber/15 text-fg'
                 : 'bg-red/15 text-fg'
           }`}
         >

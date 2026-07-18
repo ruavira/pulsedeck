@@ -314,7 +314,7 @@ export function EditorTopBar({
       <span
         aria-live="polite"
         className={`text-xs font-medium ${
-          saveState === 'error' ? 'text-amber' : saveState === 'saved' ? 'text-fg-dim' : 'text-fg'
+          saveState === 'error' ? 'text-red' : saveState === 'saved' ? 'text-fg-dim' : 'text-fg'
         }`}
       >
         {SAVE_LABEL[saveState]}

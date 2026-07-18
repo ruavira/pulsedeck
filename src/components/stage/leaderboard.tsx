@@ -170,7 +170,7 @@ export function Leaderboard({ sessionId, onDismiss }: { sessionId: string; onDis
                 </span>
                 {e.streak >= 3 && (
                   <span
-                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-panel-2 px-3 py-1 text-sm font-bold text-amber"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-panel-2 px-3 py-1 text-sm font-bold text-fg"
                     aria-label={`${e.streak} answer streak`}
                   >
                     <FlameIcon /> {e.streak}

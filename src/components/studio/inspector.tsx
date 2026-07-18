@@ -202,7 +202,7 @@ function ContentForm({
             </button>
           )}
         </div>
-        {imgErr && <p className="mt-1.5 text-xs text-amber">{imgErr}</p>}
+        {imgErr && <p className="mt-1.5 text-xs text-red">{imgErr}</p>}
       </Field>
       <Field label="Animation">
         <Segmented
@@ -480,7 +480,7 @@ function QuizForm({ slide, setBody, setSettings }: { slide: Slide; setBody: SetB
         />
       </Field>
       {(slide.body.correct ?? []).length === 0 && (
-        <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs text-amber">
+        <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs text-fg">
           No correct answer marked — nobody can score on this question.
         </p>
       )}
@@ -555,7 +555,7 @@ function ScaleForm({ slide, setBody }: { slide: Slide; setBody: SetBody }) {
         </Field>
       </div>
       {min >= max && (
-        <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs text-amber">
+        <p role="alert" className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-xs text-fg">
           Min must be less than max.
         </p>
       )}

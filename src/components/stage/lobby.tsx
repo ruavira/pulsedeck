@@ -40,7 +40,7 @@ export function Lobby({
 
       <span
         className={`absolute right-6 top-6 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest ${
-          connected ? 'border-emerald/50 text-emerald' : 'border-amber/50 text-amber'
+          connected ? 'border-emerald/50 text-emerald' : 'border-amber/50 text-fg'
         }`}
         role="status"
       >

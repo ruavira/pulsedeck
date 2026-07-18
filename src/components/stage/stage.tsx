@@ -517,7 +517,7 @@ export function Stage({
         <div
           role="alert"
           aria-live="assertive"
-          className="fixed bottom-8 left-1/2 z-[70] -translate-x-1/2 rounded-full border border-amber/50 bg-panel px-6 py-3 text-base font-semibold text-amber shadow-lg"
+          className="fixed bottom-8 left-1/2 z-[70] -translate-x-1/2 rounded-full border border-amber/50 bg-panel px-6 py-3 text-base font-semibold text-fg shadow-lg"
         >
           {toast}
         </div>
