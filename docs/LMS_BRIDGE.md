@@ -112,10 +112,11 @@ $payload = json_decode($raw, true);
 
 ## Moodle wiring options (Ruavira Moodle)
 
-- **Local plugin receiver (recommended for phase 1):** a `local/pulsedeck`
-  plugin exposing one endpoint that verifies the signature and writes a grade
-  item per deck (class-level stats) or per-user grades where nicknames are
-  matched to usernames.
+- **Local plugin receiver (recommended for phase 1): SHIPPED** — see
+  `integrations/moodle/local_pulsedeck/` in this repo (installable zip in
+  releases). Verifies signatures, stores per-participant results, matches
+  nicknames to Moodle users (unique username/email match), manager report at
+  `/local/pulsedeck/index.php`, CSV export shaped for grade import.
 - **Middleware:** any small relay (Netlify/Supabase edge function, n8n, Make)
   that verifies the signature and calls Moodle's web-service API with a token.
 - **Phase 2 — LTI 1.3:** PulseDeck as an LTI tool: launch a session from a
