@@ -100,28 +100,28 @@ Scoring is **accuracy-first**: a correct answer earns full points whether it arr
 
 ---
 
-## 6. Kahoot features — what PulseDeck has (and does differently)
+## 6. Live quiz & game features — what PulseDeck does
 
-| Kahoot feature | In PulseDeck? | Notes |
+| Feature | In PulseDeck? | Notes |
 |---|---|---|
 | Timed quiz with points | ✅ | Configurable timer + base points per question |
 | Live leaderboard | ✅ | Top-10 theatrical reveal + confetti for #1 |
 | Answer streaks | ✅ | Tracked server-side, shown on phones + recap |
-| Join by PIN/QR, no account | ✅ | 6-letter codes (clearer than 7-digit PINs), never expire mid-game |
+| Join by code/QR, no account | ✅ | 6-letter codes (clearer than 7-digit PINs), never expire mid-game |
 | Nickname generator | ✅ | "Surprise me" button |
-| Speed-based scoring | ⚙️ Optional | Off by default — accuracy-first (Kahoot's own "Accuracy mode", but as our default); enable per-question speed bonus if you want the race |
+| Speed-based scoring | ⚙️ Optional | Accuracy-first by default (fair on weak Wi-Fi); enable a per-question speed bonus if you want the race |
 | Auto-advancing question timer | ✅ | Auto-closes at 0:00 |
 | Answer reveal (correct/wrong) | ✅ | Stage highlights correct; phones show +points or the right answer |
 | Podium / end summary | ✅ | Personal recap card per player (rank, score, streak) |
 | Content slides between questions | ✅ | Full slide system, not an add-on |
 | Host controls (skip, lock) | ✅ | Panic bar: close, lock room, skip, end |
-| Player cap | ✅ Better | Certified at 1,000 concurrent (Kahoot free: 10 players) |
+| Player cap | ✅ | Certified at 1,000 concurrent (many free tools cap around 10) |
 | Nickname/content filtering | ✅ | Always on, plus custom banned words |
 | Lobby music & characters | ❌ | Deliberate — professional register by default |
 | Puzzle / slider / type-answer / pin-on-image questions | ❌ Yet | Roadmap; MCQ is the scored type today |
 | Team mode / assignments (self-paced) | ❌ Yet | Live-only for now |
 
-**The one-line summary:** everything that makes Kahoot *competitive fun* is in — minus the childish register, the speed-scoring unfairness, and the 10-player free cap.
+**The one-line summary:** everything that makes a live quiz *competitive fun* is in — minus the childish register, the speed-scoring unfairness, and the tiny free-tier player cap.
 
 ---
 

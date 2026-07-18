@@ -39,7 +39,7 @@ const FEATURES: {
   {
     icon: IconTrophy,
     tint: 'text-amber',
-    title: 'Kahoot-grade quizzes',
+    title: 'Competition-grade quizzes',
     blurb: 'Speed points, streaks and a podium — scored on the server, so nobody can cheat the clock.',
   },
   {

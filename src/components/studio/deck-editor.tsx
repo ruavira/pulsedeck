@@ -391,6 +391,9 @@ function EditorShell({
         onFonts={(fontHeading, fontBody) =>
           update((d) => ({ ...d, theme: { ...d.theme, fontHeading, fontBody } }))
         }
+        onOrgName={(orgName) =>
+          update((d) => ({ ...d, theme: { ...d.theme, orgName: orgName || undefined } }))
+        }
         onLogo={(url) =>
           update((d) => {
             const theme = { ...d.theme };

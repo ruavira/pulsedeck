@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 // same jsonb column and is read by the join_session RPC, so it merges here too.
 type SettingsPatch = Partial<SessionSettings> & { locked?: boolean };
 
-const ALLOWED_KEYS = ['qaModerated', 'qaEnabled', 'lockedNicknames', 'locked', 'autoOpenVoting'] as const;
+const ALLOWED_KEYS = ['qaModerated', 'qaEnabled', 'lockedNicknames', 'locked', 'autoOpenVoting', 'translateEnabled'] as const;
 type AllowedKey = (typeof ALLOWED_KEYS)[number];
 
 interface SettingsBody {

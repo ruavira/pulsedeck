@@ -30,7 +30,11 @@ type Key =
   | 'on'
   | 'off'
   | 'done'
-  | 'translateSoon';
+  | 'translateSoon'
+  | 'translated'
+  | 'translating'
+  | 'showOriginal'
+  | 'showTranslation';
 
 const DICT: Record<Lang, Record<Key, string>> = {
   en: {
@@ -45,7 +49,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'On',
     off: 'Off',
     done: 'Done',
-    translateSoon: 'Live question translation is coming soon.',
+    translateSoon: 'When the host turns on translation, questions appear in your language.',
+    translated: 'Translated',
+    translating: 'Translating…',
+    showOriginal: 'Show original',
+    showTranslation: 'Show translation',
   },
   fr: {
     waiting: "En attente du présentateur…",
@@ -59,7 +67,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'Activé',
     off: 'Désactivé',
     done: 'Terminé',
-    translateSoon: 'La traduction en direct arrive bientôt.',
+    translateSoon: "Quand l'animateur active la traduction, les questions s'affichent dans votre langue.",
+    translated: 'Traduit',
+    translating: 'Traduction…',
+    showOriginal: "Voir l'original",
+    showTranslation: 'Voir la traduction',
   },
   es: {
     waiting: 'Esperando a que empiece el presentador…',
@@ -73,7 +85,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'Sí',
     off: 'No',
     done: 'Listo',
-    translateSoon: 'La traducción en vivo llegará pronto.',
+    translateSoon: 'Cuando el anfitrión active la traducción, las preguntas aparecerán en tu idioma.',
+    translated: 'Traducido',
+    translating: 'Traduciendo…',
+    showOriginal: 'Ver original',
+    showTranslation: 'Ver traducción',
   },
   pt: {
     waiting: 'Aguardando o apresentador começar…',
@@ -87,7 +103,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'Sim',
     off: 'Não',
     done: 'Concluído',
-    translateSoon: 'A tradução ao vivo chega em breve.',
+    translateSoon: 'Quando o apresentador ativar a tradução, as perguntas aparecem no seu idioma.',
+    translated: 'Traduzido',
+    translating: 'A traduzir…',
+    showOriginal: 'Ver original',
+    showTranslation: 'Ver tradução',
   },
   sw: {
     waiting: 'Tunasubiri mwasilishaji aanze…',
@@ -101,7 +121,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'Washa',
     off: 'Zima',
     done: 'Imekamilika',
-    translateSoon: 'Tafsiri ya moja kwa moja inakuja hivi karibuni.',
+    translateSoon: 'Mwenyeji akiwasha tafsiri, maswali yataonekana katika lugha yako.',
+    translated: 'Imetafsiriwa',
+    translating: 'Inatafsiri…',
+    showOriginal: 'Onyesha asili',
+    showTranslation: 'Onyesha tafsiri',
   },
   ar: {
     waiting: 'في انتظار بدء المُقدِّم…',
@@ -115,7 +139,11 @@ const DICT: Record<Lang, Record<Key, string>> = {
     on: 'مفعّل',
     off: 'مغلق',
     done: 'تم',
-    translateSoon: 'الترجمة الفورية للسؤال قادمة قريباً.',
+    translateSoon: 'عند تفعيل المُقدِّم للترجمة، تظهر الأسئلة بلغتك.',
+    translated: 'مُترجَم',
+    translating: 'جارٍ الترجمة…',
+    showOriginal: 'عرض الأصل',
+    showTranslation: 'عرض الترجمة',
   },
 };
 

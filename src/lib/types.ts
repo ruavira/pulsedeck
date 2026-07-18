@@ -172,6 +172,8 @@ export interface DeckTheme {
   fontScale?: number;
   /** Brand kit: logo shown on the stage corner + a Google-Fonts heading/body pair. */
   logoUrl?: string;
+  /** Organization / presenter name — shown on the lobby, join screen and certificate. */
+  orgName?: string;
   fontHeading?: string; // Google Font family for headings (e.g. 'Fraunces')
   fontBody?: string; // Google Font family for body text (e.g. 'Inter')
 }
@@ -197,6 +199,12 @@ export interface SessionSettings {
   lockedNicknames?: boolean;
   /** Voting opens automatically when an activity slide comes up (default true; quizzes always manual). */
   autoOpenVoting?: boolean;
+  /**
+   * Facilitator opt-in: translate question/option text into each participant's
+   * chosen language on their phone. Off by default. Participant picks the language
+   * in their Display & language sheet; this switch is what activates it room-wide.
+   */
+  translateEnabled?: boolean;
 }
 
 export interface SessionState {

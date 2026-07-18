@@ -175,6 +175,11 @@ function LiveSession({
   deviceKey: string;
 }) {
   const deck = session.deck;
+  const brand = {
+    logoUrl: deck.theme?.logoUrl,
+    orgName: deck.theme?.orgName,
+    accent: deck.theme?.accent,
+  };
   const initialState: SessionState = {
     id: session.id,
     status: session.status,
@@ -253,6 +258,7 @@ function LiveSession({
         score={score}
         quizRan={quizRan}
         bestStreak={bestStreak}
+        brand={brand}
       />
     );
   }
@@ -312,6 +318,14 @@ function LiveSession({
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-40 pt-5">
         {!isLive ? (
           <section className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+            {brand.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={brand.logoUrl}
+                alt={brand.orgName ? `${brand.orgName} logo` : 'Organizer logo'}
+                className="mb-6 max-h-16 max-w-[60%] object-contain"
+              />
+            )}
             <span className="relative mb-8 flex h-4 w-4" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald opacity-60" />
               <span className="relative inline-flex h-4 w-4 rounded-full bg-emerald" />
@@ -319,6 +333,11 @@ function LiveSession({
             <h1 className="mb-2 text-2xl font-bold text-fg">
               {prefs.t('youreIn')}, {participant.nickname}!
             </h1>
+            {brand.orgName && (
+              <p className="-mt-1 mb-1 text-sm font-medium text-fg-dim">
+                Presented by <span className="font-semibold text-fg">{brand.orgName}</span>
+              </p>
+            )}
             <p role="status" aria-live="polite" className="mb-8 text-sm text-fg-dim">
               {prefs.t('waiting')}
             </p>
@@ -341,6 +360,7 @@ function LiveSession({
             broadcast={broadcast}
             onQuizResult={onQuizResult}
             results={liveResults?.slideId === slide.id ? liveResults.results : null}
+            translate={Boolean(s.settings?.translateEnabled)}
           />
         ) : (
           <section className="flex flex-1 flex-col items-center justify-center py-10 text-center">
@@ -385,6 +405,7 @@ function EndedScreen({
   score,
   quizRan,
   bestStreak,
+  brand,
 }: {
   sessionId: string;
   participantId: string;
@@ -394,6 +415,7 @@ function EndedScreen({
   score: number;
   quizRan: boolean;
   bestStreak: number;
+  brand: { logoUrl?: string; orgName?: string; accent?: string };
 }) {
   const router = useRouter();
   const [certBusy, setCertBusy] = useState(false);
@@ -405,7 +427,15 @@ function EndedScreen({
         month: 'long',
         day: 'numeric',
       });
-      await downloadCertificate({ name: nickname, deckTitle, code, dateStr });
+      await downloadCertificate({
+        name: nickname,
+        deckTitle,
+        code,
+        dateStr,
+        orgName: brand.orgName,
+        logoUrl: brand.logoUrl,
+        accent: brand.accent,
+      });
     } finally {
       setCertBusy(false);
     }

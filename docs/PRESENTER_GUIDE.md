@@ -4,15 +4,15 @@
 
 | What | URL |
 |---|---|
-| **Stage (projector laptop)** | https://pulsedeck-live.netlify.app/present/173d8553-1802-44b4-9bef-7cbce4f5b629?key=REDACTED |
-| **Remote (your phone)** | https://pulsedeck-live.netlify.app/remote/173d8553-1802-44b4-9bef-7cbce4f5b629?key=REDACTED |
+| **Stage (projector laptop)** | https://pulsedeck-live.netlify.app/present/173d8553-1802-44b4-9bef-7cbce4f5b629?key=<YOUR-PRESENTER-KEY> |
+| **Remote (your phone)** | https://pulsedeck-live.netlify.app/remote/173d8553-1802-44b4-9bef-7cbce4f5b629?key=<YOUR-PRESENTER-KEY> |
 | **Audience join** | https://pulsedeck-live.netlify.app/j/DCV3EY — code **DCV3EY** |
-| **Post-show report & exports** | https://pulsedeck-live.netlify.app/report/173d8553-1802-44b4-9bef-7cbce4f5b629?key=REDACTED |
+| **Post-show report & exports** | https://pulsedeck-live.netlify.app/report/173d8553-1802-44b4-9bef-7cbce4f5b629?key=<YOUR-PRESENTER-KEY> |
 | **Studio (edit the deck)** | https://pulsedeck-live.netlify.app/studio |
 
 **REHEARSAL session (practice here tonight, not in the show session):**
-Stage: https://pulsedeck-live.netlify.app/present/9cee2458-d2f7-4388-8274-889907aee4c2?key=REDACTED
-Remote: https://pulsedeck-live.netlify.app/remote/9cee2458-d2f7-4388-8274-889907aee4c2?key=REDACTED — join code **96K3CS**
+Stage: https://pulsedeck-live.netlify.app/present/9cee2458-d2f7-4388-8274-889907aee4c2?key=<YOUR-PRESENTER-KEY>
+Remote: https://pulsedeck-live.netlify.app/remote/9cee2458-d2f7-4388-8274-889907aee4c2?key=<YOUR-PRESENTER-KEY> — join code **96K3CS**
 
 ⚠️ The `key=` parameter is your presenter secret — never show those URLs on screen. The audience only ever sees the join code/QR.
 

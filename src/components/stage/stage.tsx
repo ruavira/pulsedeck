@@ -405,7 +405,14 @@ export function Stage({
       data-theme={deckTheme}
       className="fixed inset-0 select-none overflow-hidden bg-ink text-fg">
       {s.status === 'lobby' && (
-        <Lobby sessionId={sessionId} code={initial.code} deckTitle={deckTitle} connected={connected} />
+        <Lobby
+          sessionId={sessionId}
+          code={initial.code}
+          deckTitle={deckTitle}
+          connected={connected}
+          logoUrl={initial.deck.theme?.logoUrl}
+          orgName={initial.deck.theme?.orgName}
+        />
       )}
 
       {s.status === 'ended' && <EndedScreen sessionId={sessionId} deckTitle={deckTitle} />}

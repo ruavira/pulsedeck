@@ -125,6 +125,20 @@ export function PanicBar({
             }
           />
           <PanicButton
+            title={settings.translateEnabled === true ? 'Translate: ON' : 'Translate: OFF'}
+            detail={
+              settings.translateEnabled === true
+                ? 'Questions shown in each phone’s language'
+                : 'Let participants read in their language'
+            }
+            disabled={anyBusy}
+            onClick={() =>
+              void updateSettings('panic-translate', {
+                translateEnabled: settings.translateEnabled !== true,
+              })
+            }
+          />
+          <PanicButton
             title={armEnd ? 'Tap again to end' : 'End session'}
             detail={armEnd ? 'This closes the show for everyone' : 'Double-tap to confirm'}
             danger

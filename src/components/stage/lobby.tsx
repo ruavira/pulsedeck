@@ -21,11 +21,15 @@ export function Lobby({
   code,
   deckTitle,
   connected,
+  logoUrl,
+  orgName,
 }: {
   sessionId: string;
   code: string;
   deckTitle: string;
   connected: boolean;
+  logoUrl?: string;
+  orgName?: string;
 }) {
   // Faster poll in the lobby so the counter visibly ticks as the room fills.
   const participants = useParticipantCount(sessionId, 2500);
@@ -44,7 +48,21 @@ export function Lobby({
         {connected ? 'Live' : 'Reconnecting'}
       </span>
 
+      {logoUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logoUrl}
+          alt={orgName ? `${orgName} logo` : 'Organizer logo'}
+          className="absolute left-6 top-6 max-h-[9vh] max-w-[22vw] object-contain"
+        />
+      )}
+
       <h1 className="max-w-[80vw] text-[clamp(2rem,5vw,4rem)] font-bold leading-tight text-fg">{deckTitle}</h1>
+      {orgName && (
+        <p className="-mt-[1.5vh] text-[clamp(1rem,2vw,1.5rem)] font-medium text-fg-dim">
+          Presented by <span className="font-semibold text-fg">{orgName}</span>
+        </p>
+      )}
 
       <p className="text-[clamp(1.25rem,2.5vw,2rem)] font-medium text-fg-dim">
         Join at <span className="font-semibold text-fg">{joinHost()}/j</span>

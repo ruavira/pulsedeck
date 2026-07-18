@@ -42,6 +42,7 @@ export function EditorTopBar({
   onImageStyle,
   onFonts,
   onLogo,
+  onOrgName,
   onUndo,
   onRedo,
   onOpenAi,
@@ -65,6 +66,7 @@ export function EditorTopBar({
   onImageStyle: (style: ImageStyle) => void;
   onFonts: (heading: string, body: string) => void;
   onLogo: (url: string | null) => void;
+  onOrgName: (name: string) => void;
   onUndo: () => void;
   onRedo: () => void;
   onOpenAi: () => void;
@@ -294,6 +296,17 @@ export function EditorTopBar({
                 </button>
               )}
             </div>
+            <p className="mt-3 mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg-dim">
+              Organization name
+            </p>
+            <input
+              type="text"
+              value={deck.theme.orgName ?? ''}
+              onChange={(e) => onOrgName(e.target.value)}
+              placeholder="e.g. Ruavira Collective"
+              className="w-full rounded-lg border border-edge bg-panel px-2.5 py-1.5 text-xs text-fg placeholder:text-fg-dim/60 focus:border-accent/60 focus:outline-none"
+            />
+            <p className="mt-1 text-[10px] text-fg-dim">Shown on the lobby, join screen and certificate.</p>
           </div>
         )}
       </div>

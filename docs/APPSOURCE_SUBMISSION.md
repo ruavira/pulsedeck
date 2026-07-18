@@ -35,7 +35,7 @@ every value to paste).
 
 - Join page: `https://pulsedeck-live.netlify.app/j/MY6ZG5`
 - Stage link (paste into the add-in):
-  `https://pulsedeck-live.netlify.app/present/4d443950-216a-4349-99bb-58d7033f521f?key=REDACTED`
+  `https://pulsedeck-live.netlify.app/present/4d443950-216a-4349-99bb-58d7033f521f?key=<YOUR-PRESENTER-KEY>`
 
 ---
 
@@ -86,7 +86,7 @@ Partner Center → **Marketplace offers** → **+ New offer** → **Office add-i
 **Description:**
 
 > PulseDeck Live puts your interactive presentation stage inside PowerPoint. Run live
-> polls, word clouds, Kahoot-style quizzes with a leaderboard, rating scales, and audience
+> polls, word clouds, competitive quizzes with a live leaderboard, rating scales, and audience
 > Q&A — and watch results land on your slide in real time.
 >
 > **Your audience needs nothing.** They scan one QR code (or type a 6-letter code at
@@ -126,7 +126,7 @@ presentation, audience response, leaderboard
 > **To test:**
 > 1. Insert the add-in. On the setup screen, paste this stage link and press "Show live
 >    stage":
->    https://pulsedeck-live.netlify.app/present/4d443950-216a-4349-99bb-58d7033f521f?key=REDACTED
+>    https://pulsedeck-live.netlify.app/present/4d443950-216a-4349-99bb-58d7033f521f?key=<YOUR-PRESENTER-KEY>
 > 2. The live session (code MY6ZG5) renders inside the slide: slides, a join QR code, live
 >    poll results, quiz leaderboard and Q&A wall.
 > 3. To test audience interaction, open https://pulsedeck-live.netlify.app/j/MY6ZG5 in any
