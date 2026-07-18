@@ -34,7 +34,11 @@ type Key =
   | 'translated'
   | 'translating'
   | 'showOriginal'
-  | 'showTranslation';
+  | 'showTranslation'
+  | 'newActivity'
+  | 'responsesOpen'
+  | 'resultsShown'
+  | 'responsesClosed';
 
 const DICT: Record<Lang, Record<Key, string>> = {
   en: {
@@ -54,6 +58,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'Translating…',
     showOriginal: 'Show original',
     showTranslation: 'Show translation',
+    newActivity: 'New activity',
+    responsesOpen: 'Responses are open',
+    resultsShown: 'Results are shown',
+    responsesClosed: 'Responses are closed',
   },
   fr: {
     waiting: "En attente du présentateur…",
@@ -72,6 +80,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'Traduction…',
     showOriginal: "Voir l'original",
     showTranslation: 'Voir la traduction',
+    newActivity: 'Nouvelle activité',
+    responsesOpen: 'Les réponses sont ouvertes',
+    resultsShown: 'Les résultats sont affichés',
+    responsesClosed: 'Les réponses sont fermées',
   },
   es: {
     waiting: 'Esperando a que empiece el presentador…',
@@ -90,6 +102,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'Traduciendo…',
     showOriginal: 'Ver original',
     showTranslation: 'Ver traducción',
+    newActivity: 'Nueva actividad',
+    responsesOpen: 'Las respuestas están abiertas',
+    resultsShown: 'Se muestran los resultados',
+    responsesClosed: 'Las respuestas están cerradas',
   },
   pt: {
     waiting: 'Aguardando o apresentador começar…',
@@ -108,6 +124,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'A traduzir…',
     showOriginal: 'Ver original',
     showTranslation: 'Ver tradução',
+    newActivity: 'Nova atividade',
+    responsesOpen: 'As respostas estão abertas',
+    resultsShown: 'Os resultados estão sendo exibidos',
+    responsesClosed: 'As respostas estão encerradas',
   },
   sw: {
     waiting: 'Tunasubiri mwasilishaji aanze…',
@@ -126,6 +146,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'Inatafsiri…',
     showOriginal: 'Onyesha asili',
     showTranslation: 'Onyesha tafsiri',
+    newActivity: 'Shughuli mpya',
+    responsesOpen: 'Majibu yamefunguliwa',
+    resultsShown: 'Matokeo yanaonyeshwa',
+    responsesClosed: 'Majibu yamefungwa',
   },
   ar: {
     waiting: 'في انتظار بدء المُقدِّم…',
@@ -144,6 +168,10 @@ const DICT: Record<Lang, Record<Key, string>> = {
     translating: 'جارٍ الترجمة…',
     showOriginal: 'عرض الأصل',
     showTranslation: 'عرض الترجمة',
+    newActivity: 'نشاط جديد',
+    responsesOpen: 'الردود مفتوحة',
+    resultsShown: 'النتائج معروضة',
+    responsesClosed: 'الردود مغلقة',
   },
 };
 

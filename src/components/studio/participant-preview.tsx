@@ -249,7 +249,7 @@ function QuizMock({ slide }: { slide: Slide }) {
   return (
     <div className="flex flex-1 flex-col gap-2.5">
       <div className="flex items-center justify-between">
-        <span className="rounded-full border border-amber/40 bg-amber/10 px-2.5 py-1 text-xs font-bold tabular-nums text-amber">
+        <span className="rounded-full border border-amber/40 bg-amber/10 px-2.5 py-1 text-xs font-bold tabular-nums text-fg">
           {slide.settings.timeLimitSec ?? 30}s
         </span>
         <span className="text-xs font-semibold text-fg-dim">{slide.settings.points ?? 1000} pts</span>

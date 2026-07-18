@@ -77,7 +77,7 @@ export function BarChart({
                 aria-hidden="true"
               />
               <div className="relative flex min-h-[56px] items-center justify-between gap-6 px-5 py-2">
-                <span className="flex min-w-0 items-center gap-3 text-[clamp(1.25rem,2.2vw,1.9rem)] font-semibold leading-tight text-fg [text-shadow:0_1px_8px_rgba(0,0,0,0.45)]">
+                <span className="flex min-w-0 items-center gap-3 text-[clamp(1.25rem,2.2vw,1.9rem)] font-semibold leading-tight text-fg [text-shadow:0_0_3px_var(--bar-halo),0_1px_10px_var(--bar-halo)]">
                   {reveal && isCorrect && (
                     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 text-[0.55em] font-bold uppercase tracking-wider text-emerald">
                       <CheckIcon /> Correct
@@ -94,7 +94,7 @@ export function BarChart({
                   )}
                   <span className="truncate">{label}</span>
                 </span>
-                <span className="shrink-0 font-mono text-[clamp(1.1rem,1.8vw,1.6rem)] font-bold tabular-nums text-fg [text-shadow:0_1px_8px_rgba(0,0,0,0.45)]">
+                <span className="shrink-0 font-mono text-[clamp(1.1rem,1.8vw,1.6rem)] font-bold tabular-nums text-fg [text-shadow:0_0_3px_var(--bar-halo),0_1px_10px_var(--bar-halo)]">
                   {count} <span className="text-fg-dim">·</span> {pct}%
                 </span>
               </div>

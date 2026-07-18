@@ -192,6 +192,12 @@ export function DeckList() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
+            href="/studio/analytics"
+            className="inline-flex min-h-[40px] items-center rounded-full border border-edge px-4 text-sm font-semibold text-fg-dim transition-colors hover:border-accent/50 hover:text-fg"
+          >
+            Analytics
+          </Link>
+          <Link
             href="/account"
             className="inline-flex min-h-[40px] items-center rounded-full border border-edge px-4 text-sm font-semibold text-fg-dim transition-colors hover:border-accent/50 hover:text-fg"
           >

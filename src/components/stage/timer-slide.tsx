@@ -92,7 +92,7 @@ export function TimerSlide({ slide }: { slide: Slide }) {
       <p
         role="timer"
         className={`font-bold leading-none tabular-nums [font-size:clamp(6rem,20vw,16rem)] ${
-          done ? 'text-emerald' : closing ? 'text-amber' : 'text-fg'
+          done ? 'text-emerald' : closing ? 'text-red' : 'text-fg'
         }`}
         style={
           closing && !reduced

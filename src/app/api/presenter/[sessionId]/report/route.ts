@@ -1,5 +1,6 @@
 import { getAdmin } from '@/lib/supabase/admin';
 import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
+import { parseLmsConfig } from '@/lib/server/lms-bridge';
 import type {
   ChoiceResults,
   DeckSnapshot,
@@ -95,12 +96,13 @@ export async function GET(req: Request, ctx: { params: Promise<{ sessionId: stri
   const { sessionId } = await ctx.params;
   const url = new URL(req.url);
   const key = req.headers.get('x-presenter-key') ?? url.searchParams.get('key');
-  if (!(await verifySessionKey(sessionId, key))) return unauthorized();
+  const deckId = await verifySessionKey(sessionId, key);
+  if (!deckId) return unauthorized();
 
   const admin = getAdmin();
   const { data: session, error } = await admin
     .from('sessions')
-    .select('id, code, status, started_at, ended_at, deck_snapshot')
+    .select('id, code, status, started_at, ended_at, deck_snapshot, settings')
     .eq('id', sessionId)
     .single();
   if (error || !session) return Response.json({ error: 'not_found' }, { status: 404 });
@@ -158,6 +160,14 @@ export async function GET(req: Request, ctx: { params: Promise<{ sessionId: stri
       results: aggregate(s, bySlide.get(s.id) ?? []),
     }));
 
+  // LMS bridge status for the report actions row (configured + last delivery).
+  const { data: deckRow } = await admin.from('decks').select('lms').eq('id', deckId).single();
+  const lmsCfg = parseLmsConfig(deckRow?.lms);
+  const lmsDelivery =
+    ((session.settings as Record<string, unknown> | null)?.lmsDelivery as
+      | { at: string; ok: boolean; status: number | null; trigger: string; error?: string }
+      | undefined) ?? null;
+
   return Response.json(
     {
       session: {
@@ -174,6 +184,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ sessionId: stri
         score: p.score,
         streak: p.streak,
       })),
+      lms: { configured: Boolean(lmsCfg.url), lastDelivery: lmsDelivery },
       questions: (questions ?? []).map((q) => ({
         id: q.id as string,
         text: q.text as string,

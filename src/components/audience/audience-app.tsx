@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { DeckSnapshot, Results, SessionState } from '@/lib/types';
+import type { DeckSnapshot, Phase, Results, SessionState, Slide } from '@/lib/types';
 import { getSavedNickname, useParticipant } from '@/hooks/use-participant';
 import { useSessionChannel } from '@/hooks/use-session-channel';
 import { rpc } from '@/lib/supabase/client';
@@ -165,6 +165,44 @@ export function AudienceApp({ code }: { code: string }) {
 
 // ---------------------------------------------------------------------------
 
+// Screen-reader announcements for facilitator-driven changes (new activity /
+// phase flips). Polite so it never interrupts the reader mid-sentence; skips
+// the initial render since the freshly mounted view already reads naturally.
+function LiveAnnouncer({
+  slide,
+  phase,
+  t,
+}: {
+  slide: Slide | null;
+  phase: Phase;
+  t: (k: 'newActivity' | 'responsesOpen' | 'resultsShown' | 'responsesClosed') => string;
+}) {
+  const [msg, setMsg] = useState('');
+  const prev = useRef<{ slideId: string | null; phase: Phase | null }>({
+    slideId: null,
+    phase: null,
+  });
+  useEffect(() => {
+    const p = prev.current;
+    prev.current = { slideId: slide?.id ?? null, phase };
+    if (!slide || p.slideId === null) return; // initial render — nothing to announce
+    if (slide.id !== p.slideId) {
+      setMsg(slide.title ? `${t('newActivity')}: ${slide.title}` : t('newActivity'));
+      return;
+    }
+    if (phase !== p.phase) {
+      if (phase === 'open') setMsg(t('responsesOpen'));
+      else if (phase === 'reveal') setMsg(t('resultsShown'));
+      else if (phase === 'closed') setMsg(t('responsesClosed'));
+    }
+  }, [slide, phase, t]);
+  return (
+    <div aria-live="polite" role="status" className="sr-only">
+      {msg}
+    </div>
+  );
+}
+
 function LiveSession({
   session,
   participant,
@@ -282,11 +320,13 @@ function LiveSession({
         showScore={quizRan}
       />
 
+      <LiveAnnouncer slide={isLive ? slide : null} phase={s.phase} t={prefs.t} />
+
       {showReconnect && (
         <div
           role="status"
           aria-live="polite"
-          className="sticky top-12 z-20 border-b border-amber/40 bg-amber/15 px-4 py-2 text-center text-sm font-medium text-amber"
+          className="sticky top-12 z-20 border-b border-amber/40 bg-amber/15 px-4 py-2 text-center text-sm font-medium text-fg"
         >
           Reconnecting… you can keep answering.
         </div>
@@ -544,7 +584,7 @@ function EndedScreen({
               )}
             </div>
             {streakBest > 1 && (
-              <p className="mt-2 text-sm font-semibold text-amber">
+              <p className="mt-2 text-sm font-semibold text-fg">
                 <span aria-hidden="true">🔥</span> Best streak: {streakBest} in a row
               </p>
             )}

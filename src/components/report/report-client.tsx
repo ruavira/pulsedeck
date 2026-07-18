@@ -84,6 +84,7 @@ function KeyEntry({
 }
 
 export function ReportClient({ sessionId }: { sessionId: string }) {
+  const [lmsState, setLmsState] = useState<'idle' | 'sending' | 'ok' | 'fail'>('idle');
   const searchParams = useSearchParams();
   const urlKey = searchParams.get('key');
   const [state, setState] = useState<LoadState>({ phase: 'resolving-key' });
@@ -164,6 +165,19 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
   const { report, key } = state;
   const exportBase = `/api/export/results/${sessionId}?key=${encodeURIComponent(key)}&format=`;
 
+  const pushLms = async () => {
+    setLmsState('sending');
+    try {
+      const res = await fetch(`/api/presenter/${sessionId}/lms-push`, {
+        method: 'POST',
+        headers: { 'x-presenter-key': key },
+      });
+      setLmsState(res.ok ? 'ok' : 'fail');
+    } catch {
+      setLmsState('fail');
+    }
+  };
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 print:max-w-none print:px-0 sm:px-6">
       {/* Header */}
@@ -201,7 +215,29 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
           <Button variant="secondary" onClick={() => window.print()}>
             Print
           </Button>
+          {report.lms?.configured && (
+            <Button variant="secondary" onClick={() => void pushLms()} disabled={lmsState === 'sending'}>
+              {lmsState === 'sending' ? 'Sending to LMS…' : 'Send to LMS'}
+            </Button>
+          )}
         </div>
+        {report.lms?.configured && (
+          <p aria-live="polite" className="no-print mt-2 text-sm text-fg-dim">
+            {lmsState === 'ok' && <span className="font-semibold text-emerald">Results delivered to your LMS ✓</span>}
+            {lmsState === 'fail' && (
+              <span className="font-semibold text-red">
+                Delivery failed — check the LMS bridge settings in the deck editor.
+              </span>
+            )}
+            {lmsState === 'idle' && report.lms.lastDelivery && (
+              <>
+                Last LMS push{' '}
+                {report.lms.lastDelivery.ok ? 'delivered' : `failed (${report.lms.lastDelivery.error ?? report.lms.lastDelivery.status ?? 'error'})`}{' '}
+                · {new Date(report.lms.lastDelivery.at).toLocaleString()}
+              </>
+            )}
+          </p>
+        )}
       </header>
 
       {/* Activity results */}

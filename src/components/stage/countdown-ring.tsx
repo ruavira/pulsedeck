@@ -73,7 +73,7 @@ export function CountdownRing({
         // Re-keying per displayed second restarts the pulse on each tick.
         key={urgent ? `u-${shown}` : 'steady'}
         className={`absolute font-mono text-3xl font-bold tabular-nums ${
-          urgent ? 'pd-count-urgent text-amber' : 'text-fg'
+          urgent ? 'pd-count-urgent text-red' : 'text-fg'
         }`}
         aria-hidden="true"
       >

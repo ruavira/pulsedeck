@@ -572,7 +572,7 @@ export default async function OpsDashboardPage({ searchParams }: { searchParams?
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums text-fg">{n(feature.events_7d)}</td>
                       <td className="px-3 py-3 text-right tabular-nums text-red">{n(feature.errors_7d)}</td>
-                      <td className="px-3 py-3 text-right tabular-nums text-amber">{n(feature.reports_7d)}</td>
+                      <td className="px-3 py-3 text-right tabular-nums text-fg">{n(feature.reports_7d)}</td>
                       <td className="px-5 py-3 text-xs tabular-nums text-fg-dim">{when(feature.last_event_at)}</td>
                     </tr>
                   ))}

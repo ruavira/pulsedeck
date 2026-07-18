@@ -83,7 +83,7 @@ export function StatusNote({
   const tones = {
     dim: 'text-fg-dim',
     ok: 'text-emerald',
-    warn: 'text-amber',
+    warn: 'text-fg',
   };
   return (
     <p role="status" aria-live="polite" className={`text-sm font-medium ${tones[tone]}`}>

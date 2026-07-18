@@ -52,7 +52,7 @@ export function TopBar({
             <span aria-hidden="true">★</span>
             <span aria-label={`Score ${score} points`}>{score.toLocaleString()}</span>
             {streak > 1 && (
-              <span className="text-amber" aria-label={`${streak} answer streak`}>
+              <span className="text-fg" aria-label={`${streak} answer streak`}>
                 🔥{streak}
               </span>
             )}

@@ -135,7 +135,7 @@ export function JoinCodeForm() {
             Taking you in…
           </span>
         ) : error ? (
-          <span id="join-code-error" className="font-medium text-amber">
+          <span id="join-code-error" className="font-medium text-red">
             <span aria-hidden="true">▲ </span>
             {error}
           </span>
