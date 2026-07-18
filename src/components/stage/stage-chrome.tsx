@@ -25,7 +25,6 @@ export function StageChrome({
   connected,
   index,
   total,
-  mini: _mini,
 }: {
   sessionId: string;
   code: string;

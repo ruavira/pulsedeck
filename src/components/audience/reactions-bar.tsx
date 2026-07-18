@@ -2,7 +2,7 @@
 // Emoji reactions: fire-and-forget broadcasts, throttled to 1 per 800ms with a
 // tiny CSS cooldown pop. No framer-motion — audience path stays light.
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const REACTIONS: { emoji: string; name: string }[] = [
   { emoji: '👏', name: 'Clap' },
@@ -28,7 +28,7 @@ export function ReactionsBar({
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  const react = (emoji: string, i: number) => {
+  const react = useCallback((emoji: string, i: number) => {
     const now = Date.now();
     if (now - lastSent.current < THROTTLE_MS) return; // silent throttle
     lastSent.current = now;
@@ -40,7 +40,7 @@ export function ReactionsBar({
       setPopped(null);
       setCoolingDown(false);
     }, THROTTLE_MS);
-  };
+  }, [broadcast]);
 
   return (
     <div

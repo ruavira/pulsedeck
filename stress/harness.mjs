@@ -10,7 +10,7 @@
 //   node stress/harness.mjs --scenario=quiz    --vus=1000 --window=10  --session=... --slide=...
 //   node stress/harness.mjs --scenario=words   --vus=800  --window=30  ...
 //   node stress/harness.mjs --scenario=qa      --vus=300  --window=30  ...
-// Env: SUPABASE_URL, SUPABASE_ANON_KEY, APP_ORIGIN
+// Env: SUPABASE_URL, SUPABASE_ANON_KEY
 
 import { argv, env } from 'node:process';
 
@@ -23,7 +23,6 @@ const args = Object.fromEntries(
 
 const SUPABASE_URL = env.SUPABASE_URL;
 const ANON = env.SUPABASE_ANON_KEY;
-const APP_ORIGIN = env.APP_ORIGIN ?? '';
 if (!SUPABASE_URL || !ANON) {
   console.error('Set SUPABASE_URL and SUPABASE_ANON_KEY');
   process.exit(1);
