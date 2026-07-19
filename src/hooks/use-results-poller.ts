@@ -10,6 +10,9 @@ import type { Results } from '@/lib/types';
 const FAST_MS = 700; // while voting is open
 const SLOW_MS = 2500; // otherwise
 const REBROADCAST_MIN_MS = 1500;
+// Consecutive get_results failures before we flag the stage as degraded. ~3s of
+// failed fast polls, or ~10s of slow ones — long enough to ride out a blip.
+const DEGRADE_AFTER = 4;
 
 /** One respond→on-screen latency measurement, computed at the stage on receipt. */
 export interface LatencySample {
@@ -39,6 +42,10 @@ export function useResultsPoller(
   onLatency?: (sample: LatencySample) => void,
 ) {
   const [results, setResults] = useState<Results | null>(null);
+  // `degraded` = get_results has failed DEGRADE_AFTER times in a row, so the
+  // on-screen results are unreliable even though the realtime channel may be up.
+  const [degraded, setDegraded] = useState(false);
+  const failures = useRef(0);
   const lastBroadcast = useRef(0);
   const inFlight = useRef(false);
   // Keep latest skew/callback in refs so the poll interval isn't torn down when
@@ -50,6 +57,8 @@ export function useResultsPoller(
 
   useEffect(() => {
     setResults(null);
+    failures.current = 0;
+    setDegraded(false);
   }, [slideId]);
 
   useEffect(() => {
@@ -66,6 +75,8 @@ export function useResultsPoller(
         });
         if (!stop && r) {
           setResults(r);
+          failures.current = 0;
+          setDegraded(false); // no-op re-render when already false (React bails)
           const now = Date.now();
           // Latency telemetry: measure respond→on-screen at the moment fresh
           // data lands. serverNow (stage clock normalized to the server clock)
@@ -101,7 +112,13 @@ export function useResultsPoller(
           }
         }
       } catch {
-        /* transient; next tick retries */
+        // Transient; next tick retries. After enough consecutive misses, flag
+        // degraded so the stage can say "reconnecting" instead of implying the
+        // audience simply hasn't responded yet.
+        if (!stop) {
+          failures.current += 1;
+          if (failures.current >= DEGRADE_AFTER) setDegraded(true);
+        }
       } finally {
         inFlight.current = false;
       }
@@ -116,5 +133,5 @@ export function useResultsPoller(
     };
   }, [sessionId, slideId, active, open, rebroadcast]);
 
-  return results;
+  return { results, degraded };
 }

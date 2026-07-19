@@ -63,7 +63,7 @@ export function TopBar({
           type="button"
           onClick={prefs.open}
           aria-label={prefs.t('a11y')}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-edge bg-panel text-sm font-bold text-fg-dim hover:text-fg"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-edge bg-panel text-sm font-bold text-fg-dim hover:text-fg"
         >
           <span aria-hidden="true">A</span>
           <span aria-hidden="true" className="text-[10px]">a</span>

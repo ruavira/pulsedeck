@@ -173,7 +173,7 @@ export function QaPanel({
           onChange={(e) => setText(e.target.value)}
           placeholder="Ask the presenter anything…"
           aria-label="Your question"
-          className="w-full resize-none rounded-xl border border-edge bg-panel-2 px-4 py-3 text-[16px] text-fg placeholder:text-fg-dim/70 focus:border-accent focus:outline-none transition-colors"
+          className="w-full resize-none rounded-xl border border-edge bg-panel-2 px-4 py-3 text-[16px] text-fg placeholder:text-fg-dim focus:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors"
         />
         <div className="mt-2 flex items-center justify-between gap-3">
           <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm text-fg-dim">

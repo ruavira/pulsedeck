@@ -35,6 +35,15 @@ export function ThemeSwitcher({ className = '' }: { className?: string }) {
     setCurrent(saved);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
   const active = THEMES.find((t) => t.id === current) ?? THEMES[0];
 
   return (

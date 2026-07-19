@@ -19,7 +19,7 @@ export const Button = forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; size?: 'sm' | 'md' | 'lg' }
 >(function Button({ variant = 'primary', size = 'md', className = '', ...props }, ref) {
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm min-h-[36px]',
+    sm: 'px-3 py-2 text-sm min-h-[44px]',
     md: 'px-5 py-2.5 text-[15px] min-h-[44px]',
     lg: 'px-7 py-3.5 text-lg min-h-[52px]',
   };
@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
     return (
       <input
         ref={ref}
-        className={`w-full rounded-xl bg-panel-2 border border-edge px-4 py-3 text-[16px] text-fg placeholder:text-fg-dim/70 focus:border-accent focus:outline-none focus:ring-accent-soft transition-[border-color,box-shadow] min-h-[48px] ${className}`}
+        className={`w-full rounded-xl bg-panel-2 border border-edge px-4 py-3 text-[16px] text-fg placeholder:text-fg-dim focus:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-[border-color,box-shadow] min-h-[48px] ${className}`}
         {...props}
       />
     );

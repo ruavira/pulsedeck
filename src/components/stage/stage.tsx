@@ -165,7 +165,7 @@ export function Stage({
     latencyRef.current = { last: sample.serverToScreenMs, avg, n, e2e: sample.endToEndMs };
     setLatency({ ...latencyRef.current });
   }, []);
-  const results = useResultsPoller(
+  const { results, degraded: resultsDegraded } = useResultsPoller(
     sessionId,
     slide?.id ?? null,
     pollActive,
@@ -432,6 +432,7 @@ export function Stage({
               phase={s.phase}
               phaseOpenedAt={s.phaseOpenedAt ?? null}
               results={results}
+              resultsDegraded={resultsDegraded}
               code={initial.code}
               skewMs={skewMs}
               sessionId={sessionId}

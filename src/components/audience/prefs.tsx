@@ -289,7 +289,7 @@ function AccessibilitySheet({
             type="button"
             onClick={onClose}
             aria-label={ctx.t('done')}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-fg-dim hover:bg-panel-2 hover:text-fg"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-fg-dim hover:bg-panel-2 hover:text-fg"
           >
             ×
           </button>
@@ -303,7 +303,7 @@ function AccessibilitySheet({
                 aria-label="Smaller"
                 onClick={() => ctx.setSize(ctx.size - 1)}
                 disabled={ctx.size === 0}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-edge text-sm font-bold disabled:opacity-40"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-edge text-sm font-bold disabled:opacity-40"
               >
                 A−
               </button>
@@ -313,7 +313,7 @@ function AccessibilitySheet({
                 aria-label="Larger"
                 onClick={() => ctx.setSize(ctx.size + 1)}
                 disabled={ctx.size === zoomCount - 1}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-edge text-base font-bold disabled:opacity-40"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-edge text-base font-bold disabled:opacity-40"
               >
                 A+
               </button>
@@ -336,7 +336,7 @@ function AccessibilitySheet({
                   key={l.id}
                   type="button"
                   onClick={() => ctx.setLang(l.id)}
-                  className={`min-h-[40px] rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
+                  className={`min-h-[44px] rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
                     l.id === ctx.lang
                       ? 'border-accent bg-accent-soft text-accent'
                       : 'border-edge text-fg-dim'
@@ -378,11 +378,16 @@ function Toggle({
       aria-checked={on}
       aria-label={on ? labels[0] : labels[1]}
       onClick={() => onChange(!on)}
-      className={`relative h-7 w-12 rounded-full transition-colors ${on ? 'bg-accent' : 'bg-panel-2 border border-edge'}`}
+      className="flex h-11 w-12 items-center justify-center"
     >
       <span
-        className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`}
-      />
+        aria-hidden="true"
+        className={`relative block h-7 w-12 rounded-full transition-colors ${on ? 'bg-accent' : 'bg-panel-2 border border-edge'}`}
+      >
+        <span
+          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0.5'}`}
+        />
+      </span>
     </button>
   );
 }

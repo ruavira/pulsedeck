@@ -18,6 +18,26 @@ type LoadState =
   | { phase: 'error'; message: string }
   | { phase: 'ready'; report: SessionReport; key: string };
 
+/** Download button with a brief "Preparing…" busy state (server-generated files
+ *  can take a second; the navigation has no completion event, so we time-box it). */
+function ExportButton({ href, children }: { href: string; children: React.ReactNode }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <Button
+      variant="secondary"
+      disabled={busy}
+      aria-live="polite"
+      onClick={() => {
+        setBusy(true);
+        window.location.href = href;
+        setTimeout(() => setBusy(false), 2500);
+      }}
+    >
+      {busy ? 'Preparing…' : children}
+    </Button>
+  );
+}
+
 function formatWhen(startedAt: string | null, endedAt: string | null): string {
   if (!startedAt) return 'Never went live';
   const start = new Date(startedAt);
@@ -203,15 +223,9 @@ export function ReportClient({ sessionId }: { sessionId: string }) {
 
         {/* Actions (hidden in print) */}
         <div className="no-print mt-6 flex flex-wrap gap-3">
-          <Button variant="secondary" onClick={() => (window.location.href = `${exportBase}xlsx`)}>
-            Download XLSX
-          </Button>
-          <Button variant="secondary" onClick={() => (window.location.href = `${exportBase}csv`)}>
-            Download CSV
-          </Button>
-          <Button variant="secondary" onClick={() => (window.location.href = `${exportBase}pdf`)}>
-            Download PDF
-          </Button>
+          <ExportButton href={`${exportBase}xlsx`}>Download XLSX</ExportButton>
+          <ExportButton href={`${exportBase}csv`}>Download CSV</ExportButton>
+          <ExportButton href={`${exportBase}pdf`}>Download PDF</ExportButton>
           <Button variant="secondary" onClick={() => window.print()}>
             Print
           </Button>

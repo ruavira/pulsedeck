@@ -19,20 +19,24 @@ import {
 import { IconExternal, IconPlay, IconWarn } from './icons';
 
 function CopyButton({ text, label }: { text: string; label: string }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const text_ =
+    state === 'copied' ? 'Copied ✓' : state === 'failed' ? 'Press ⌘/Ctrl+C' : 'Copy link';
   return (
     <Button
       type="button"
       variant="ghost"
       size="sm"
-      aria-label={`Copy ${label}`}
+      // Let the live label be the accessible name so AT hears the result, not a stale "Copy".
+      aria-label={state === 'idle' ? `Copy ${label}` : undefined}
+      aria-live="polite"
       onClick={async () => {
         const ok = await copyText(text);
-        setCopied(ok);
-        if (ok) setTimeout(() => setCopied(false), 1600);
+        setState(ok ? 'copied' : 'failed');
+        setTimeout(() => setState('idle'), 1800);
       }}
     >
-      {copied ? 'Copied ✓' : 'Copy link'}
+      {text_}
     </Button>
   );
 }
