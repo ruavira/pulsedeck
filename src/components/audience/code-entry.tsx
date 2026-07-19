@@ -131,7 +131,7 @@ export function CodeEntry({ badCode }: { badCode?: string }) {
               maxLength={LEN}
               aria-label={`Character ${i + 1} of ${LEN}`}
               autoFocus={i === 0}
-              className="h-16 w-12 rounded-xl border border-edge bg-panel-2 text-center font-mono text-3xl font-bold uppercase text-fg caret-accent focus:border-accent focus:outline-none transition-colors"
+              className="h-16 w-12 rounded-xl border border-edge bg-panel-2 text-center font-mono text-3xl font-bold uppercase text-fg caret-accent focus:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors"
             />
           ))}
         </fieldset>

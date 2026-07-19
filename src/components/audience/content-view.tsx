@@ -49,7 +49,7 @@ export function ContentView({ slide, deckTitle }: { slide: Slide; deckTitle: str
               type="button"
               aria-label="Smaller text"
               onClick={() => setSize((s) => Math.max(0, s - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-edge bg-panel text-sm font-bold text-fg disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-edge bg-panel text-sm font-bold text-fg disabled:opacity-40"
               disabled={size === 0}
             >
               A−
@@ -58,7 +58,7 @@ export function ContentView({ slide, deckTitle }: { slide: Slide; deckTitle: str
               type="button"
               aria-label="Larger text"
               onClick={() => setSize((s) => Math.min(SIZES.length - 1, s + 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-edge bg-panel text-base font-bold text-fg disabled:opacity-40"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-edge bg-panel text-base font-bold text-fg disabled:opacity-40"
               disabled={size === SIZES.length - 1}
             >
               A+
@@ -119,7 +119,7 @@ export function ContentView({ slide, deckTitle }: { slide: Slide; deckTitle: str
         <button
           type="button"
           onClick={() => setFollow(false)}
-          className="mt-6 self-start rounded-full border border-edge bg-panel px-4 py-2 text-sm font-semibold text-fg-dim hover:text-fg"
+          className="mt-6 inline-flex min-h-[44px] items-center self-start rounded-full border border-edge bg-panel px-4 py-2 text-sm font-semibold text-fg-dim hover:text-fg"
         >
           ← Eyes up front
         </button>
@@ -145,7 +145,7 @@ export function ContentView({ slide, deckTitle }: { slide: Slide; deckTitle: str
         <button
           type="button"
           onClick={() => setFollow(true)}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent bg-accent-soft px-4 py-2.5 text-sm font-semibold text-accent"
+          className="mb-8 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-accent bg-accent-soft px-4 py-2.5 text-sm font-semibold text-accent"
         >
           📖 Follow along on my phone
         </button>

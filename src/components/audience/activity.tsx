@@ -49,7 +49,7 @@ function TranslateBar({
       <button
         type="button"
         onClick={onToggle}
-        className="min-h-[32px] rounded-full border border-edge px-3 py-1 text-xs font-semibold text-accent transition-colors hover:bg-accent-soft"
+        className="min-h-[44px] rounded-full border border-edge px-4 py-2 text-xs font-semibold text-accent transition-colors hover:bg-accent-soft"
       >
         {showingOriginal ? t('showTranslation') : t('showOriginal')}
       </button>

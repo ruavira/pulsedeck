@@ -171,7 +171,7 @@ function PhoneResultsBody({
             <span
               key={word}
               className={`font-bold leading-tight ${isMine ? 'text-cyan' : 'text-fg'}`}
-              style={{ fontSize: `${size}rem`, opacity: 0.55 + (n / max) * 0.45 }}
+              style={{ fontSize: `${size}rem`, opacity: 0.72 + (n / max) * 0.28 }}
             >
               {word}
             </span>

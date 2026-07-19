@@ -12,12 +12,15 @@ export function Modal({
   title,
   children,
   wide = false,
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
   wide?: boolean;
+  /** When false, backdrop-click and Escape don't close (e.g. an action is in flight). */
+  dismissible?: boolean;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -34,7 +37,11 @@ export function Modal({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-ink/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-ink/80 backdrop-blur-sm"
+        onClick={dismissible ? onClose : undefined}
+        aria-hidden="true"
+      />
       <div
         ref={dialogRef}
         role="dialog"
@@ -42,9 +49,26 @@ export function Modal({
         aria-label={title}
         tabIndex={-1}
         onKeyDown={(e) => {
-          if (e.key === 'Escape') {
+          if (e.key === 'Escape' && dismissible) {
             e.stopPropagation();
             onClose();
+            return;
+          }
+          if (e.key !== 'Tab') return;
+          // Keep focus inside the dialog (WCAG 2.4.3 / no-escape modal).
+          const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          );
+          if (!focusables || focusables.length === 0) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          const active = document.activeElement;
+          if (e.shiftKey && (active === first || active === dialogRef.current)) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
           }
         }}
         className={`relative flex max-h-[88vh] w-full flex-col rounded-2xl border border-edge bg-panel shadow-modal ${wide ? 'max-w-2xl' : 'max-w-lg'}`}
@@ -219,7 +243,7 @@ export function ConfirmDialog({
   onCancel: () => void;
 }) {
   return (
-    <Modal open={open} onClose={onCancel} title={title}>
+    <Modal open={open} onClose={onCancel} title={title} dismissible={!busy}>
       <p className="text-sm leading-relaxed text-fg-dim">{body}</p>
       {error && (
         <p role="alert" className="mt-3 rounded-lg border border-red/40 bg-red/10 px-3 py-2 text-sm text-red">

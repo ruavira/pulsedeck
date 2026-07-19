@@ -53,7 +53,7 @@ export function SignalBar({ broadcast }: { broadcast: (event: string, payload: u
               key={s.kind}
               type="button"
               onClick={() => tap(s.kind, s.label)}
-              className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-fg hover:bg-panel-2"
+              className="flex min-h-[44px] items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-semibold text-fg hover:bg-panel-2"
             >
               <span className="text-lg" aria-hidden="true">
                 {s.emoji}
