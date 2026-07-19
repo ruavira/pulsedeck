@@ -4,7 +4,7 @@ This source tree was recovered from Netlify and then reconnected to GitHub. The 
 
 ## Production migration ledger
 
-Verified against Supabase production on 2026-07-15:
+Verified against Supabase production on 2026-07-19:
 
 | Version | Name |
 | --- | --- |
@@ -20,6 +20,13 @@ Verified against Supabase production on 2026-07-15:
 | 20260712033017 | join_session_participant_cap |
 | 20260712122225 | response_latency_telemetry |
 | 20260715213631 | ops_feedback_and_telemetry |
+| 20260718145231 | lms_bridge |
+| 20260719040753 | ruavira_moodle_events_tables |
+| 20260719040843 | ruavira_dashboard_users_and_rls |
+| 20260719040907 | ruavira_rollup_views |
+| 20260719040949 | ruavira_secrets_table |
+| 20260719141544 | security_and_perf_polish |
+| 20260719141710 | harden_function_execute_grants |
 
 ## Cleanup notes
 
