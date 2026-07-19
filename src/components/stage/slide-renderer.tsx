@@ -534,7 +534,7 @@ function PhasePill({ phase }: { phase: Phase }) {
   );
 }
 
-function WaitingPanel({ code, open }: { code: string; open: boolean }) {
+function WaitingPanel({ code, open, degraded }: { code: string; open: boolean; degraded?: boolean }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-[3vh] text-center">
       <style>{`@keyframes pd-wait-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }`}</style>
@@ -549,6 +549,11 @@ function WaitingPanel({ code, open }: { code: string; open: boolean }) {
       >
         {open ? 'Voting is open — waiting for responses…' : 'Waiting for responses…'}
       </p>
+      {degraded && (
+        <p role="status" className="text-[clamp(0.95rem,1.6vw,1.2rem)] font-medium text-amber">
+          Reconnecting to live results…
+        </p>
+      )}
     </div>
   );
 }
@@ -558,6 +563,7 @@ function InteractiveSlideView({
   phase,
   phaseOpenedAt,
   results,
+  resultsDegraded,
   code,
   skewMs,
   sessionId,
@@ -567,6 +573,7 @@ function InteractiveSlideView({
   phase: Phase;
   phaseOpenedAt: string | null;
   results: Results | null;
+  resultsDegraded?: boolean;
   code: string;
   skewMs: number;
   sessionId: string;
@@ -587,7 +594,7 @@ function InteractiveSlideView({
   if (isQa) {
     body = <QaWall sessionId={sessionId} bumpSignal={qaBump} code={code} />;
   } else if (showWaiting) {
-    body = <WaitingPanel code={code} open={phase === 'open'} />;
+    body = <WaitingPanel code={code} open={phase === 'open'} degraded={resultsDegraded} />;
   } else if (hideLiveBars) {
     body = (
       <div className="flex h-full flex-col items-center justify-center gap-[2vh] text-center">
@@ -679,6 +686,8 @@ export interface SlideRendererProps {
   phase: Phase;
   phaseOpenedAt: string | null;
   results: Results | null;
+  /** Results polling has failed repeatedly — show a reconnecting note. */
+  resultsDegraded?: boolean;
   code: string;
   skewMs: number;
   sessionId: string;
@@ -692,6 +701,7 @@ export function SlideRenderer({
   phase,
   phaseOpenedAt,
   results,
+  resultsDegraded,
   code,
   skewMs,
   sessionId,
@@ -795,6 +805,7 @@ export function SlideRenderer({
             phase={phase}
             phaseOpenedAt={phaseOpenedAt}
             results={results}
+            resultsDegraded={resultsDegraded}
             code={code}
             skewMs={skewMs}
             sessionId={sessionId}
