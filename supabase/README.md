@@ -29,6 +29,7 @@ Verified against Supabase production on 2026-07-19:
 | 20260719141710 | harden_function_execute_grants |
 | 20260722114255 | embed_live_session |
 | 20260722150519 | fix_get_results_total |
+| 20260722152339 | embed_live_session_scale_axis |
 
 ## Cleanup notes
 
