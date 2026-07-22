@@ -4,6 +4,7 @@
 // lobby/live/ended states. Rendered by /present/[sessionId] after key auth.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { nanoid } from 'nanoid';
 import { useSessionChannel } from '@/hooks/use-session-channel';
 import { useResultsPoller, type LatencySample } from '@/hooks/use-results-poller';
 import { presenterPost } from '@/lib/presenter-api';
@@ -83,11 +84,16 @@ export function Stage({
   const onSignal = useCallback((p: { kind: string }) => {
     signalsRef.current.push({ kind: p.kind, at: Date.now() });
   }, []);
+  // Advertise presence as the stage so embeds on this session defer to us as the
+  // results aggregator and never poll. Stable per mount; the stage keeps polling
+  // exactly as before (this is additive and non-breaking).
+  const stageClientId = useRef(`stage-${nanoid(10)}`);
   const { state, setState, connected, broadcast, resync } = useSessionChannel(sessionId, {
     initialState,
     onReact: (p) => reactionsRef.current?.push(p.emoji),
     onQaBump: () => setQaBump((n) => n + 1),
     onSignal,
+    presence: { key: stageClientId.current, role: 'stage' },
   });
 
   // Recompute the rolling mood every second: pace signals over 30s, hands over 60s.

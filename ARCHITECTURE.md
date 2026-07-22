@@ -31,6 +31,19 @@ every feature works without it.
 - Reactions: `react` broadcast events, client rate-limited (max 1/800ms per device).
 - Every subscription must handle reconnect: on `SUBSCRIBED` after a drop, resync via RPC.
 
+### Embeds & aggregator election
+
+- Embeds preserve the single-poller contract via Realtime **Presence** (no new
+  channel — presence rides the existing `session:{id}` channel). The stage tracks
+  presence `role:'stage'`; embeds track `role:'embed'` with a stable per-tab
+  `clientId`. Every client computes the same winner from the same presence snapshot:
+  if a `stage` is present it is the aggregator (embeds NEVER poll); otherwise the
+  present embed with the lexicographically smallest `clientId` polls. Exactly one
+  poller results. Election has ~750ms hysteresis; the winner's leading `get_results`
+  fetch is gap-free and consumers keep last-known results, so handoff is seamless.
+  Hooks: `use-aggregator-election`, `use-embed-session` (deck→live-session resolver),
+  reusing `use-session-channel` (now presence-capable) + `use-results-poller`.
+
 ## Data flow rules
 
 - Audience clients: ONLY call the granted RPCs (join_session, get_session_state,
@@ -53,6 +66,7 @@ every feature works without it.
 | `/remote/[sessionId]` | Presenter phone remote: next/prev, open/close/reveal, Q&A moderation, participant count |
 | `/j/[code]` | Audience app (also `/j` with manual code entry) |
 | `/report/[sessionId]` | Post-session report + exports (xlsx/csv, print-to-PDF view) |
+| `/embed/deck/[deckId]/[widget]` | Host-agnostic, read-only, live embed widget (iframe). `widget` ∈ auto\|poll\|quiz\|ranking\|wordcloud\|qa\|leaderboard\|join. Deck-scoped so one pasted URL works every session. Public/live data only — no deck-private data ever. `/embed/*` allows framing from any host (`frame-ancestors *`) |
 
 ## API routes (server, service role)
 
@@ -67,6 +81,11 @@ every feature works without it.
 - `POST /api/import/pptx` (multipart) -> extracted slides JSON
 - `POST /api/upload` (multipart) -> Storage `media` bucket, returns public URL
 - `GET /api/export/results/[sessionId]?format=xlsx|csv` -> file download
+- RPC `get_live_session_for_deck(p_deck_id uuid)` (anon/authenticated) -> the deck's
+  currently-live session (or null) for embeds: `session_id, code, phase, status,
+  current_slide_index, participant_count, current_slide` (PUBLIC-safe slide fields
+  ONLY: id, kind, title, body.prompt/options/optionImages, settings.timeLimitSec —
+  never correct answers, notes, snapshot or PII). Migration `20260722143000_embed_live_session`.
 - AI routes degrade gracefully: if `ANTHROPIC_API_KEY` unset, return `{aiDisabled: true}` 501
   and the UI shows a friendly "AI is off" state. NOTHING else may depend on AI.
 
