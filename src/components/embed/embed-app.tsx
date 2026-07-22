@@ -116,14 +116,14 @@ export function EmbedApp({
     <div
       data-theme={themed}
       style={style}
-      className={`text-fg ${config.compact ? 'p-2' : 'p-3'}`}
+      className={`flex min-h-[100dvh] flex-col justify-center text-fg ${config.compact ? 'p-2' : 'p-3'}`}
     >
       <div
         className={
           framed
-            ? 'rounded-2xl border border-edge bg-panel/80 shadow-soft ' +
+            ? 'w-full rounded-2xl border border-edge bg-panel/80 shadow-soft ' +
               (config.compact ? 'p-3' : 'p-4 sm:p-5')
-            : ''
+            : 'w-full'
         }
       >
         <EmbedWidgetView
