@@ -17,6 +17,7 @@ import { LmsBridgeModal } from './lms-bridge-modal';
 import { FirstRun } from './first-run';
 import { GoLiveModal } from './go-live-modal';
 import { FileImportModal, MarkdownImportModal, type ImportResult } from './import-modals';
+import { GammaImportModal } from './gamma-import-modal';
 import { Inspector } from './inspector';
 import { KindPicker } from './kind-picker';
 import { SlideCanvas } from './slide-canvas';
@@ -40,6 +41,7 @@ type StudioModal =
   | { type: 'markdown' }
   | { type: 'sessions' }
   | { type: 'lms' }
+  | { type: 'gamma' }
   | { type: 'file'; kind: 'pptx' | 'pdf'; file: File };
 
 export function DeckEditor({ deckId }: { deckId: string }) {
@@ -407,6 +409,7 @@ function EditorShell({
         onUndo={ed.undo}
         onRedo={ed.redo}
         onOpenAi={() => setModal({ type: 'ai' })}
+        onOpenGamma={() => setModal({ type: 'gamma' })}
         onOpenMarkdown={() => setModal({ type: 'markdown' })}
         onOpenSessions={() => setModal({ type: 'sessions' })}
         onOpenLms={() => setModal({ type: 'lms' })}
@@ -586,6 +589,12 @@ function EditorShell({
           onApply={applyResult}
         />
       )}
+      <GammaImportModal
+        open={modal?.type === 'gamma'}
+        onClose={() => setModal(null)}
+        hasSlides={slides.length > 0}
+        onApply={applyResult}
+      />
       <GoLiveModal
         open={modal?.type === 'golive'}
         onClose={() => setModal(null)}
