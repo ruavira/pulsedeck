@@ -2,19 +2,13 @@
 // Global theme picker — persists per browser, applies to every surface
 // (studio, stage, remote, audience) via data-theme on <html>.
 import { useEffect, useState } from 'react';
+import { THEMES, type ThemeId } from './themes';
 
-export const THEMES = [
-  { id: 'ice', name: 'Ice & Azure', swatch: '#1e88d2', bg: '#f5f9fc' },
-  { id: 'sky', name: 'Sky Navy', swatch: '#53c1f0', bg: '#10527f' },
-  { id: 'teal', name: 'Teal Fresh', swatch: '#109d8d', bg: '#f0faf9' },
-  { id: 'sunrise', name: 'Sunrise', swatch: '#d97a06', bg: '#fdfaf3' },
-  { id: 'navy', name: 'Deep Navy', swatch: '#2f86c9', bg: '#061826' },
-  { id: 'aurora', name: 'Aurora', swatch: '#8b7cf6', bg: '#14123c' },
-  { id: 'sand', name: 'Sand', swatch: '#c2653c', bg: '#faf6f0' },
-  { id: 'pop', name: 'Pop', swatch: '#4f46e5', bg: '#ffffff' },
-] as const;
-
-export type ThemeId = (typeof THEMES)[number]['id'];
+// Re-exported so existing client-side importers keep working. Server components
+// MUST import from './themes' directly (a value imported from this 'use client'
+// module resolves to a client-reference proxy on the server, not the array).
+export { THEMES };
+export type { ThemeId };
 
 export function applyTheme(id: ThemeId) {
   if (id === 'ice') delete document.documentElement.dataset.theme;

@@ -2,7 +2,7 @@
 //   /embed/deck/{deckId}/{widget}?theme=&accent=&compact=&preset=
 // Next 16: params and searchParams are Promises — await them.
 import { EmbedApp, type EmbedConfig, type EmbedWidget } from '@/components/embed/embed-app';
-import { THEMES, type ThemeId } from '@/components/shared/theme-switcher';
+import { THEMES, type ThemeId } from '@/components/shared/themes';
 
 const WIDGETS: readonly EmbedWidget[] = [
   'auto',
