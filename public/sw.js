@@ -1,7 +1,7 @@
 // PulseDeck service worker — deliberately conservative for a realtime app.
 // Strategy: network-first for EVERYTHING except immutable static assets.
 // Live data (RPCs, API routes, realtime) must never be served stale.
-const VERSION = 'pd-v1';
+const VERSION = 'pd-v2';
 const STATIC_CACHE = `static-${VERSION}`;
 const STATIC_PATHS = ['/icon-192.png', '/icon-512.png', '/manifest.webmanifest'];
 
@@ -25,6 +25,9 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return; // never touch writes
   if (url.origin !== self.location.origin) return; // never touch Supabase/external
   if (url.pathname.startsWith('/api/')) return; // API always network
+  // Embed widgets run inside third-party iframes (Gamma, Notion, …). The SW must
+  // never intercept them — go straight to the network, no caching, no interference.
+  if (url.pathname.startsWith('/embed')) return;
 
   // Immutable Next static assets + our icons: cache-first
   if (url.pathname.startsWith('/_next/static/') || STATIC_PATHS.includes(url.pathname)) {
@@ -42,7 +45,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Pages: network-first with cache fallback (offline shell for reopens)
+  // Pages: network-first with cache fallback (offline shell for reopens).
+  // The fallback MUST resolve to a Response — caches.match() resolves to
+  // undefined on a miss, and respondWith(undefined) throws
+  // "Failed to convert value to 'Response'" and breaks the navigation.
   event.respondWith(
     fetch(event.request)
       .then((res) => {
@@ -52,6 +58,6 @@ self.addEventListener('fetch', (event) => {
         }
         return res;
       })
-      .catch(() => caches.match(event.request)),
+      .catch(async () => (await caches.match(event.request)) || Response.error()),
   );
 });
