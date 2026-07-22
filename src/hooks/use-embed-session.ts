@@ -22,7 +22,16 @@ export interface EmbedSlide {
   id: string;
   kind: SlideKind;
   title?: string;
-  body: { prompt?: string; options?: string[]; optionImages?: string[] };
+  body: {
+    prompt?: string;
+    options?: string[];
+    optionImages?: string[];
+    // Scale axis (public — shown on the projector's scale slide).
+    min?: number;
+    max?: number;
+    minLabel?: string;
+    maxLabel?: string;
+  };
   settings: { timeLimitSec?: number };
 }
 
@@ -57,6 +66,8 @@ export interface EmbedSession {
   currentSlideIndex: number | null;
   participantCount: number | null;
   connected: boolean;
+  /** Increments on each `qa` broadcast nudge so an embedded Q&A wall refetches live. */
+  qaBump: number;
   /** Broadcast on the session channel (used to rebroadcast aggregated results). */
   broadcast: (event: string, payload: unknown) => void;
 }
@@ -69,8 +80,14 @@ export function useEmbedSession(deckId: string, opts: Options = {}): EmbedSessio
 
   const sessionId = resolved?.session_id ?? null;
 
+  // Q&A nudge: bump a counter on each `qa` broadcast so the embedded Q&A wall
+  // refetches immediately rather than waiting for its own poll.
+  const [qaBump, setQaBump] = useState(0);
+  const onQaBump = useCallback(() => setQaBump((n) => n + 1), []);
+
   const { state: channelState, connected, broadcast } = useSessionChannel(sessionId, {
     onResults: opts.onResults,
+    onQaBump,
     presence: opts.presence,
     onPresenceSync: opts.onPresenceSync,
   });
@@ -153,6 +170,7 @@ export function useEmbedSession(deckId: string, opts: Options = {}): EmbedSessio
     currentSlideIndex,
     participantCount: resolved?.participant_count ?? null,
     connected,
+    qaBump,
     broadcast,
   };
 }

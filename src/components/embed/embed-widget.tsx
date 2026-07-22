@@ -235,7 +235,13 @@ function ResultsBody({
       case 'scale':
         body = (
           <div className={`${bodyHeight(compact)} overflow-hidden`}>
-            <ScaleView results={results} min={1} max={5} />
+            <ScaleView
+              results={results}
+              min={slide.body.min ?? 1}
+              max={slide.body.max ?? 5}
+              minLabel={slide.body.minLabel}
+              maxLabel={slide.body.maxLabel}
+            />
           </div>
         );
         break;
@@ -330,7 +336,7 @@ export function EmbedWidgetView({
   if (widget === 'qa' || (widget === 'auto' && kind === 'qa')) {
     return (
       <div className={`${bodyHeight(compact)} overflow-hidden`}>
-        <QaWall sessionId={sessionId} bumpSignal={0} code={session.code ?? ''} />
+        <QaWall sessionId={sessionId} bumpSignal={session.qaBump} code={session.code ?? ''} />
       </div>
     );
   }
