@@ -27,10 +27,12 @@ Verified against Supabase production on 2026-07-19:
 | 20260719040949 | ruavira_secrets_table |
 | 20260719141544 | security_and_perf_polish |
 | 20260719141710 | harden_function_execute_grants |
+| 20260722114255 | embed_live_session |
 
 ## Cleanup notes
 
 - `.env*`, `.netlify`, `.next`, `node_modules`, build output, and local TypeScript build metadata are ignored and must stay out of Git.
 - The recovered `001_*.sql` through `004_*.sql` files are legacy source snapshots from the archive. Do not use that short-name pattern for new database work.
 - New database work should be timestamped, committed under `supabase/migrations`, and checked against the production migration ledger before deployment.
+- `20260722114255_embed_live_session` (PulseDeck Embeds) is **applied to production** (verified 2026-07-22) — it adds the read-only, public/live `get_live_session_for_deck(uuid)` RPC (granted to anon/authenticated), returning only the public fields the stage already shows.
 - Keep public-schema tables protected with RLS. Views exposed through the client should use `security_invoker = true`.
