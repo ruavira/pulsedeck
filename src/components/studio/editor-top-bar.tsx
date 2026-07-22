@@ -47,6 +47,7 @@ export function EditorTopBar({
   onUndo,
   onRedo,
   onOpenAi,
+  onOpenGamma,
   onOpenMarkdown,
   onOpenSessions,
   onOpenLms,
@@ -72,6 +73,7 @@ export function EditorTopBar({
   onUndo: () => void;
   onRedo: () => void;
   onOpenAi: () => void;
+  onOpenGamma: () => void;
   onOpenMarkdown: () => void;
   onOpenSessions: () => void;
   onOpenLms: () => void;
@@ -370,6 +372,11 @@ export function EditorTopBar({
         <Menu
           label="Import"
           items={[
+            {
+              label: 'From Gamma…',
+              hint: 'Bring your Gamma visuals in + weave live activities between them',
+              onSelect: onOpenGamma,
+            },
             {
               label: 'PowerPoint (.pptx)…',
               hint: 'Extract slides from a PowerPoint file',
