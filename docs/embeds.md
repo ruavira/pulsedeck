@@ -39,6 +39,28 @@ automatically picks up your **next** session. No re-pasting per session.
 The embed is transparent and auto-fits its content, so it sits cleanly inside the
 card. `frame-ancestors *` is set on `/embed/*`, so Gamma (or any host) can frame it.
 
+Two Gamma settings to check on the card once (Gamma remembers them):
+
+- **Link display → Embed** (not "Preview" — Preview only shows a link/bookmark card).
+- **Load through a proxy → OFF** — the widget is a live app with a realtime socket;
+  Gamma's proxy is for static pages and will break the live updates.
+
+### Sizing the card
+
+The widget **centers and fills** whatever height the card gives it, so you just set
+a card height tall enough for the content — a bit too tall only adds transparent
+whitespace; too short clips. Suggested Gamma card heights:
+
+| widget | default height | with `compact=1` |
+|---|---|---|
+| `auto` · `poll` · `quiz` · `ranking` · `wordcloud` · `scale` · `open_text` | ~500 px | ~400 px |
+| `qa` (Q&A wall) | ~500 px | ~420 px |
+| `leaderboard` | ~440 px | ~360 px |
+| `join` (QR + code) | ~360 px | ~280 px |
+
+Use `compact=1` when the card has to be small (a corner of a busy slide); it tightens
+the chart height, padding and QR size. On a full-bleed slide, the defaults look best.
+
 ## Host-agnostic
 
 The same URL works anywhere an iframe does — Notion (`/embed` a link), a plain

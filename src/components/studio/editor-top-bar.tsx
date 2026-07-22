@@ -10,6 +10,7 @@ import { THEMES, type ThemeId } from '@/components/shared/theme-switcher';
 import { IMAGE_STYLES } from '@/lib/image-catalog';
 import { FONT_PAIRINGS, pairingFor } from '@/lib/font-pairings';
 import { Menu } from './modal';
+import { EmbedModal } from './embed-modal';
 import type { SaveState } from './use-deck-editor';
 import { IconEye, IconHistory, IconPlay, IconRedo, IconSparkle, IconUndo } from './icons';
 
@@ -84,6 +85,7 @@ export function EditorTopBar({
   const pdfRef = useRef<HTMLInputElement>(null);
   const logoRef = useRef<HTMLInputElement>(null);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
   const [logoBusy, setLogoBusy] = useState(false);
   const themeRef = useRef<HTMLDivElement>(null);
   const accent = deck.theme.accent ?? ACCENT_PRESETS[0].hex;
@@ -352,6 +354,9 @@ export function EditorTopBar({
         <Button type="button" variant="ghost" size="sm" onClick={onOpenLms}>
           LMS
         </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setEmbedOpen(true)}>
+          Embed
+        </Button>
         <Button
           type="button"
           variant={previewOpen ? 'secondary' : 'ghost'}
@@ -437,6 +442,13 @@ export function EditorTopBar({
           if (f) void uploadLogo(f);
           e.target.value = '';
         }}
+      />
+
+      <EmbedModal
+        open={embedOpen}
+        onClose={() => setEmbedOpen(false)}
+        deckId={deck.id}
+        themePack={deck.theme.pack}
       />
     </header>
   );
