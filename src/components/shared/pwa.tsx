@@ -9,6 +9,9 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function PwaRegister() {
   useEffect(() => {
+    // Never run the PWA service worker inside an iframe — embed widgets are framed
+    // by third-party hosts (Gamma, Notion, …) and a SW there only causes trouble.
+    if (typeof window !== 'undefined' && window.top !== window.self) return;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => undefined);
     }
