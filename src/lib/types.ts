@@ -98,6 +98,17 @@ export interface SlideSettings {
   buildAnimation?: boolean;
   accent?: string; // per-slide accent color override
   notes?: string; // presenter-only speaker notes (shown on the phone remote)
+  /**
+   * Optional facilitator-only mapping used by the PulseDeck Gamma Sync browser
+   * extension. The extension reads this from the presenter-authenticated frozen
+   * session snapshot; it is never exposed by the public embed resolver.
+   */
+  gammaSync?: {
+    /** Gamma document slug, i.e. the segment after gamma.app/docs/. */
+    documentSlug: string;
+    /** Gamma card id without the URL's leading `card-` prefix. */
+    cardId: string;
+  };
 }
 
 export interface Slide {

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PulseDeck Gamma Sync</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="mark">P</span>
+        <div>
+          <h1>Gamma Sync</h1>
+          <p>PulseDeck follows the card you present.</p>
+        </div>
+      </header>
+
+      <section id="disconnected">
+        <label for="remote-url">PulseDeck remote URL</label>
+        <input id="remote-url" type="password" autocomplete="off" placeholder="https://…/remote/…?key=…" />
+        <button id="connect" type="button">Connect live session</button>
+        <p class="fine">The presenter key stays only in this Chrome session and is never sent to Gamma.</p>
+      </section>
+
+      <section id="connected" hidden>
+        <div class="status"><span class="dot"></span><strong>Connected</strong></div>
+        <p id="deck-title" class="deck"></p>
+        <p id="mapping-count" class="muted"></p>
+        <p id="current-card" class="card"></p>
+        <p id="last-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button id="sync-now" type="button">Sync this card now</button>
+          <button id="disconnect" class="secondary" type="button">Disconnect</button>
+        </div>
+      </section>
+
+      <p id="message" class="message" role="status"></p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
