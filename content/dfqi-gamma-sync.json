@@ -1,0 +1,1023 @@
+{
+  "title": "DFQI Part 1 — Sessions 1–3 · Gamma Live Interactions",
+  "theme": {
+    "pack": "teal",
+    "accent": "#0F766E",
+    "orgName": "SQHN × Ruavira Collective Inc.",
+    "fontScale": 1
+  },
+  "sessions": [
+    {
+      "slug": "DFQI-Part-1-Session-1-Signal-or-Noise-PulseDeck-Live-Pilot-cy7x7cox38l68ru",
+      "label": "Session 1 — Signal or Noise?",
+      "cards": [
+        {
+          "n": 1,
+          "id": "4igd7qm6fghnfdt",
+          "heading": "Signal or Noise? Crisis, or just a bad month?"
+        },
+        {
+          "n": 2,
+          "id": "idf3wydu3lx2ojq",
+          "heading": "Signal or Noise?"
+        },
+        {
+          "n": 3,
+          "id": "9vjk5mcl3516gwc",
+          "heading": "Where this sits — the three-session map"
+        },
+        {
+          "n": 4,
+          "id": "vddwklsrlute87m",
+          "heading": "What Session 1 gives you"
+        },
+        {
+          "n": 5,
+          "id": "9lon6rqzk7erjwx",
+          "heading": "One data point is not a story"
+        },
+        {
+          "n": 6,
+          "id": "y9hqa60z60xxewl",
+          "heading": "The shape is the story"
+        },
+        {
+          "n": 7,
+          "id": "t30j8turmc1xn15",
+          "heading": "Two ways to get this wrong"
+        },
+        {
+          "n": 8,
+          "id": "x44gr6itkx6o62b",
+          "heading": "QUICK POLL — is your dashboard reporting, or improving?"
+        },
+        {
+          "n": 9,
+          "id": "zf3hinstkbrltrj",
+          "heading": "Meet Sango District Hospital"
+        },
+        {
+          "n": 10,
+          "id": "h12uhtf846pfl4l",
+          "heading": "Two ways to use the same number"
+        },
+        {
+          "n": 11,
+          "id": "tg62jw19f0mdwvk",
+          "heading": "The Sango micro-scene — CMD vs QI Lead"
+        },
+        {
+          "n": 12,
+          "id": "k0xdzu5my1is1ex",
+          "heading": "The judgment-vs-improvement diagnostic"
+        },
+        {
+          "n": 13,
+          "id": "2btf18d94hu92mx",
+          "heading": "Run the diagnostic — the Sango SSI chart"
+        },
+        {
+          "n": 14,
+          "id": "bl5mmsdpdpaarsj",
+          "heading": "ACTIVITY — Card sort, Round 1: judgment or improvement?"
+        },
+        {
+          "n": 15,
+          "id": "2b8t11ytc7mhf8q",
+          "heading": "Round 1 — debrief"
+        },
+        {
+          "n": 16,
+          "id": "j7h6s5qygi1eiq6",
+          "heading": "Every system varies"
+        },
+        {
+          "n": 17,
+          "id": "z7vc7u9lhqdd8hj",
+          "heading": "Common cause vs special cause — signal vs noise"
+        },
+        {
+          "n": 18,
+          "id": "joig9s07k7aaww2",
+          "heading": "The analogy — the driver who jerks the wheel"
+        },
+        {
+          "n": 19,
+          "id": "ianakzyujkhlvmj",
+          "heading": "The cardinal sin — tampering (the two-point trap)"
+        },
+        {
+          "n": 20,
+          "id": "t0mmxxsz6pgk5jo",
+          "heading": "Tampering usually makes it worse"
+        },
+        {
+          "n": 21,
+          "id": "w56lwao869sog77",
+          "heading": "HINGE POLL — signal or noise?"
+        },
+        {
+          "n": 22,
+          "id": "vaszks6npuqjx07",
+          "heading": "Poll reveal — the discipline"
+        },
+        {
+          "n": 23,
+          "id": "8rymw114j4deptt",
+          "heading": "A Sango example — the tempting bad month"
+        },
+        {
+          "n": 24,
+          "id": "51l1osw9pfncrqe",
+          "heading": "The four Provost rules are signal detectors"
+        },
+        {
+          "n": 25,
+          "id": "kpi7mjt1u8kjl53",
+          "heading": "Signal vs hunch — the bright line"
+        },
+        {
+          "n": 26,
+          "id": "463sizwf08tphys",
+          "heading": "ACTIVITY — Card sort, Round 2: signal or noise?"
+        },
+        {
+          "n": 27,
+          "id": "1m3nf97cztdm24w",
+          "heading": "Round 2 — debrief"
+        },
+        {
+          "n": 28,
+          "id": "jpprd9fgclzyhrz",
+          "heading": "From reacting to improving — the Model for Improvement"
+        },
+        {
+          "n": 29,
+          "id": "uz7wkbjdqyvlllq",
+          "heading": "The three questions — anchored to Sango's SSI"
+        },
+        {
+          "n": 30,
+          "id": "lut5ia1fliypkak",
+          "heading": "PDSA — test small"
+        },
+        {
+          "n": 31,
+          "id": "gtni48ci0idzop1",
+          "heading": "QUICK CHECK — what's your aim?"
+        },
+        {
+          "n": 32,
+          "id": "08etekoti8n8osp",
+          "heading": "One aim needs three kinds of measure"
+        },
+        {
+          "n": 33,
+          "id": "olmachpu83yezd5",
+          "heading": "Outcome measure — did the patient's result change?"
+        },
+        {
+          "n": 34,
+          "id": "19fodzujg4j39dd",
+          "heading": "Process measure — did we actually do the thing?"
+        },
+        {
+          "n": 35,
+          "id": "s08sacua6uipyum",
+          "heading": "Balancing measure — what did it cost us elsewhere?"
+        },
+        {
+          "n": 36,
+          "id": "iru99k208kmk1um",
+          "heading": "Why the board cares most about the balancing measure"
+        },
+        {
+          "n": 37,
+          "id": "ppjkr0t8ddkxu04",
+          "heading": "QUICK POLL — which measure is this?"
+        },
+        {
+          "n": 38,
+          "id": "gmklwwpx0bsmzyz",
+          "heading": "The Sango SSI measure family — all three together"
+        },
+        {
+          "n": 39,
+          "id": "818471428xnl9hf",
+          "heading": "Back to card 1 — the falls chart returns"
+        },
+        {
+          "n": 40,
+          "id": "srh35gp4wm3urwp",
+          "heading": "The panicked read vs the disciplined read"
+        },
+        {
+          "n": 41,
+          "id": "tcx74r113fa8qd6",
+          "heading": "The reveal — Rule 4, astronomical point"
+        },
+        {
+          "n": 42,
+          "id": "vite5msb9ol0e90",
+          "heading": "The cause — a four-day blackout"
+        },
+        {
+          "n": 43,
+          "id": "zc06isxhmtmlbxq",
+          "heading": "MUDDIEST POINT — what's still murky?"
+        },
+        {
+          "n": 44,
+          "id": "sao4nzwmuwzk28r",
+          "heading": "The lesson — fix the system, not the staff"
+        },
+        {
+          "n": 45,
+          "id": "6mmlfa4drj510xb",
+          "heading": "The chart told the story"
+        },
+        {
+          "n": 46,
+          "id": "bv1s0fb3af62ncu",
+          "heading": "Revisit the vote — from card 1 to now"
+        },
+        {
+          "n": 47,
+          "id": "s3crrbpsyhoah85",
+          "heading": "The three ideas to keep"
+        },
+        {
+          "n": 48,
+          "id": "3z5c3nt2tm4qevx",
+          "heading": "Your pre-task — bring your own metric"
+        },
+        {
+          "n": 49,
+          "id": "hl3vrwzq2ble4vp",
+          "heading": "CONFIDENCE PULSE — rate yourself"
+        },
+        {
+          "n": 50,
+          "id": "zbspjrssywl30wj",
+          "heading": "Next — Session 2: From Metric to Chart"
+        },
+        {
+          "n": 51,
+          "id": "6l09ein4r561zn5",
+          "heading": "From reporting numbers to using them"
+        }
+      ]
+    },
+    {
+      "slug": "DFQI-Part-1-Session-2-From-Metric-to-Chart-PulseDeck-Live-Pilot-dc0sfypwingbucz",
+      "label": "Session 2 — From Metric to Chart",
+      "cards": [
+        {
+          "n": 1,
+          "id": "vfcr4qibumwmsvg",
+          "heading": "Is our SSI rate really improving?"
+        },
+        {
+          "n": 2,
+          "id": "hjfx0fwxoen2o79",
+          "heading": "The story so far — where this sits"
+        },
+        {
+          "n": 3,
+          "id": "8onxkrtdkpkgkt5",
+          "heading": "What you'll walk out able to do"
+        },
+        {
+          "n": 4,
+          "id": "ncghmqii73n5z82",
+          "heading": "The argument, unpacked"
+        },
+        {
+          "n": 5,
+          "id": "bdqd25e2q1aivg1",
+          "heading": "Why metrics quietly collapse dashboards"
+        },
+        {
+          "n": 6,
+          "id": "qr4dljjidf30h63",
+          "heading": "Which is the real rate?"
+        },
+        {
+          "n": 7,
+          "id": "p4uudy2lj95u93m",
+          "heading": "There is no \"real\" rate — yet"
+        },
+        {
+          "n": 8,
+          "id": "6tey9ulsey3ec9q",
+          "heading": "The fix has a name — the operational definition"
+        },
+        {
+          "n": 9,
+          "id": "bfmeyrsfm3t4961",
+          "heading": "An op-def is a contract"
+        },
+        {
+          "n": 10,
+          "id": "gytmmm7za7ez082",
+          "heading": "The six components — the anatomy"
+        },
+        {
+          "n": 11,
+          "id": "o3rtyu2esraj9sz",
+          "heading": "Numerator & Denominator"
+        },
+        {
+          "n": 12,
+          "id": "lrij39w260epv89",
+          "heading": "Inclusion & Exclusion"
+        },
+        {
+          "n": 13,
+          "id": "8v4bpms6lcgzj2w",
+          "heading": "Data source & Sampling / frequency"
+        },
+        {
+          "n": 14,
+          "id": "3buyxd1wouu4zxx",
+          "heading": "Which do you skip?"
+        },
+        {
+          "n": 15,
+          "id": "krahrolodobn4j8",
+          "heading": "The Six-Question Checklist"
+        },
+        {
+          "n": 16,
+          "id": "s2gcryxzjaurlbr",
+          "heading": "Sango worked example — the measure"
+        },
+        {
+          "n": 17,
+          "id": "2fy01viyhyi9o7c",
+          "heading": "Sango op-def — numerator & denominator"
+        },
+        {
+          "n": 18,
+          "id": "h4vz5epy3huq5hd",
+          "heading": "Sango op-def — inclusion & exclusion"
+        },
+        {
+          "n": 19,
+          "id": "4cbzq1pgrx01p0s",
+          "heading": "Sango op-def — data source & sampling / frequency"
+        },
+        {
+          "n": 20,
+          "id": "30zihtitodcdot1",
+          "heading": "Failure modes — what breaks when one is missing"
+        },
+        {
+          "n": 21,
+          "id": "fb2nalkh66luu4x",
+          "heading": "Spot the missing component"
+        },
+        {
+          "n": 22,
+          "id": "mdk9oguvgj19xy0",
+          "heading": "So — what makes a metric trustworthy?"
+        },
+        {
+          "n": 23,
+          "id": "an1yp5t7id7r3i8",
+          "heading": "Fix the Metric — set-up"
+        },
+        {
+          "n": 24,
+          "id": "79wayamqf885u0x",
+          "heading": "Your task, groups, and timing"
+        },
+        {
+          "n": 25,
+          "id": "xh1aszkkog4u332",
+          "heading": "While you work"
+        },
+        {
+          "n": 26,
+          "id": "b7m438j5pcrcfaq",
+          "heading": "Breakout 1 — debrief"
+        },
+        {
+          "n": 27,
+          "id": "mfxiaphh83mrsjm",
+          "heading": "From metric to chart"
+        },
+        {
+          "n": 28,
+          "id": "v2oym3bdwkx4jjf",
+          "heading": "Run-chart anatomy — the x-axis"
+        },
+        {
+          "n": 29,
+          "id": "r92cf9sfzk8psjm",
+          "heading": "Run-chart anatomy — the y-axis, plot & join"
+        },
+        {
+          "n": 30,
+          "id": "7x2csb6gq32y69e",
+          "heading": "The centreline — median, not mean"
+        },
+        {
+          "n": 31,
+          "id": "qy2bdarhu0xxmsr",
+          "heading": "How many points — and the on-line rule"
+        },
+        {
+          "n": 32,
+          "id": "0rt1uvtekkvua8y",
+          "heading": "The 4-step scan — how to read any chart"
+        },
+        {
+          "n": 33,
+          "id": "73mn5dqt8j0c5z4",
+          "heading": "The four signals — your signal alphabet"
+        },
+        {
+          "n": 34,
+          "id": "oroviqwb7gvkpyy",
+          "heading": "Rule 1 — Shift"
+        },
+        {
+          "n": 35,
+          "id": "92qr5z5ysuiyabf",
+          "heading": "Rule 2 — Trend"
+        },
+        {
+          "n": 36,
+          "id": "65pplqi32fsfoe1",
+          "heading": "Is this a trend?"
+        },
+        {
+          "n": 37,
+          "id": "c3vc54aaqm2plpr",
+          "heading": "Rule 4 — Astronomical point"
+        },
+        {
+          "n": 38,
+          "id": "lw8lggwo85oh545",
+          "heading": "Rule 3 — Runs (the technical fourth check)"
+        },
+        {
+          "n": 39,
+          "id": "gnwwmlgmivmel3f",
+          "heading": "Three workhorses + one specialist"
+        },
+        {
+          "n": 40,
+          "id": "uz3r2tjt9poo30q",
+          "heading": "Reading real charts — the messy bits"
+        },
+        {
+          "n": 41,
+          "id": "vgyoeqipdu3tmr6",
+          "heading": "Don't tamper — the cardinal sin"
+        },
+        {
+          "n": 42,
+          "id": "rgwm0ydsnn3278v",
+          "heading": "What's still fuzzy?"
+        },
+        {
+          "n": 43,
+          "id": "mlddfutvk89d92g",
+          "heading": "Signal or noise?"
+        },
+        {
+          "n": 44,
+          "id": "iamex9msibaangf",
+          "heading": "Read the Run Chart — set-up"
+        },
+        {
+          "n": 45,
+          "id": "1890821fxmou1ol",
+          "heading": "Your task, groups, and timing"
+        },
+        {
+          "n": 46,
+          "id": "o4m0lzr640r0rgx",
+          "heading": "While you work"
+        },
+        {
+          "n": 47,
+          "id": "oa9au229x7uuukj",
+          "heading": "Breakout 2 — debrief (all four rules at once)"
+        },
+        {
+          "n": 48,
+          "id": "x3xr70b8x64gq79",
+          "heading": "Payoff — now read Sango, together"
+        },
+        {
+          "n": 49,
+          "id": "sfqsmcmogw6a3zu",
+          "heading": "The Sango SSI shift — the chart"
+        },
+        {
+          "n": 50,
+          "id": "9nkwnll8qcaelx8",
+          "heading": "The Sango SSI shift — read it"
+        },
+        {
+          "n": 51,
+          "id": "nz049wnoas4ongy",
+          "heading": "The Sango sepsis trend — the chart"
+        },
+        {
+          "n": 52,
+          "id": "dmo96yi1sefspxu",
+          "heading": "The Sango sepsis trend — read it"
+        },
+        {
+          "n": 53,
+          "id": "29oit8fbf6v0idn",
+          "heading": "Two charts, two signals — one skill"
+        },
+        {
+          "n": 54,
+          "id": "eerldptyocp7nns",
+          "heading": "What you just did"
+        },
+        {
+          "n": 55,
+          "id": "1jr76jpx8y42fvq",
+          "heading": "Recap + your reusable run-chart template"
+        },
+        {
+          "n": 56,
+          "id": "20ndeny736ysqz6",
+          "heading": "Confidence pulse + next: Chart → Boardroom"
+        }
+      ]
+    },
+    {
+      "slug": "DFQI-Part-1-Session-3-From-Chart-to-Boardroom-PulseDeck-Live-Pilo-f7h6h98pib25r7f",
+      "label": "Session 3 — From Chart to Boardroom",
+      "cards": [
+        {
+          "n": 1,
+          "id": "h8kvizk6z6bpbho",
+          "heading": "You have the chart. The board has 90 seconds."
+        },
+        {
+          "n": 2,
+          "id": "81yyd6sdahmm4d4",
+          "heading": "The story so far — where this sits"
+        },
+        {
+          "n": 3,
+          "id": "146k2kvaqajg20w",
+          "heading": "First: choose the right tool — start from the question, not the tool"
+        },
+        {
+          "n": 4,
+          "id": "t9r6pj7ee4wcl5r",
+          "heading": "The run chart — your default instrument"
+        },
+        {
+          "n": 5,
+          "id": "ubcsm8o0x4nq9oh",
+          "heading": "Pareto — which few causes dominate?"
+        },
+        {
+          "n": 6,
+          "id": "938b1xqq0hfhz4w",
+          "heading": "Fishbone & Five Whys — the \"why\" tools"
+        },
+        {
+          "n": 7,
+          "id": "08swjcv8rw1cahs",
+          "heading": "\"What's your question?\" — the selector"
+        },
+        {
+          "n": 8,
+          "id": "ut58qahuk295ogv",
+          "heading": "Named and deferred to Part 2 — and why"
+        },
+        {
+          "n": 9,
+          "id": "krnae3syuwn1fpk",
+          "heading": "HINGE POLL — the matron's question"
+        },
+        {
+          "n": 10,
+          "id": "x97s8tut1ei5juq",
+          "heading": "You have the chart. Now the hard part."
+        },
+        {
+          "n": 11,
+          "id": "gzr4sn5eqh1hxmx",
+          "heading": "The frame collision that quietly kills dashboards"
+        },
+        {
+          "n": 12,
+          "id": "9mked2x2n6oq6xv",
+          "heading": "Frame collision, defined"
+        },
+        {
+          "n": 13,
+          "id": "mtjkeki22s005l3",
+          "heading": "Solberg's three faces of measurement"
+        },
+        {
+          "n": 14,
+          "id": "qrjrar3p17yax8f",
+          "heading": "The three faces, mapped to your ward"
+        },
+        {
+          "n": 15,
+          "id": "xeio7mq9v8dsocs",
+          "heading": "QUICK POLL — which face is this?"
+        },
+        {
+          "n": 16,
+          "id": "fjgrw36d7gsdpxw",
+          "heading": "The 3-part diagnostic — is this improvement data or judgment data?"
+        },
+        {
+          "n": 17,
+          "id": "iwf3zhyjux83mxp",
+          "heading": "Detecting the collision — the tells"
+        },
+        {
+          "n": 18,
+          "id": "tvnmrzgu0hytxmm",
+          "heading": "The reframe — a script you can say on Monday"
+        },
+        {
+          "n": 19,
+          "id": "wktw8uxpsdiwrug",
+          "heading": "The reframe in action — a 30-second board exchange"
+        },
+        {
+          "n": 20,
+          "id": "7t1fys1ycb9333e",
+          "heading": "One Chart · One Paragraph · One Decision"
+        },
+        {
+          "n": 21,
+          "id": "ex3u81x4vsadory",
+          "heading": "INTERACTION — three Sango charts, one page"
+        },
+        {
+          "n": 22,
+          "id": "te4etw0h71uwz7i",
+          "heading": "The three-thirds page — anatomy"
+        },
+        {
+          "n": 23,
+          "id": "1sp63i3hhp38pf3",
+          "heading": "The paragraph — its micro-structure"
+        },
+        {
+          "n": 24,
+          "id": "lzv9uq0mhn28v87",
+          "heading": "Two paragraphs, plain language — words that work / words that don't"
+        },
+        {
+          "n": 25,
+          "id": "9g0b5qikdaio6np",
+          "heading": "INTERACTION — spot what doesn't belong"
+        },
+        {
+          "n": 26,
+          "id": "v5deei3vot2c1jo",
+          "heading": "Sango SSI one-pager — the chart third"
+        },
+        {
+          "n": 27,
+          "id": "xc1ggchvu0dzljr",
+          "heading": "Sango SSI one-pager — the commentary third"
+        },
+        {
+          "n": 28,
+          "id": "j0sxgcm8mhziaeb",
+          "heading": "PREDICT THE DECISION — before we reveal it"
+        },
+        {
+          "n": 29,
+          "id": "cje6ms1o5f15hn5",
+          "heading": "Sango SSI one-pager — the decision-asked third"
+        },
+        {
+          "n": 30,
+          "id": "8qhbfu2aiojnlun",
+          "heading": "The assembled one-pager — the payoff"
+        },
+        {
+          "n": 31,
+          "id": "gwr55yfnhi8bc8v",
+          "heading": "Saying it out loud — the 90-second brief"
+        },
+        {
+          "n": 32,
+          "id": "335y42en0z1u1g4",
+          "heading": "MUDDIEST POINT — open poll"
+        },
+        {
+          "n": 33,
+          "id": "a5o6n92bwcd3mnz",
+          "heading": "BREAKOUT 3 — Advise the Board (the brief)"
+        },
+        {
+          "n": 34,
+          "id": "ucm9icva6rq40kg",
+          "heading": "BREAKOUT 3 — while you're in the rooms"
+        },
+        {
+          "n": 35,
+          "id": "6q5r48bhawaw0rg",
+          "heading": "BREAKOUT 3 — debrief: five one-pagers, every rule on one screen"
+        },
+        {
+          "n": 36,
+          "id": "ra25o414czegyn5",
+          "heading": "What a board-ready one-pager looks like — the debrief lens"
+        },
+        {
+          "n": 37,
+          "id": "b7atbyjh953204g",
+          "heading": "From workshop to Monday — why good intentions fail"
+        },
+        {
+          "n": 38,
+          "id": "zpe2yib7vkwgbup",
+          "heading": "Your 7-day action plan — implementation intentions"
+        },
+        {
+          "n": 39,
+          "id": "25xer0owldvkerw",
+          "heading": "Peer-accountability pairing"
+        },
+        {
+          "n": 40,
+          "id": "0cw16qpakvh5ml5",
+          "heading": "The Part 2 deliverable — bring your first real run chart"
+        },
+        {
+          "n": 41,
+          "id": "2ksjanywyat84q0",
+          "heading": "Your take-home toolkit"
+        },
+        {
+          "n": 42,
+          "id": "cyku0y2zt6nvu01",
+          "heading": "Confidence pulse — 3 quick questions"
+        },
+        {
+          "n": 43,
+          "id": "t482jupbqi28ye3",
+          "heading": "Check your learning — the posttest"
+        },
+        {
+          "n": 44,
+          "id": "egr83vy6gm1omo6",
+          "heading": "Session 3 recap — Choose · Communicate · Ask"
+        },
+        {
+          "n": 45,
+          "id": "69sg9xolce0zaax",
+          "heading": "What Part 2 adds — the build-your-own pack"
+        },
+        {
+          "n": 46,
+          "id": "nqmxn1vf5bm9rer",
+          "heading": "Part 2 — the seven tools, the platform, the certificate"
+        },
+        {
+          "n": 47,
+          "id": "tm3oagumu6rgqe3",
+          "heading": "Is Part 2 your next step?"
+        },
+        {
+          "n": 48,
+          "id": "wz39myad5g7ulrn",
+          "heading": "From data collection to data-driven improvement"
+        }
+      ]
+    }
+  ],
+  "activities": {
+    "idf3wydu3lx2ojq": {
+      "kind": "poll",
+      "title": "Gut check — crisis or noise?",
+      "body": {
+        "prompt": "What is your initial reaction to the spike?",
+        "options": [
+          "Crisis — act today",
+          "Noise — keep watching",
+          "Not enough information yet"
+        ]
+      }
+    },
+    "x44gr6itkx6o62b": {
+      "kind": "poll",
+      "title": "Is your dashboard reporting or improving?",
+      "body": {
+        "prompt": "Think about the dashboard you send upstairs each month. What does it mainly do?",
+        "options": [
+          "Reports numbers",
+          "Drives changes we can point to",
+          "Honestly, I am not sure"
+        ]
+      }
+    },
+    "bl5mmsdpdpaarsj": {
+      "kind": "open_text",
+      "title": "Card sort — judgment or improvement?",
+      "body": {
+        "prompt": "Post your two lists: Judgment = … · Improvement = …"
+      }
+    },
+    "w56lwao869sog77": {
+      "kind": "poll",
+      "title": "Hinge poll — signal or noise?",
+      "body": {
+        "prompt": "Look at the shape, not the individual numbers. What do you see?",
+        "options": [
+          "Signal — something happened",
+          "Noise — ordinary wobble",
+          "Can't tell yet"
+        ]
+      }
+    },
+    "gtni48ci0idzop1": {
+      "kind": "open_text",
+      "title": "What is your improvement aim?",
+      "body": {
+        "prompt": "Complete one line: We are trying to accomplish …"
+      }
+    },
+    "zc06isxhmtmlbxq": {
+      "kind": "open_text",
+      "title": "Muddiest point",
+      "body": {
+        "prompt": "What is the one idea from this session that is still muddiest for you?"
+      }
+    },
+    "hl3vrwzq2ble4vp": {
+      "kind": "scale",
+      "title": "Confidence pulse — signal versus noise",
+      "body": {
+        "prompt": "How confident are you that you can distinguish a signal from noise on a run chart?",
+        "min": 1,
+        "max": 5,
+        "minLabel": "Not yet",
+        "maxLabel": "Confident"
+      }
+    },
+    "qr4dljjidf30h63": {
+      "kind": "poll",
+      "title": "Which is the real SSI rate?",
+      "body": {
+        "prompt": "Three counts are reported for the same month: 3, 5, and 8. Which is the real rate?",
+        "options": [
+          "The lowest — 3",
+          "The highest — 8",
+          "The average",
+          "None until the metric is defined"
+        ]
+      }
+    },
+    "3buyxd1wouu4zxx": {
+      "kind": "poll",
+      "title": "Which component do you skip?",
+      "body": {
+        "prompt": "Which operational-definition component does your hospital most often leave undefined?",
+        "options": [
+          "Numerator",
+          "Denominator",
+          "Inclusion / exclusion",
+          "Data source",
+          "Sampling / frequency"
+        ]
+      }
+    },
+    "fb2nalkh66luu4x": {
+      "kind": "poll",
+      "title": "Spot the missing component",
+      "body": {
+        "prompt": "“We count all wound infections after surgery each month from theatre.” What is still missing?",
+        "options": [
+          "Numerator",
+          "Denominator",
+          "Inclusion / exclusion",
+          "Data source",
+          "Sampling detail"
+        ]
+      }
+    },
+    "b7m438j5pcrcfaq": {
+      "kind": "open_text",
+      "title": "Breakout 1 debrief",
+      "body": {
+        "prompt": "Which component did your group debate most—and why?"
+      }
+    },
+    "65pplqi32fsfoe1": {
+      "kind": "poll",
+      "title": "Is this a trend?",
+      "body": {
+        "prompt": "Four straight months are rising. Do we call a trend?",
+        "options": [
+          "Yes — four rising months is a trend",
+          "No — the rule needs five"
+        ]
+      }
+    },
+    "rgwm0ydsnn3278v": {
+      "kind": "wordcloud",
+      "title": "Which signal rule is still fuzzy?",
+      "body": {
+        "prompt": "Name the run-chart rule that is still fuzziest for you."
+      },
+      "settings": {
+        "maxWords": 1
+      }
+    },
+    "20ndeny736ysqz6": {
+      "kind": "scale",
+      "title": "Confidence pulse — metric to chart",
+      "body": {
+        "prompt": "How confident are you that you can turn a defined metric into a defensible run chart?",
+        "min": 1,
+        "max": 5,
+        "minLabel": "Not yet",
+        "maxLabel": "Confident"
+      }
+    },
+    "krnae3syuwn1fpk": {
+      "kind": "poll",
+      "title": "Choose the right tool",
+      "body": {
+        "prompt": "The matron asks whether infections are actually improving. Which tool do you reach for first?",
+        "options": [
+          "Run chart",
+          "Pareto chart",
+          "Fishbone diagram",
+          "Benchmark table"
+        ]
+      }
+    },
+    "xeio7mq9v8dsocs": {
+      "kind": "poll",
+      "title": "Which face of measurement?",
+      "body": {
+        "prompt": "“Ward B was 4% higher than Ward A—put it in the appraisal.” Which face is that?",
+        "options": [
+          "Improvement",
+          "Judgment",
+          "Research"
+        ]
+      }
+    },
+    "tvnmrzgu0hytxmm": {
+      "kind": "open_text",
+      "title": "Strategic practice — reframe the blame",
+      "body": {
+        "prompt": "Rewrite the board’s blame question as one learning-focused question you could say on Monday."
+      }
+    },
+    "ex3u81x4vsadory": {
+      "kind": "poll",
+      "title": "One page, one chart",
+      "body": {
+        "prompt": "Which Sango chart carries the message the board most needs now?",
+        "options": [
+          "SSI shift",
+          "Sepsis trend",
+          "Falls astronomical point"
+        ]
+      }
+    },
+    "j0sxgcm8mhziaeb": {
+      "kind": "open_text",
+      "title": "Predict the decision",
+      "body": {
+        "prompt": "What one decision would you ask the board for? Use one verb and one time horizon."
+      }
+    },
+    "335y42en0z1u1g4": {
+      "kind": "open_text",
+      "title": "Muddiest point — board communication",
+      "body": {
+        "prompt": "What part of reporting to a board is still muddiest for you?"
+      }
+    },
+    "cyku0y2zt6nvu01": {
+      "kind": "scale",
+      "title": "Confidence pulse — board-ready",
+      "body": {
+        "prompt": "How confident are you that you can turn a chart into one paragraph and one decision?",
+        "min": 1,
+        "max": 5,
+        "minLabel": "Not yet",
+        "maxLabel": "Confident"
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 You built your deck in Gamma and you love how it looks. PulseDeck gives you the
 live layer — polls, word clouds, quizzes, Q&A — without asking you to rebuild
-anything. There are **two ways** to run the two together; pick per talk.
+anything. There are **three ways** to run the two together; pick per talk.
 
 ## Mode 1 — Import from Gamma (present from the PulseDeck Stage)
 
@@ -38,15 +38,27 @@ to flip once, and suggested card heights.
 Use **Import → From Gamma…** in studio, or the **Embed** button in the editor top
 bar, to get either flow.
 
+## Mode 3 — Runtime overlay + automatic Gamma Sync
+
+For a facilitator who must stay inside Gamma without operating two controls,
+use the facilitator-side Gamma Sync browser extension. It watches the active
+Gamma card, advances the mapped PulseDeck session through the existing
+authenticated presenter API, and injects a public live-interaction panel only
+on join/activity cards. Ordinary Gamma cards remain unobstructed, and the Gamma
+file itself needs no permanent iframe blocks. The presenter key stays out of
+public URLs and the phone remote remains a manual fallback. See
+[`gamma-sync.md`](./gamma-sync.md).
+
 ## Which mode?
 
 | You want… | Use |
 |---|---|
 | One screen, drive open/close from your phone, no per-slide setup | **Mode 1 — Import** |
 | To keep your live presentation inside Gamma, add interactivity in a spot or two | **Mode 2 — Embed** |
+| To keep presenting in Gamma with one-control automatic navigation | **Mode 3 — Runtime overlay + Gamma Sync** |
 | Pixel-exact Gamma visuals on the big screen | **Mode 1 — Import (PDF)** |
 | The Gamma text back as editable slides | **Mode 1 — Import (PPTX)** |
 
-Both modes run the **same live session** underneath — the audience joins the same
+All three modes run the **same live session** underneath — the audience joins the same
 way and the results are identical. The only difference is what fills the screen
 you present from.
