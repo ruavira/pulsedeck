@@ -95,7 +95,7 @@ inside the authenticated PulseDeck snapshot.
 - The presenter key is never written to local persistent storage or logs; the
   scoped controller token disappears when the Chrome session ends.
 - Pairing codes are high-entropy, expire after 72 hours, and can be redeemed
-  once. Generation uses rejection sampling to avoid modulo bias.
+  once. Creating a new code expires the previous unused code for that live\n  session. Generation uses rejection sampling to avoid modulo bias.
 - Controller and baseline endpoints return no-store, no-referrer and nosniff
   response headers. New tables use RLS and server-only policies.
 - Duplicate Gamma navigation events are idempotent and do not reopen a poll.
