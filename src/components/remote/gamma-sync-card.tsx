@@ -8,6 +8,12 @@ interface PairingResult {
   expiresAt: string;
 }
 
+function countdownLabel(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = String(seconds % 60).padStart(2, '0');
+  return `${minutes}:${remainder}`;
+}
+
 export function GammaSyncCard({
   busy,
   createPairingCode,
@@ -35,14 +41,14 @@ export function GammaSyncCard({
         <Pill tone="accent">Secure pairing</Pill>
       </div>
       <p className="mt-1 text-sm leading-relaxed text-fg-dim">
-        Pair Chrome with a five-minute, one-use code. Your full presenter key never enters the extension.
+        Pair Chrome with a 15-minute, one-use code. Your full presenter key never enters the extension.
       </p>
       {pairing && seconds > 0 ? (
         <div className="mt-3 rounded-2xl border border-cyan/35 bg-cyan/10 p-4 text-center">
           <p className="font-mono text-2xl font-black tracking-[0.16em] text-fg" aria-label={`Pairing code ${pairing.code}`}>
             {pairing.code}
           </p>
-          <p className="mt-1 text-xs text-fg-dim">Expires in {seconds}s · one use only</p>
+          <p className="mt-1 text-xs text-fg-dim">Expires in {countdownLabel(seconds)} · one use only</p>
           <Button
             variant="secondary"
             className="mt-3 w-full"

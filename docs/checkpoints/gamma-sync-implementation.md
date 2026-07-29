@@ -81,7 +81,7 @@ Updated: 2026-07-29
 
 Updated: 2026-07-29
 
-- Replaced routine Remote-URL entry with five-minute, one-use pairing codes and
+- Replaced routine Remote-URL entry with 15-minute, one-use pairing codes and
   random session-scoped Chrome controller tokens.
 - Added atomic renewable presenter leases, standby/takeover, and a 30-second
   priority window for deliberate mobile Remote actions.
