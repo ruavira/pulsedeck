@@ -25,6 +25,12 @@ const combinedActivityIds = new Set(Object.values(activityAliases));
 assert.ok(combinedSlug, 'Missing final combined Gamma document slug');
 assert.equal(Object.keys(activityAliases).length, 21, 'Expected 21 combined-deck activity aliases');
 
+function displayModeFor(slide) {
+  if (['poll', 'scale', 'ranking'].includes(slide.kind)) return 'compact';
+  if (['open_text', 'wordcloud', 'qa'].includes(slide.kind)) return 'side';
+  return 'hidden';
+}
+
 async function request(path, init = {}) {
   const response = await fetch(`${credentials.origin}${path}`, {
     ...init,
@@ -54,7 +60,7 @@ const slides = deck.slides.map((slide) => {
       gammaSync: {
         cardId: combinedCardId ?? cardId,
         documentSlug,
-        ...(combinedCardId ? { displayMode: 'side' } : {}),
+        ...(combinedCardId ? { displayMode: displayModeFor(slide) } : {}),
       },
     },
   };

@@ -6,6 +6,7 @@ export const TRUSTED_PULSEDECK_ORIGINS = new Set([
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CARD_ID_RE = /^[a-z0-9_-]{6,80}$/i;
 const DISPLAY_MODES = new Set(['hidden', 'compact', 'side', 'focus']);
+const PAIRING_CODE_RE = /^[A-Z2-9]{9}$/;
 
 export const INTERACTIVE_KINDS = new Set([
   'poll',
@@ -45,6 +46,38 @@ export function parseRemoteUrl(value) {
     throw new Error('Use the full remote URL from PulseDeck, including its one-time key.');
   }
   return { origin: url.origin, sessionId, presenterKey };
+}
+
+export function parsePairingCode(value) {
+  const normalized = typeof value === 'string'
+    ? value.replace(/[^a-z0-9]/gi, '').toUpperCase()
+    : '';
+  if (!PAIRING_CODE_RE.test(normalized)) {
+    throw new Error('Enter the 9-character pairing code shown on the PulseDeck remote.');
+  }
+  return normalized;
+}
+
+/**
+ * Stable, non-cryptographic 64-bit fingerprint of Gamma card order and content.
+ * Only the fingerprint leaves Gamma; card text is never sent to PulseDeck.
+ */
+export function fingerprintGammaCards(entries) {
+  let hash = 0xcbf29ce484222325n;
+  const prime = 0x100000001b3n;
+  const mask = 0xffffffffffffffffn;
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    const cardId = typeof entry?.cardId === 'string' ? entry.cardId : '';
+    const text = typeof entry?.text === 'string'
+      ? entry.text.replace(/\s+/g, ' ').trim().slice(0, 800)
+      : '';
+    const value = `${cardId}\u001f${text}\u001e`;
+    for (let i = 0; i < value.length; i += 1) {
+      hash ^= BigInt(value.charCodeAt(i));
+      hash = (hash * prime) & mask;
+    }
+  }
+  return hash.toString(16).padStart(16, '0');
 }
 
 export function parseGammaUrl(value) {
@@ -149,7 +182,7 @@ export function mappedSlideForUrl(mappings, gammaUrl) {
   return aliases.length === 1 ? aliases[0] : null;
 }
 
-export function summarizeGammaInventory(mappings, documentSlug, cardIds) {
+export function summarizeGammaInventory(mappings, documentSlug, cardIds, fingerprint = null) {
   const uniqueIds = [
     ...new Set(
       (Array.isArray(cardIds) ? cardIds : []).filter(
@@ -174,5 +207,8 @@ export function summarizeGammaInventory(mappings, documentSlug, cardIds) {
     mappedCount,
     mappedActivityCount,
     safeNeutralCount: uniqueIds.length - mappedCount,
+    fingerprint: typeof fingerprint === 'string' && /^[0-9a-f]{16}$/i.test(fingerprint)
+      ? fingerprint.toLowerCase()
+      : null,
   };
 }

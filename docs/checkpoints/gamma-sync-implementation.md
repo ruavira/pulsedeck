@@ -76,3 +76,23 @@ Updated: 2026-07-29
   handling, and a public-safe embed state handshake.
 - Added merged-deck inventory preflight and duplicate-mapping rejection.
 - Expanded the automated Gamma Sync suite from 8 to 17 tests.
+
+## Completed batch 5 — v0.4 secure-control architecture
+
+Updated: 2026-07-29
+
+- Replaced routine Remote-URL entry with five-minute, one-use pairing codes and
+  random session-scoped Chrome controller tokens.
+- Added atomic renewable presenter leases, standby/takeover, and a 30-second
+  priority window for deliberate mobile Remote actions.
+- Added Gamma card/content fingerprints so rehearsals cannot silently run
+  against an edited or reordered deck.
+- Replaced repeated full-document geometry scans with an
+  `IntersectionObserver`, while retaining hash-first Present-mode navigation.
+- Added a rehearsal reset that deletes simulated data only and preserves real
+  participant records.
+- Added reviewed ZIP packaging with a checksum and credential-pattern scanning.
+- Added server-only RLS tables/functions and applied the Supabase advisor's
+  recommended indexes for new foreign keys.
+- Expanded the automated Gamma Sync suite to 23 tests; full deployment and live
+  v0.4 browser acceptance are the remaining gates for this batch.

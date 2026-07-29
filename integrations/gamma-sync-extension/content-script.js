@@ -6,6 +6,7 @@ const OVERLAY_ID = 'pulsedeck-gamma-live-overlay';
 const SETTLE_MS = 140;
 const HEARTBEAT_MS = 8000;
 const EMBED_CONFIRM_TIMEOUT_MS = 1600;
+const HASH_PRIORITY_MS = 700;
 
 let scheduled = false;
 let settleTimer = null;
@@ -19,6 +20,11 @@ let iframeLoaded = false;
 let latestEmbedState = null;
 let pendingOverlay = null;
 let revealFallbackTimer = null;
+let lastHashChangeAt = Date.now();
+let inventoryTimer = null;
+let cachedInventory = null;
+const visibleCards = new Map();
+const observedCards = new WeakSet();
 
 function normalizeCardId(value) {
   if (typeof value !== 'string') return null;
@@ -32,6 +38,7 @@ function hidePulseDeckOverlay() {
   pendingOverlay = null;
   clearTimeout(revealFallbackTimer);
   host.dataset.visible = 'false';
+  host.dataset.state = 'hidden';
   host.setAttribute('aria-hidden', 'true');
 }
 
@@ -39,7 +46,10 @@ function revealPulseDeckOverlay() {
   const host = document.getElementById(OVERLAY_ID);
   if (!host || !pendingOverlay) return;
   host.dataset.mode = pendingOverlay.displayMode ?? 'side';
+  host.shadowRoot.querySelector('.label').textContent =
+    `Live interaction · ${pendingOverlay.title ?? 'PulseDeck'}`;
   host.dataset.visible = 'true';
+  host.dataset.state = 'ready';
   host.setAttribute('aria-hidden', 'false');
   pendingOverlay = null;
 }
@@ -67,6 +77,8 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
     host.dataset.visible = 'false';
     host.dataset.mode = 'side';
     host.setAttribute('aria-label', 'PulseDeck live interaction');
+    host.setAttribute('role', 'region');
+    host.setAttribute('aria-live', 'polite');
     host.setAttribute('aria-hidden', 'true');
     // Keep the host isolated without an inline `all` reset. Inline `all: initial`
     // wins over the shadow stylesheet's :host rules and leaves a supposedly
@@ -115,6 +127,13 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
           --pd-height: 92vh;
           min-height: 0 !important;
         }
+        :host([data-presentation="true"][data-mode="side"]) {
+          --pd-top: 4vh;
+          --pd-right: 2vw;
+          --pd-width: clamp(380px, 40vw, 660px);
+          --pd-height: 92vh;
+          min-height: 0 !important;
+        }
         .shell {
           box-sizing: border-box;
           width: 100%; height: 100%; overflow: hidden;
@@ -158,6 +177,10 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
     });
   }
 
+  host.dataset.presentation = new URL(window.location.href).searchParams.get('mode') === 'present'
+    ? 'true'
+    : 'false';
+
   const iframe = host.shadowRoot.querySelector('iframe');
   if (iframe.src !== embedUrl) {
     iframeLoaded = false;
@@ -170,11 +193,13 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
 function showPulseDeckOverlay(result) {
   const host = preparePulseDeckOverlay(result.embedUrl, result.trustedOrigin);
   if (!host) return;
+  host.dataset.state = 'syncing';
   host.shadowRoot.querySelector('.label').textContent =
-    `Live interaction · ${result.target?.title ?? 'PulseDeck'}`;
+    `Live interaction · ${result.target?.title ?? 'PulseDeck'} · Synchronizing`;
   pendingOverlay = {
     expectedIndex: result.expectedIndex,
     displayMode: result.displayMode ?? 'side',
+    title: result.target?.title ?? 'PulseDeck',
   };
 
   const confirmed =
@@ -230,44 +255,78 @@ window.addEventListener('message', (event) => {
 
 function viewportCandidate() {
   let best = null;
-  let bestScore = 0;
-  const viewportArea = Math.max(1, innerWidth * innerHeight);
-  for (const section of document.querySelectorAll('[data-card-id]')) {
-    if (section.closest('.preview-card-wrapper')) continue;
-    const cardId = normalizeCardId(section.getAttribute('data-card-id'));
-    if (!cardId) continue;
-    const rect = section.getBoundingClientRect();
-    const width = Math.max(0, Math.min(rect.right, innerWidth) - Math.max(rect.left, 0));
-    const height = Math.max(0, Math.min(rect.bottom, innerHeight) - Math.max(rect.top, 0));
-    const score = width * height;
-    if (score > bestScore) {
-      bestScore = score;
+  let bestCoverage = 0;
+  for (const [cardId, coverage] of visibleCards) {
+    if (coverage > bestCoverage) {
+      bestCoverage = coverage;
       best = cardId;
     }
   }
-  return { cardId: best, coverage: bestScore / viewportArea };
+  return { cardId: best, coverage: bestCoverage };
 }
 
 function gammaInventory() {
-  const cardIds = [];
+  if (cachedInventory) return cachedInventory;
+  const entries = [];
   const seen = new Set();
   for (const card of document.querySelectorAll('[data-card-id]')) {
     if (card.closest('.preview-card-wrapper')) continue;
     const cardId = normalizeCardId(card.getAttribute('data-card-id'));
     if (!cardId || seen.has(cardId)) continue;
     seen.add(cardId);
-    cardIds.push(cardId);
+    entries.push({
+      cardId,
+      text: (card.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 800),
+    });
   }
-  return { cardCount: cardIds.length, cardIds };
+  let hash = 0xcbf29ce484222325n;
+  const prime = 0x100000001b3n;
+  const mask = 0xffffffffffffffffn;
+  for (const entry of entries) {
+    const value = `${entry.cardId}\u001f${entry.text}\u001e`;
+    for (let i = 0; i < value.length; i += 1) {
+      hash ^= BigInt(value.charCodeAt(i));
+      hash = (hash * prime) & mask;
+    }
+  }
+  cachedInventory = {
+    cardCount: entries.length,
+    cardIds: entries.map((entry) => entry.cardId),
+    fingerprint: hash.toString(16).padStart(16, '0'),
+  };
+  return cachedInventory;
 }
 
 function activeCardId() {
   const hash = normalizeCardId(window.location.hash.match(/^#card-(.+)$/i)?.[1]);
+  const presentation = new URL(window.location.href).searchParams.get('mode') === 'present';
+  if (hash && (presentation || Date.now() - lastHashChangeAt <= HASH_PRIORITY_MS)) return hash;
   const visible = viewportCandidate();
   if (visible.cardId && visible.coverage >= 0.28 && visible.cardId !== hash) {
     return visible.cardId;
   }
   return hash ?? visible.cardId;
+}
+
+const intersectionObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      const cardId = normalizeCardId(entry.target.getAttribute('data-card-id'));
+      if (!cardId) continue;
+      if (entry.isIntersecting) visibleCards.set(cardId, entry.intersectionRatio);
+      else visibleCards.delete(cardId);
+    }
+    scheduleReport();
+  },
+  { threshold: [0, 0.25, 0.5, 0.75, 1] },
+);
+
+function refreshObservedCards() {
+  for (const card of document.querySelectorAll('[data-card-id]')) {
+    if (card.closest('.preview-card-wrapper') || observedCards.has(card)) continue;
+    observedCards.add(card);
+    intersectionObserver.observe(card);
+  }
 }
 
 function gammaUrlForCard(cardId) {
@@ -325,18 +384,25 @@ function scheduleReport() {
   requestAnimationFrame(settleNavigation);
 }
 
-window.addEventListener('hashchange', scheduleReport, true);
+window.addEventListener('hashchange', () => {
+  lastHashChangeAt = Date.now();
+  scheduleReport();
+}, true);
 window.addEventListener('popstate', scheduleReport, true);
 window.addEventListener('scroll', scheduleReport, { capture: true, passive: true });
 window.addEventListener('focus', scheduleReport, true);
 document.addEventListener('visibilitychange', scheduleReport, true);
 
-const observer = new MutationObserver(scheduleReport);
+const observer = new MutationObserver(() => {
+  cachedInventory = null;
+  refreshObservedCards();
+  clearTimeout(inventoryTimer);
+  inventoryTimer = setTimeout(scheduleReport, 300);
+});
 observer.observe(document.documentElement, {
   subtree: true,
   childList: true,
-  attributes: true,
-  attributeFilter: ['id', 'class', 'style', 'aria-current'],
+  characterData: true,
 });
 
 setInterval(scheduleReport, 1000);
@@ -348,6 +414,7 @@ setInterval(() => {
     .then(renderPulseDeckSync)
     .catch(() => undefined);
 }, HEARTBEAT_MS);
+refreshObservedCards();
 scheduleReport();
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {

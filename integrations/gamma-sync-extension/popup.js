@@ -3,11 +3,15 @@ import { parseGammaUrl } from './shared.mjs';
 const disconnected = document.querySelector('#disconnected');
 const connected = document.querySelector('#connected');
 const remoteInput = document.querySelector('#remote-url');
+const pairingInput = document.querySelector('#pairing-code');
+const pairingButton = document.querySelector('#connect-pairing');
 const connectButton = document.querySelector('#connect');
 const disconnectButton = document.querySelector('#disconnect');
 const syncButton = document.querySelector('#sync-now');
 const pauseButton = document.querySelector('#pause-sync');
 const diagnosticsButton = document.querySelector('#copy-diagnostics');
+const takeoverButton = document.querySelector('#take-control');
+const baselineButton = document.querySelector('#freeze-baseline');
 const readiness = document.querySelector('#readiness');
 const readinessLabel = document.querySelector('#readiness-label');
 const deckTitle = document.querySelector('#deck-title');
@@ -16,6 +20,9 @@ const healthList = document.querySelector('#health-list');
 const warningList = document.querySelector('#warning-list');
 const lastError = document.querySelector('#last-error');
 const message = document.querySelector('#message');
+const extensionVersion = document.querySelector('#extension-version');
+
+extensionVersion.textContent = `v${chrome.runtime.getManifest().version}`;
 
 let status = { connected: false };
 let activeGammaTab = null;
@@ -88,8 +95,16 @@ function renderHealth() {
     ),
     healthItem(
       'Sync controller',
-      status.paused ? 'Paused for manual control' : status.controllerState ?? 'Unknown',
-      status.paused ? 'warn' : status.controllerState === 'error' ? 'bad' : 'good',
+      status.paused
+        ? 'Released for manual control'
+        : status.controllerState === 'standby'
+          ? 'Another presenter is active'
+          : status.leaseState === 'active'
+            ? 'Exclusive lease active'
+            : status.controllerState ?? 'Unknown',
+      status.paused || status.controllerState === 'standby'
+        ? 'warn'
+        : status.controllerState === 'error' ? 'bad' : 'good',
     ),
     healthItem(
       'Live panel',
@@ -99,6 +114,17 @@ function renderHealth() {
           : 'Loaded; awaiting realtime state'
         : 'Prewarming',
       status.embedReady ? (status.embedConnected ? 'good' : 'warn') : 'warn',
+    ),
+    healthItem(
+      'Gamma version',
+      status.baselineState === 'matched'
+        ? `${status.gammaInventory?.cardCount ?? 0} cards match the frozen rehearsal`
+        : status.baselineState === 'mismatch'
+          ? 'Changed since the frozen rehearsal'
+          : status.baselineState === 'missing'
+            ? 'No rehearsal baseline yet'
+            : 'Fingerprint pending',
+      status.baselineState === 'matched' ? 'good' : 'warn',
     ),
   );
 }
@@ -121,18 +147,29 @@ function render() {
   if (!status.connected) return;
 
   const isOwner = activeGammaTab?.id === status.ownerTabId;
+  const isStandby = status.controllerState === 'standby';
   const state = status.paused ? 'paused' : status.ready ? 'ready' : 'warning';
   readiness.dataset.state = state;
-  readinessLabel.textContent =
-    state === 'ready' ? 'Ready to present' : state === 'paused' ? 'Automatic sync paused' : 'Check before presenting';
+  readinessLabel.textContent = isStandby
+    ? 'Standby — another presenter is active'
+    : state === 'ready'
+      ? 'Ready to present'
+      : state === 'paused'
+        ? 'Automatic sync paused'
+        : 'Check before presenting';
   deckTitle.textContent = status.deckTitle ?? 'PulseDeck session';
   const parsed = activeGammaTab?.url ? parseGammaUrl(activeGammaTab.url) : null;
   currentCard.textContent = parsed
     ? `Gamma card ${parsed.cardId} · PulseDeck ${Number.isInteger(status.currentIndex) ? status.currentIndex + 1 : '—'} · ${status.lastLatencyMs ?? '—'} ms`
     : 'Open the connected Gamma presentation to continue.';
-  syncButton.disabled = !isOwner || status.paused;
-  pauseButton.disabled = !isOwner;
+  syncButton.disabled = !isOwner || status.paused || isStandby;
+  pauseButton.disabled = !isOwner || isStandby;
   pauseButton.textContent = status.paused ? 'Resume automatic sync' : 'Pause for mobile control';
+  takeoverButton.hidden = !isOwner || status.controllerState !== 'standby';
+  baselineButton.hidden = !isOwner || !['missing', 'mismatch'].includes(status.baselineState);
+  baselineButton.textContent = status.baselineState === 'mismatch'
+    ? 'Accept and freeze this new Gamma version'
+    : 'Freeze this Gamma version';
   renderHealth();
   renderWarnings();
   lastError.textContent = !isOwner
@@ -155,21 +192,21 @@ async function refresh() {
   render();
 }
 
-connectButton.addEventListener('click', async () => {
+async function connectWith(messageBody, button) {
   message.textContent = '';
-  connectButton.disabled = true;
+  button.disabled = true;
   try {
     activeGammaTab = await readActiveGammaTab();
     if (!activeGammaTab) throw new Error('Open the final mapped Gamma presentation first.');
     const response = await send({
-      type: 'CONFIGURE',
-      remoteUrl: remoteInput.value.trim(),
+      ...messageBody,
       tabId: activeGammaTab.id,
       windowId: activeGammaTab.windowId,
       gammaUrl: activeGammaTab.url,
     });
     if (!response?.ok) throw new Error(response?.error ?? 'Could not connect.');
     remoteInput.value = '';
+    pairingInput.value = '';
     status = response.status;
     const synced = await send({
       type: 'SYNC_GAMMA_URL',
@@ -177,14 +214,42 @@ connectButton.addEventListener('click', async () => {
       tabId: activeGammaTab.id,
       force: true,
     });
-    if (!synced?.ok) throw new Error(synced?.error ?? 'Connected, but the first card did not sync.');
+    if (!synced?.ok && !synced?.controllerConflict) {
+      throw new Error(synced?.error ?? 'Connected, but the first card did not sync.');
+    }
     await refresh();
-    message.textContent = 'Connected, checked and synchronized.';
+    message.textContent = synced?.controllerConflict
+      ? 'Securely paired in standby. Use Take Control when this presenter should become active.'
+      : 'Secure controller paired, checked and synchronized.';
   } catch (error) {
     message.textContent = error?.message ?? 'Could not connect.';
   } finally {
-    connectButton.disabled = false;
+    button.disabled = false;
   }
+}
+
+pairingInput.addEventListener('input', () => {
+  const raw = pairingInput.value.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 9);
+  pairingInput.value = [raw.slice(0, 3), raw.slice(3, 6), raw.slice(6, 9)].filter(Boolean).join('-');
+});
+
+pairingInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && !pairingButton.disabled) pairingButton.click();
+});
+
+remoteInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && !connectButton.disabled) connectButton.click();
+});
+
+pairingButton.addEventListener('click', () => {
+  void connectWith(
+    { type: 'CONFIGURE_PAIRING', pairingCode: pairingInput.value.trim(), origin: 'https://pulsedeck-live.netlify.app' },
+    pairingButton,
+  );
+});
+
+connectButton.addEventListener('click', () => {
+  void connectWith({ type: 'CONFIGURE', remoteUrl: remoteInput.value.trim() }, connectButton);
 });
 
 disconnectButton.addEventListener('click', async () => {
@@ -263,5 +328,46 @@ diagnosticsButton.addEventListener('click', async () => {
   }
 });
 
+takeoverButton.addEventListener('click', async () => {
+  takeoverButton.disabled = true;
+  message.textContent = '';
+  try {
+    activeGammaTab = await readActiveGammaTab();
+    const response = await send({ type: 'TAKE_CONTROL', tabId: activeGammaTab?.id });
+    if (!response?.ok) throw new Error(response?.error ?? 'Could not take control.');
+    status = response.status;
+    const synced = await send({
+      type: 'SYNC_GAMMA_URL',
+      gammaUrl: activeGammaTab.url,
+      tabId: activeGammaTab.id,
+      force: true,
+    });
+    if (!synced?.ok) throw new Error(synced?.error ?? 'Control transferred, but sync failed.');
+    message.textContent = 'This Chrome now has exclusive control and is synchronized.';
+  } catch (error) {
+    message.textContent = error?.message ?? 'Could not take control.';
+  } finally {
+    takeoverButton.disabled = false;
+    await refresh();
+  }
+});
+
+baselineButton.addEventListener('click', async () => {
+  baselineButton.disabled = true;
+  message.textContent = '';
+  try {
+    activeGammaTab = await readActiveGammaTab();
+    const response = await send({ type: 'FREEZE_GAMMA_BASELINE', tabId: activeGammaTab?.id });
+    if (!response?.ok) throw new Error(response?.error ?? 'Could not freeze this Gamma version.');
+    status = response.status;
+    message.textContent = 'Gamma version frozen. Future card or content changes will be flagged.';
+  } catch (error) {
+    message.textContent = error?.message ?? 'Could not freeze this Gamma version.';
+  } finally {
+    baselineButton.disabled = false;
+    await refresh();
+  }
+});
+
 void refresh();
-setInterval(() => void refresh(), 1000);
+setInterval(() => void refresh(), 1500);

@@ -1,5 +1,5 @@
 import { getAdmin } from '@/lib/supabase/admin';
-import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
+import { verifyPresenterAccess, unauthorized } from '@/lib/server/presenter-auth';
 
 export const runtime = 'nodejs';
 
@@ -7,9 +7,9 @@ export const runtime = 'nodejs';
 // state + frozen deck snapshot + join info. Requires x-presenter-key.
 export async function GET(req: Request, ctx: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await ctx.params;
-  const key = req.headers.get('x-presenter-key');
-  const deckId = await verifySessionKey(sessionId, key);
-  if (!deckId) return unauthorized();
+  const access = await verifyPresenterAccess(sessionId, req);
+  if (!access) return unauthorized();
+  const deckId = access.deckId;
 
   const { data: s } = await getAdmin()
     .from('sessions')
@@ -17,6 +17,11 @@ export async function GET(req: Request, ctx: { params: Promise<{ sessionId: stri
     .eq('id', sessionId)
     .single();
   if (!s) return Response.json({ error: 'not_found' }, { status: 404 });
+
+  const { data: baselines } = await getAdmin()
+    .from('gamma_deck_baselines')
+    .select('document_slug, fingerprint, card_count, captured_at')
+    .eq('deck_id', deckId);
 
   return Response.json({
     id: s.id,
@@ -29,5 +34,13 @@ export async function GET(req: Request, ctx: { params: Promise<{ sessionId: stri
     settings: s.settings,
     deck: s.deck_snapshot,
     startedAt: s.started_at,
+    gammaBaselines: (baselines ?? []).map((baseline) => ({
+      documentSlug: baseline.document_slug,
+      fingerprint: baseline.fingerprint,
+      cardCount: baseline.card_count,
+      capturedAt: baseline.captured_at,
+    })),
+    controllerAccess:
+      access.kind === 'gamma' ? { kind: 'gamma', controllerId: access.controllerId } : { kind: 'presenter' },
   });
 }

@@ -9,12 +9,16 @@ import { Button, Card, Pill } from '@/components/shared/ui';
 export function RehearsalCard({
   busy,
   simulate,
+  resetRehearsal,
 }: {
   busy: string | null;
   simulate: (n: number) => Promise<number | null>;
+  resetRehearsal: () => Promise<number | null>;
 }) {
   const [added, setAdded] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [removed, setRemoved] = useState<number | null>(null);
   const inFlight = busy === 'simulate';
 
   return (
@@ -54,6 +58,34 @@ export function RehearsalCard({
           </p>
         )}
       </div>
+      <button
+        type="button"
+        disabled={busy !== null}
+        className="mt-3 min-h-[44px] w-full rounded-full text-sm font-semibold text-fg-dim transition-colors hover:text-fg disabled:opacity-40"
+        onClick={async () => {
+          if (!confirmReset) {
+            setConfirmReset(true);
+            return;
+          }
+          const count = await resetRehearsal();
+          setConfirmReset(false);
+          if (count !== null) {
+            setAdded(null);
+            setRemoved(count);
+          }
+        }}
+      >
+        {busy === 'reset-rehearsal'
+          ? 'Clearing practice data…'
+          : confirmReset
+            ? 'Confirm: remove simulated data only'
+            : 'Clear rehearsal data'}
+      </button>
+      {removed !== null && (
+        <p className="mt-2 text-sm font-semibold text-emerald" aria-live="polite">
+          Rehearsal reset complete. {removed} simulated participant{removed === 1 ? '' : 's'} removed; real participants were untouched.
+        </p>
+      )}
     </Card>
   );
 }

@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 .pulsedeck-local/
+.release/
+.netlify/db/
+.netlify/plugins/
 
 # vercel
 .vercel

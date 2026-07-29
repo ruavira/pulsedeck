@@ -12,12 +12,18 @@ header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 h1 { margin: 0; font-size: 17px; }
 header p, .fine, .muted { color: #9ca6ba; }
 header p { margin: 2px 0 0; font-size: 12px; }
+.version { margin-left: auto; align-self: flex-start; color: #9ca6ba; font-size: 10px; font-weight: 800; }
 label { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 700; }
 input { box-sizing: border-box; width: 100%; border: 1px solid #30394d; border-radius: 10px; background: #131826; color: #f2f5fa; padding: 10px 11px; outline: none; }
+input#pairing-code { text-align: center; font: 800 18px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; }
 input:focus { border-color: #22d3ee; box-shadow: 0 0 0 2px rgb(34 211 238 / 18%); }
 button { width: 100%; margin-top: 10px; border: 0; border-radius: 10px; background: #7c5cff; color: white; padding: 10px 12px; font-weight: 800; cursor: pointer; }
-button:disabled { cursor: wait; opacity: .6; }
+button:disabled { cursor: not-allowed; opacity: .6; }
 button.secondary { background: #232b3d; }
+button.warning { background: #b45309; }
+details { margin-top: 14px; border-top: 1px solid #30394d; padding-top: 12px; }
+summary { cursor: pointer; color: #b8c0cf; font-size: 11px; font-weight: 700; }
+details label { margin-top: 12px; }
 .fine { margin: 9px 1px 0; font-size: 11px; line-height: 1.45; }
 .readiness { display: flex; align-items: center; gap: 8px; border-radius: 10px; padding: 9px 10px; font-size: 13px; background: rgb(16 185 129 / 10%); }
 .readiness[data-state="warning"] { background: rgb(245 158 11 / 11%); }
@@ -40,3 +46,5 @@ button.tertiary { border: 1px solid #30394d; background: transparent; color: #cb
 .health-list li.warn .health-dot { background: #f59e0b; }
 .health-list li.bad .health-dot { background: #fb7185; }
 .warning-list { border-left: 2px solid #f59e0b; padding-left: 10px; color: #fcd34d; font-size: 11px; line-height: 1.4; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid #22d3ee; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

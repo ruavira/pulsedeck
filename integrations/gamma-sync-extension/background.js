@@ -3,6 +3,7 @@ import {
   buildGammaMappingReport,
   mappedSlideForUrl,
   parseGammaUrl,
+  parsePairingCode,
   parseRemoteUrl,
   summarizeGammaInventory,
 } from './shared.mjs';
@@ -12,6 +13,8 @@ const STORAGE_KEY = 'pulseDeckGammaSyncConnection';
 const SYNC_TIMEOUT_MS = 8000;
 const AUTHORITATIVE_CHECK_MS = 8000;
 const DIAGNOSTIC_LIMIT = 40;
+const LEASE_RENEW_AHEAD_MS = 25_000;
+const DEFAULT_PULSEDECK_ORIGIN = 'https://pulsedeck-live.netlify.app';
 
 let runtimeHealth = {
   controllerState: 'disconnected',
@@ -20,6 +23,7 @@ let runtimeHealth = {
   embedConnected: false,
   lastEmbedStateAt: null,
   gammaInventory: null,
+  baselineState: 'pending',
 };
 
 class PulseDeckHttpError extends Error {
@@ -27,6 +31,15 @@ class PulseDeckHttpError extends Error {
     super(message);
     this.name = 'PulseDeckHttpError';
     this.status = status;
+  }
+}
+
+class ControllerConflictError extends Error {
+  constructor(message = 'Another presenter currently controls this PulseDeck session.', lease = null) {
+    super(message);
+    this.name = 'ControllerConflictError';
+    this.status = 409;
+    this.lease = lease;
   }
 }
 
@@ -47,6 +60,7 @@ async function setBadge(text, color) {
 async function updateBadge(connection, state = runtimeHealth.controllerState) {
   if (!connection) return setBadge('', '#64748b');
   if (connection.paused) return setBadge('Ⅱ', '#64748b');
+  if (state === 'standby') return setBadge('◇', '#d97706');
   if (state === 'error' || state === 'degraded') return setBadge('!', '#dc2626');
   if (state === 'unmapped') return setBadge('–', '#d97706');
   if (state === 'syncing' || state === 'recovering') return setBadge('↻', '#2563eb');
@@ -61,6 +75,16 @@ async function messageOwner(connection, message) {
 async function clearConnection(reason = 'manual') {
   const connection = await readConnection();
   await messageOwner(connection, { type: 'HIDE_PULSEDECK_OVERLAY', reason });
+  if (connection?.controllerToken) {
+    await pulseFetch(
+      `${connection.origin}/api/gamma-sync/controllers/lease`,
+      {
+        method: 'POST',
+        headers: controllerHeaders(connection, true),
+        body: JSON.stringify({ sessionId: connection.sessionId, action: 'release' }),
+      },
+    ).catch(() => undefined);
+  }
   await chrome.storage.session.remove(STORAGE_KEY);
   runtimeHealth = {
     controllerState: 'disconnected',
@@ -69,6 +93,7 @@ async function clearConnection(reason = 'manual') {
     embedConnected: false,
     lastEmbedStateAt: null,
     gammaInventory: null,
+    baselineState: 'pending',
   };
   await updateBadge(null);
 }
@@ -127,10 +152,17 @@ async function pulseFetch(url, options = {}, externalSignal) {
   }
 }
 
+function controllerHeaders(connection, json = false) {
+  return {
+    ...(json ? { 'content-type': 'application/json' } : {}),
+    'x-gamma-controller-token': connection.controllerToken,
+  };
+}
+
 async function readPulseDeckSession(connection, signal) {
   const response = await pulseFetch(
     `${connection.origin}/api/presenter/${connection.sessionId}`,
-    { headers: { 'x-presenter-key': connection.presenterKey } },
+    { headers: controllerHeaders(connection) },
     signal,
   );
   if (response.status === 401 || response.status === 403) {
@@ -150,8 +182,7 @@ async function advancePulseDeck(connection, index, signal) {
     {
       method: 'POST',
       headers: {
-        'content-type': 'application/json',
-        'x-presenter-key': connection.presenterKey,
+        ...controllerHeaders(connection, true),
       },
       body: JSON.stringify({ index }),
     },
@@ -161,6 +192,10 @@ async function advancePulseDeck(connection, index, signal) {
     const error = new PulseDeckHttpError('Presenter access expired.', response.status);
     error.name = 'PresenterAuthError';
     throw error;
+  }
+  if (response.status === 409) {
+    const body = await response.json().catch(() => ({}));
+    throw new ControllerConflictError('Another presenter took control of PulseDeck.', body.lease);
   }
   if (!response.ok) {
     throw new PulseDeckHttpError(`PulseDeck sync failed (${response.status}).`, response.status);
@@ -174,8 +209,7 @@ async function closePulseDeckInteraction(connection, signal) {
     {
       method: 'POST',
       headers: {
-        'content-type': 'application/json',
-        'x-presenter-key': connection.presenterKey,
+        ...controllerHeaders(connection, true),
       },
       body: JSON.stringify({ phase: 'show' }),
     },
@@ -186,21 +220,119 @@ async function closePulseDeckInteraction(connection, signal) {
     error.name = 'PresenterAuthError';
     throw error;
   }
+  if (response.status === 409) {
+    const body = await response.json().catch(() => ({}));
+    throw new ControllerConflictError('Another presenter took control of PulseDeck.', body.lease);
+  }
   if (!response.ok) {
     throw new PulseDeckHttpError(`PulseDeck close failed (${response.status}).`, response.status);
   }
   return await response.json();
 }
 
-async function configure(remoteUrl, owner) {
+async function requestControllerLease(connection, action, signal) {
+  const response = await pulseFetch(
+    `${connection.origin}/api/gamma-sync/controllers/lease`,
+    {
+      method: 'POST',
+      headers: controllerHeaders(connection, true),
+      body: JSON.stringify({ sessionId: connection.sessionId, action }),
+    },
+    signal,
+  );
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 401 || response.status === 403) {
+    const error = new PulseDeckHttpError('Gamma controller access expired.', response.status);
+    error.name = 'PresenterAuthError';
+    throw error;
+  }
+  if (response.status === 409 || !body?.lease?.granted) {
+    throw new ControllerConflictError('Another presenter currently controls this session.', body?.lease);
+  }
+  if (!response.ok) throw new PulseDeckHttpError(`Controller lease failed (${response.status}).`, response.status);
+  connection.leaseState = 'active';
+  connection.leaseExpiresAt = body.lease.leaseExpiresAt;
+  connection.remoteHoldUntil = body.lease.remoteHoldUntil;
+  connection.lastLeaseRenewedAt = new Date().toISOString();
+  return body.lease;
+}
+
+async function releaseControllerLease(connection, signal) {
+  const response = await pulseFetch(
+    `${connection.origin}/api/gamma-sync/controllers/lease`,
+    {
+      method: 'POST',
+      headers: controllerHeaders(connection, true),
+      body: JSON.stringify({ sessionId: connection.sessionId, action: 'release' }),
+    },
+    signal,
+  );
+  if (response.status === 401 || response.status === 403) {
+    const error = new PulseDeckHttpError('Gamma controller access expired.', response.status);
+    error.name = 'PresenterAuthError';
+    throw error;
+  }
+  if (!response.ok) throw new PulseDeckHttpError(`Controller release failed (${response.status}).`, response.status);
+  connection.leaseState = 'released';
+  connection.leaseExpiresAt = null;
+}
+
+async function ensureControllerLease(connection, signal, force = false) {
+  const expiresAt = Date.parse(connection.leaseExpiresAt ?? '') || 0;
+  if (!force && connection.leaseState === 'active' && expiresAt - Date.now() > LEASE_RENEW_AHEAD_MS) {
+    return true;
+  }
+  await requestControllerLease(connection, force ? 'takeover' : 'renew', signal);
+  return true;
+}
+
+async function exchangeRemoteUrl(remoteUrl) {
+  const parsed = parseRemoteUrl(remoteUrl);
+  const response = await pulseFetch(`${parsed.origin}/api/presenter/${parsed.sessionId}/gamma-controller`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-presenter-key': parsed.presenterKey },
+    body: JSON.stringify({ label: `Chrome ${navigator.userAgentData?.platform ?? 'presenter'}` }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error('PulseDeck could not create a scoped Gamma controller.');
+  return { origin: parsed.origin, sessionId: parsed.sessionId, ...body };
+}
+
+async function redeemPairingCode(pairingCode, origin = DEFAULT_PULSEDECK_ORIGIN) {
+  const code = parsePairingCode(pairingCode);
+  if (![DEFAULT_PULSEDECK_ORIGIN, 'https://pulsedeck.app'].includes(origin)) {
+    throw new Error('This is not a trusted PulseDeck deployment.');
+  }
+  const response = await pulseFetch(`${origin}/api/gamma-sync/pair/redeem`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ code, label: `Chrome ${navigator.userAgentData?.platform ?? 'presenter'}` }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 410) throw new Error('That pairing code expired or was already used. Create a new code.');
+  if (!response.ok) throw new Error('PulseDeck could not redeem that pairing code.');
+  return { origin, ...body };
+}
+
+async function configureController(controllerAuth, owner) {
   if (!Number.isInteger(owner?.tabId) || !owner?.gammaUrl) {
     throw new Error('Open the mapped Gamma presentation before connecting.');
   }
   const gammaLocation = parseGammaUrl(owner.gammaUrl);
   if (!gammaLocation) throw new Error('The active tab is not a supported Gamma presentation.');
 
-  const parsed = parseRemoteUrl(remoteUrl);
-  const provisional = { ...parsed };
+  if (!controllerAuth?.controllerToken || !controllerAuth?.sessionId || !controllerAuth?.origin) {
+    throw new Error('PulseDeck did not return a valid scoped controller.');
+  }
+  const provisional = {
+    origin: controllerAuth.origin,
+    sessionId: controllerAuth.sessionId,
+    controllerId: controllerAuth.controllerId,
+    controllerToken: controllerAuth.controllerToken,
+    leaseState: controllerAuth.lease?.granted ? 'active' : 'standby',
+    leaseExpiresAt: controllerAuth.lease?.leaseExpiresAt ?? null,
+    remoteHoldUntil: controllerAuth.lease?.remoteHoldUntil ?? null,
+  };
   const session = await readPulseDeckSession(provisional);
   if (session.status === 'ended') throw new Error('That PulseDeck session has already ended.');
 
@@ -224,27 +356,30 @@ async function configure(remoteUrl, owner) {
   }
 
   const connection = {
-    ...parsed,
+    ...provisional,
     ownerTabId: owner.tabId,
     ownerWindowId: owner.windowId ?? null,
     deckId: session.deckId,
     deckTitle: session.deck?.title ?? 'PulseDeck session',
-    embedUrl: buildAutoEmbedUrl(parsed.origin, session.deckId, session.deck?.theme?.pack ?? 'teal'),
+    embedUrl: buildAutoEmbedUrl(provisional.origin, session.deckId, session.deck?.theme?.pack ?? 'teal'),
     mappings: report.mappings,
     mappingCount: report.mappingCount,
     slideCount: report.slideCount,
     activityCount: report.activityCount,
     documentSlugs: report.documents,
     preflightWarnings: warnings,
+    gammaBaselines: Array.isArray(session.gammaBaselines) ? session.gammaBaselines : [],
     currentIndex: session.currentSlideIndex,
     sessionStatus: session.status,
     phase: session.phase,
     paused: false,
+    pairingMode: controllerAuth.pairingMode ?? 'code',
     lastGammaUrl: null,
     lastSyncedAt: null,
     lastAuthoritativeCheckAt: new Date().toISOString(),
     lastLatencyMs: null,
     lastRetryCount: 0,
+    lastLeaseRenewedAt: new Date().toISOString(),
     lastError: null,
     diagnostics: [],
   };
@@ -256,12 +391,15 @@ async function configure(remoteUrl, owner) {
   });
 
   runtimeHealth = {
-    controllerState: warnings.length > 0 ? 'degraded' : 'ready',
+    controllerState: provisional.leaseState === 'active'
+      ? warnings.length > 0 ? 'degraded' : 'ready'
+      : 'standby',
     embedReady: false,
     embedMatchesTarget: false,
     embedConnected: false,
     lastEmbedStateAt: null,
     gammaInventory: null,
+    baselineState: 'pending',
   };
   await writeConnection(connection);
   await updateBadge(connection);
@@ -273,6 +411,37 @@ async function configure(remoteUrl, owner) {
   return publicStatus(connection);
 }
 
+async function configureFromRemoteUrl(remoteUrl, owner) {
+  const controller = await exchangeRemoteUrl(remoteUrl);
+  return await configureController({ ...controller, pairingMode: 'remote-exchange' }, owner);
+}
+
+async function configureFromPairingCode(pairingCode, origin, owner) {
+  const controller = await redeemPairingCode(pairingCode, origin);
+  return await configureController({ ...controller, pairingMode: 'pairing-code' }, owner);
+}
+
+async function enterStandby(connection, error) {
+  connection.leaseState = 'standby';
+  connection.leaseExpiresAt = error?.lease?.leaseExpiresAt ?? null;
+  connection.remoteHoldUntil = error?.lease?.remoteHoldUntil ?? null;
+  connection.lastError = error?.message ?? 'Another presenter currently controls PulseDeck.';
+  diagnostic(connection, 'controller-standby', {
+    remoteHoldUntil: connection.remoteHoldUntil,
+  });
+  runtimeHealth.controllerState = 'standby';
+  await writeConnection(connection);
+  await updateBadge(connection);
+  await messageOwner(connection, { type: 'HIDE_PULSEDECK_OVERLAY', reason: 'controller-standby' });
+  return {
+    ok: false,
+    connected: true,
+    controllerConflict: true,
+    showEmbed: false,
+    error: connection.lastError,
+  };
+}
+
 async function executeSync(payload, context) {
   const startedAt = Date.now();
   const connection = await readConnection();
@@ -282,6 +451,13 @@ async function executeSync(payload, context) {
   }
   if (connection.paused && !payload.force) {
     return { ok: false, connected: true, paused: true };
+  }
+
+  try {
+    await ensureControllerLease(connection, context.signal, false);
+  } catch (error) {
+    if (error?.name === 'ControllerConflictError') return await enterStandby(connection, error);
+    throw error;
   }
 
   const gammaLocation = parseGammaUrl(payload.gammaUrl);
@@ -344,6 +520,7 @@ async function executeSync(payload, context) {
       };
     } catch (error) {
       if (error?.name === 'AbortError') throw error;
+      if (error?.name === 'ControllerConflictError') return await enterStandby(connection, error);
       if (error?.name === 'PresenterAuthError') {
         await clearConnection('auth-expired');
         throw new Error('Presenter access expired. Reconnect using a fresh PulseDeck remote URL.');
@@ -447,6 +624,7 @@ async function executeSync(payload, context) {
     };
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
+    if (error?.name === 'ControllerConflictError') return await enterStandby(connection, error);
     if (error?.name === 'PresenterAuthError') {
       await clearConnection('auth-expired');
       throw new Error('Presenter access expired. Reconnect using a fresh PulseDeck remote URL.');
@@ -474,12 +652,18 @@ function publicStatus(connection) {
     connection.sessionStatus === 'live' &&
     runtimeHealth.embedReady &&
     runtimeHealth.gammaInventory?.mappedActivityCount === connection.activityCount &&
+    runtimeHealth.baselineState === 'matched' &&
+    connection.leaseState === 'active' &&
     runtimeHealth.controllerState !== 'error' &&
     runtimeHealth.controllerState !== 'unmapped';
   return {
     connected: true,
     ready,
     paused: connection.paused,
+    pairingMode: connection.pairingMode,
+    leaseState: connection.leaseState,
+    leaseExpiresAt: connection.leaseExpiresAt,
+    remoteHoldUntil: connection.remoteHoldUntil,
     controllerState: runtimeHealth.controllerState,
     deckTitle: connection.deckTitle,
     mappingCount: connection.mappingCount,
@@ -501,6 +685,10 @@ function publicStatus(connection) {
     embedConnected: runtimeHealth.embedConnected,
     lastEmbedStateAt: runtimeHealth.lastEmbedStateAt,
     gammaInventory: runtimeHealth.gammaInventory,
+    baselineState: runtimeHealth.baselineState,
+    gammaBaseline: connection.gammaBaselines?.find(
+      (baseline) => baseline.documentSlug === runtimeHealth.gammaInventory?.documentSlug,
+    ) ?? null,
   };
 }
 
@@ -508,6 +696,19 @@ async function setPaused(paused, tabId) {
   const connection = await readConnection();
   if (!connection) return { connected: false };
   if (!ownerMatches(connection, tabId)) throw new Error('Only the connected Gamma tab can control sync.');
+  if (paused) {
+    await releaseControllerLease(connection).catch(() => undefined);
+  } else {
+    try {
+      await ensureControllerLease(connection, undefined, false);
+    } catch (error) {
+      if (error?.name === 'ControllerConflictError') {
+        await enterStandby(connection, error);
+        return publicStatus(connection);
+      }
+      throw error;
+    }
+  }
   connection.paused = paused;
   connection.lastError = null;
   diagnostic(connection, paused ? 'paused' : 'resumed');
@@ -542,8 +743,68 @@ async function receiveGammaInventory(message) {
     connection.mappings,
     location.documentSlug,
     cardIds,
+    message.inventory?.fingerprint,
   );
+  const baseline = connection.gammaBaselines?.find(
+    (candidate) => candidate.documentSlug === location.documentSlug,
+  );
+  runtimeHealth.baselineState = !baseline
+    ? 'missing'
+    : baseline.fingerprint === runtimeHealth.gammaInventory.fingerprint &&
+        baseline.cardCount === runtimeHealth.gammaInventory.cardCount
+      ? 'matched'
+      : 'mismatch';
   return { ok: true };
+}
+
+async function freezeGammaBaseline(message) {
+  const connection = await readConnection();
+  if (!connection || !ownerMatches(connection, message.tabId)) return { ok: false };
+  const inventory = runtimeHealth.gammaInventory;
+  if (!inventory?.fingerprint || !inventory?.documentSlug || !inventory?.cardCount) {
+    throw new Error('Gamma inventory is still loading. Try again in a moment.');
+  }
+  await ensureControllerLease(connection, undefined, false);
+  const response = await pulseFetch(`${connection.origin}/api/gamma-sync/baseline`, {
+    method: 'POST',
+    headers: controllerHeaders(connection, true),
+    body: JSON.stringify({
+      sessionId: connection.sessionId,
+      documentSlug: inventory.documentSlug,
+      fingerprint: inventory.fingerprint,
+      cardCount: inventory.cardCount,
+    }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 409) throw new ControllerConflictError('Another presenter controls baseline changes.', body.lease);
+  if (!response.ok) throw new Error('PulseDeck could not freeze this Gamma version.');
+  connection.gammaBaselines = [
+    ...(connection.gammaBaselines ?? []).filter(
+      (baseline) => baseline.documentSlug !== body.baseline.documentSlug,
+    ),
+    body.baseline,
+  ];
+  runtimeHealth.baselineState = 'matched';
+  diagnostic(connection, 'baseline-frozen', {
+    documentSlug: body.baseline.documentSlug,
+    cardCount: body.baseline.cardCount,
+  });
+  await writeConnection(connection);
+  return { ok: true, status: publicStatus(connection) };
+}
+
+async function takeControl(tabId) {
+  const connection = await readConnection();
+  if (!connection || !ownerMatches(connection, tabId)) throw new Error('Return to the connected Gamma tab.');
+  await ensureControllerLease(connection, undefined, true);
+  connection.leaseState = 'active';
+  connection.paused = false;
+  connection.lastError = null;
+  runtimeHealth.controllerState = 'ready';
+  diagnostic(connection, 'controller-takeover');
+  await writeConnection(connection);
+  await updateBadge(connection);
+  return publicStatus(connection);
 }
 
 chrome.runtime.onInstalled.addListener(() => setBadge('', '#64748b'));
@@ -562,7 +823,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case 'CONFIGURE':
         return {
           ok: true,
-          status: await configure(message.remoteUrl, {
+          status: await configureFromRemoteUrl(message.remoteUrl, {
+            tabId: message.tabId,
+            windowId: message.windowId,
+            gammaUrl: message.gammaUrl,
+          }),
+        };
+      case 'CONFIGURE_PAIRING':
+        return {
+          ok: true,
+          status: await configureFromPairingCode(message.pairingCode, message.origin, {
             tabId: message.tabId,
             windowId: message.windowId,
             gammaUrl: message.gammaUrl,
@@ -583,6 +853,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
       case 'SET_PAUSED':
         return { ok: true, status: await setPaused(Boolean(message.paused), message.tabId) };
+      case 'TAKE_CONTROL':
+        return { ok: true, status: await takeControl(message.tabId) };
+      case 'FREEZE_GAMMA_BASELINE':
+        return await freezeGammaBaseline(message);
       case 'EMBED_HEALTH':
         return await receiveEmbedHealth(message, senderTabId);
       case 'UPDATE_GAMMA_INVENTORY':

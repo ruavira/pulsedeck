@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "PulseDeck Gamma Sync",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "minimum_chrome_version": "102",
-  "description": "Reliably keeps PulseDeck aligned with Gamma and presents verified live interactions in place.",
+  "description": "Securely pairs, coordinates and keeps PulseDeck aligned with Gamma in editor and presentation modes.",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://gamma.app/*",
