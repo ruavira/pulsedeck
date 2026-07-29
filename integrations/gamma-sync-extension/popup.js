@@ -41,9 +41,10 @@ async function readActiveGammaTab() {
       windowId: tab.windowId,
       url: response?.gammaUrl ?? tab.url,
       inventory: response?.inventory ?? null,
+      contentScriptReady: Boolean(response?.gammaUrl && parseGammaUrl(response.gammaUrl)),
     };
   } catch {
-    return { id: tab.id, windowId: tab.windowId, url: tab.url };
+    return { id: tab.id, windowId: tab.windowId, url: tab.url, contentScriptReady: false };
   }
 }
 
@@ -198,6 +199,9 @@ async function connectWith(messageBody, button) {
   try {
     activeGammaTab = await readActiveGammaTab();
     if (!activeGammaTab) throw new Error('Open the final mapped Gamma presentation first.');
+    if (!activeGammaTab.contentScriptReady) {
+      throw new Error('Refresh the Gamma tab, select a card, then open Gamma Sync again. Your pairing code was not used.');
+    }
     const response = await send({
       ...messageBody,
       tabId: activeGammaTab.id,

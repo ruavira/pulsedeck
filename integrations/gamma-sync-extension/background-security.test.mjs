@@ -17,3 +17,10 @@ test('supports lease coordination, takeover, and safe release', () => {
   assert.match(source, /ControllerConflictError/);
   assert.match(source, /controller-standby/);
 });
+
+test('validates the live Gamma card before consuming a one-use credential', () => {
+  const validateAt = source.indexOf('validateGammaOwner(owner);', source.indexOf('async function configureFromPairingCode'));
+  const redeemAt = source.indexOf('redeemPairingCode(pairingCode, origin)', source.indexOf('async function configureFromPairingCode'));
+  assert.ok(validateAt > 0 && redeemAt > validateAt);
+  assert.match(source, /Your pairing code was not used/);
+});
