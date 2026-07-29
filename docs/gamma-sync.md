@@ -13,7 +13,7 @@ cleanup on top of the v0.3 controller and prewarmed overlay.
 
 Public PulseDeck embeds are intentionally read-only. Putting a presenter key in
 an iframe URL would let anyone with the Gamma link control the live room. The
-Remote now creates a five-minute, one-use pairing code. PulseDeck exchanges it
+Remote now creates a 15-minute, one-use pairing code. PulseDeck exchanges it
 for a random session-scoped controller token, stores only its SHA-256 hash on
 the server, and keeps the token in `chrome.storage.session`. Gamma receives no
 credential. The private Remote URL remains a recovery option; the extension
@@ -94,7 +94,7 @@ inside the authenticated PulseDeck snapshot.
   `pulsedeck.app` origin are permitted.
 - The presenter key is never written to local persistent storage or logs; the
   scoped controller token disappears when the Chrome session ends.
-- Pairing codes are high-entropy, expire after five minutes, and can be redeemed
+- Pairing codes are high-entropy, expire after 15 minutes, and can be redeemed
   once. Generation uses rejection sampling to avoid modulo bias.
 - Controller and baseline endpoints return no-store, no-referrer and nosniff
   response headers. New tables use RLS and server-only policies.

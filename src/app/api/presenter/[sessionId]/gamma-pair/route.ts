@@ -6,6 +6,7 @@ import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
 export const runtime = 'nodejs';
 
 const PAIR_ALPHABET = '23456789ACDEFGHJKMNPQRSTUVWXYZ';
+const PAIRING_TTL_MINUTES = 15;
 
 function makePairingCode(): string {
   // Rejection sampling avoids modulo bias while keeping the code easy to type.
@@ -27,7 +28,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   if (!deckId) return unauthorized();
   const body = await req.json().catch(() => ({}));
   const code = makePairingCode();
-  const expiresAt = new Date(Date.now() + 5 * 60_000).toISOString();
+  const expiresAt = new Date(Date.now() + PAIRING_TTL_MINUTES * 60_000).toISOString();
   const { error } = await getAdmin().from('gamma_pairing_codes').insert({
     session_id: sessionId,
     code_hash: hashGammaSecret(code.replace(/-/g, '')),

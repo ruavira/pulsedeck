@@ -1,0 +1,110 @@
+{
+  "title": "PulseDeck × Gamma Production Acceptance — Rehearsal Kit",
+  "gamma": {
+    "url": "https://gamma.app/docs/PulseDeck-Gamma-Production-Acceptance-Rehearsal-Kit-9dr3ul4d5a5wsdd",
+    "documentSlug": "PulseDeck-Gamma-Production-Acceptance-Rehearsal-Kit-9dr3ul4d5a5wsdd"
+  },
+  "theme": {
+    "name": "Production Acceptance",
+    "pack": "navy",
+    "accent": "#22D3EE",
+    "orgName": "Ruavira",
+    "fontScale": 1
+  },
+  "cards": [
+    {
+      "cardId": "h7noxevoqod7ndz",
+      "kind": "content",
+      "title": "PulseDeck × Gamma Production Acceptance",
+      "text": "10-minute rehearsal kit. Certify synchronization before a live training."
+    },
+    {
+      "cardId": "kq44gz2qdo598ae",
+      "kind": "content",
+      "title": "Pre-flight readiness",
+      "text": "Confirm extension 0.4.0, secure controller pairing, Gamma version baseline and standby readiness."
+    },
+    {
+      "cardId": "xxvf9jvk1ys3alb",
+      "kind": "poll",
+      "title": "Signal or noise?",
+      "prompt": "Which signal should a QI team investigate first?",
+      "options": [
+        "One isolated late submission",
+        "A sustained shift across eight observations",
+        "A single unusually high value",
+        "A change in chart colour"
+      ],
+      "displayMode": "compact"
+    },
+    {
+      "cardId": "oigpuxorblnj9ne",
+      "kind": "content",
+      "title": "Neutral transition",
+      "text": "Confirm the poll closes and the PulseDeck panel disappears before continuing."
+    },
+    {
+      "cardId": "dh8daoczs8rbwsx",
+      "kind": "scale",
+      "title": "Confidence check",
+      "prompt": "How confident are you that you can distinguish common-cause from special-cause variation?",
+      "min": 1,
+      "max": 5,
+      "minLabel": "Not yet confident",
+      "maxLabel": "Ready to explain it",
+      "displayMode": "compact"
+    },
+    {
+      "cardId": "tpsrhpp6l7i8j1f",
+      "kind": "ranking",
+      "title": "First response",
+      "prompt": "Rank the actions after a concerning data signal.",
+      "options": [
+        "Validate the data",
+        "Understand the context",
+        "Review the pattern over time",
+        "Select a proportionate response"
+      ],
+      "displayMode": "compact"
+    },
+    {
+      "cardId": "qjv745xknanz9el",
+      "kind": "wordcloud",
+      "title": "Boardroom language",
+      "prompt": "In one word, what makes a QI chart credible?",
+      "displayMode": "side"
+    },
+    {
+      "cardId": "luz2w3pw9bfv6py",
+      "kind": "open_text",
+      "title": "Facilitation prompt",
+      "prompt": "What is one question you would ask before acting on this chart?",
+      "displayMode": "side"
+    },
+    {
+      "cardId": "wzyfg8cn5r5nqi3",
+      "kind": "content",
+      "title": "Rapid navigation test",
+      "text": "Press Next, Back, then Next quickly. The final visible Gamma card must be authoritative."
+    },
+    {
+      "cardId": "2r0hlu7egor8j1i",
+      "kind": "qa",
+      "title": "Production question",
+      "prompt": "Submit one production-readiness question from the audience device.",
+      "displayMode": "side"
+    },
+    {
+      "cardId": "bzq9b9bbal1i7c7",
+      "kind": "content",
+      "title": "Controller resilience",
+      "text": "Verify primary control, standby takeover and the mobile Remote priority window."
+    },
+    {
+      "cardId": "tv6letl8vg63xr4",
+      "kind": "content",
+      "title": "Acceptance complete",
+      "text": "Record PASS or HOLD before using the live training deck."
+    }
+  ]
+}
