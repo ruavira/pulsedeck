@@ -25,20 +25,30 @@ test('extension reload invalidation is contained by the runtime message boundary
   assert.equal(source.match(/chrome\.runtime\.sendMessage/g)?.length, 1);
 });
 
-test('presenter can dock, resize, and minimize the live interaction panel', () => {
+test('presenter can move, resize, and minimize the live interaction panel', () => {
   assert.match(source, /class="dock"/);
   assert.match(source, /class="size"/);
   assert.match(source, /class="minimize"/);
-  assert.match(source, /pulsedeckGammaDock/);
   assert.match(source, /pulsedeckGammaSize/);
   assert.match(source, /data-minimized/);
 });
 
-test('Gamma renders trusted ambient reactions, signals, and safe Q&A notices', () => {
+test('Gamma renders trusted ambient reactions and a persistent safe audience inbox', () => {
   assert.match(source, /PULSEDECK_AMBIENT_EVENT/);
   assert.match(source, /renderAmbientReaction/);
   assert.match(source, /renderAmbientSignal/);
   assert.match(source, /renderAmbientQuestion/);
-  assert.match(source, /Review or moderate it on the PulseDeck Remote/);
+  assert.match(source, /renderAudienceHub/);
+  assert.match(source, /class="audience-hub"/);
+  assert.match(source, /Review questions on the private PulseDeck Remote/);
+  assert.match(source, /kind === 'hand' \? 60000 : 30000/);
   assert.doesNotMatch(source, /message\.payload\?\.text/);
+});
+
+test('overlay placement scores visible Gamma content and chooses a corner automatically', () => {
+  assert.match(source, /function meaningfulContentRects/);
+  assert.match(source, /function scorePlacement/);
+  assert.match(source, /function placePulseDeckOverlay/);
+  assert.match(source, /data-position="top-right"/);
+  assert.match(source, /data-position="bottom-left"/);
 });

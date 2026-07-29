@@ -1,4 +1,4 @@
-# PulseDeck Gamma Sync 0.4.1
+# PulseDeck Gamma Sync 0.6.0
 
 ## Install or update
 
@@ -20,6 +20,16 @@ Only one Chrome controls a session at a time.
 4. Freeze the Gamma version when prompted and confirm **Ready to present**.
 5. Present in Gamma. PulseDeck activities open and close as the mapped Gamma
    cards change.
+
+The interaction panel evaluates the visible card and chooses the corner with
+the least content overlap. The arrow control cycles through the four corners
+when the presenter wants to override that choice. Closing an activity is
+instant so a panel cannot linger over a transition card.
+
+Audience reactions remain lightweight: emojis float briefly, while pace
+signals, raised hands and new questions collect in a small **Audience inbox**
+tab at the edge of the screen. Open it when convenient; question text remains
+on the private Remote rather than being exposed to the room automatically.
 
 The mobile PulseDeck Remote is still useful for participant counts, Q&A,
 rehearsal tools and intentional overrides. A Remote navigation action temporarily

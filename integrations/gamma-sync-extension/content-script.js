@@ -28,9 +28,8 @@ let runtimeContextActive = true;
 const visibleCards = new Map();
 const observedCards = new WeakSet();
 const ambientSignalCounts = new Map();
-let ambientSignalTimer = null;
 let ambientQuestionCount = 0;
-let ambientQuestionTimer = null;
+let audienceHubOpen = false;
 
 const REACTIONS = new Set(['👏', '❤️', '😂', '🤯', '👍']);
 const SIGNALS = {
@@ -63,28 +62,106 @@ function prepareAmbientLayer() {
         12% { opacity: 1; transform: translate3d(0,-8vh,0) scale(1); }
         100% { opacity: 0; transform: translate3d(var(--drift),-72vh,0) scale(1.18); }
       }
-      .notice {
-        position: fixed; z-index: 4; box-sizing: border-box; max-width: min(440px, calc(100vw - 32px));
-        border: 1px solid rgba(15,118,110,.26); border-radius: 14px;
-        background: rgba(255,255,255,.97); color: #0f2940;
-        box-shadow: 0 12px 34px rgba(15,23,42,.2); backdrop-filter: blur(12px);
-        padding: 12px 16px; font: 700 15px/1.35 ui-sans-serif, system-ui, sans-serif;
-        animation: pd-notice-in 180ms ease-out;
+      .audience-hub {
+        position: fixed; right: 0; top: 48%; z-index: 5; pointer-events: auto;
+        display: flex; align-items: center; gap: 7px; box-sizing: border-box;
+        min-width: 42px; height: 46px; padding: 0 10px; border: 0;
+        border-radius: 14px 0 0 14px; color: #fff; background: #0f766e;
+        box-shadow: 0 8px 24px rgba(15,23,42,.22); cursor: pointer;
+        font: 800 15px/1 ui-sans-serif, system-ui, sans-serif;
+        transform: translateY(-50%); transition: transform 160ms ease, background 160ms ease;
       }
-      .notice small { display:block; margin-top:3px; color:#56728a; font-weight:500; }
-      .question { top: 18px; left: 18px; }
-      .signal { bottom: 18px; left: 18px; }
-      @keyframes pd-notice-in { from { opacity:0; transform:translateY(-8px) scale(.98); } }
+      .audience-hub:hover, .audience-hub:focus-visible { background:#115e59; outline:3px solid rgba(45,212,191,.35); }
+      .audience-hub[data-unread="true"] { animation: pd-hub-pulse 700ms ease-out 2; }
+      .audience-hub .icon { font-size:20px; }
+      .audience-hub .count { min-width:18px; text-align:center; }
+      .audience-hub[data-edge="left"] { left:0; right:auto; border-radius:0 14px 14px 0; }
+      .audience-drawer {
+        position: fixed; right: 54px; top: 48%; z-index: 5; pointer-events: auto;
+        box-sizing: border-box; width: min(330px, calc(100vw - 82px)); max-height: min(520px, 74vh);
+        overflow: auto; padding: 16px; border: 1px solid rgba(15,118,110,.26); border-radius: 18px;
+        background: rgba(255,255,255,.98); color:#0f2940;
+        box-shadow:0 16px 42px rgba(15,23,42,.24); backdrop-filter:blur(14px);
+        transform: translateY(-50%); font: 600 14px/1.4 ui-sans-serif,system-ui,sans-serif;
+      }
+      .audience-drawer h2 { margin:0 0 10px; font-size:16px; }
+      .audience-drawer ul { list-style:none; margin:0; padding:0; }
+      .audience-drawer li { display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px solid #dcebea; }
+      .audience-drawer small { display:block; margin-top:10px; color:#56728a; font-weight:500; }
+      .audience-drawer button { width:100%; margin-top:12px; padding:9px; border:0; border-radius:10px; background:#e6fffb; color:#0f766e; cursor:pointer; font-weight:800; }
+      .audience-drawer[data-edge="left"] { left:54px; right:auto; }
+      @keyframes pd-hub-pulse { 50% { transform:translateY(-50%) scale(1.1); box-shadow:0 8px 28px rgba(13,148,136,.48); } }
       @media (prefers-reduced-motion: reduce) {
         .reaction { display:none; }
-        .notice { animation:none; }
+        .audience-hub { animation:none !important; transition:none; }
       }
     </style>
     <div class="events"></div>
-    <div class="notice question" hidden></div>
-    <div class="notice signal" hidden></div>`;
+    <button class="audience-hub" type="button" aria-label="Open audience inbox" hidden>
+      <span class="icon">✋</span><span class="count">0</span>
+    </button>
+    <section class="audience-drawer" aria-label="Audience inbox" hidden>
+      <h2>Audience inbox</h2><ul></ul>
+      <small>Review questions on the private PulseDeck Remote.</small>
+      <button class="clear" type="button">Mark all reviewed</button>
+    </section>`;
   document.documentElement.append(host);
+  const hub = shadow.querySelector('.audience-hub');
+  hub.addEventListener('click', () => {
+    audienceHubOpen = !audienceHubOpen;
+    renderAudienceHub(false);
+  });
+  shadow.querySelector('.clear').addEventListener('click', () => {
+    ambientSignalCounts.clear();
+    ambientQuestionCount = 0;
+    audienceHubOpen = false;
+    renderAudienceHub(false);
+  });
   return host;
+}
+
+function renderAudienceHub(unread = true) {
+  const shadow = prepareAmbientLayer().shadowRoot;
+  const hub = shadow.querySelector('.audience-hub');
+  const drawer = shadow.querySelector('.audience-drawer');
+  const signalTotal = [...ambientSignalCounts.values()].reduce((total, count) => total + count, 0);
+  const total = signalTotal + ambientQuestionCount;
+  const panelPosition = document.getElementById(OVERLAY_ID)?.dataset.position ?? 'bottom-right';
+  const edge = panelPosition.endsWith('right') ? 'left' : 'right';
+  hub.dataset.edge = edge;
+  drawer.dataset.edge = edge;
+  hub.hidden = total === 0;
+  hub.querySelector('.count').textContent = String(total);
+  if (unread) {
+    hub.dataset.unread = 'false';
+    void hub.offsetWidth;
+    hub.dataset.unread = 'true';
+  } else {
+    hub.dataset.unread = 'false';
+  }
+  hub.setAttribute('aria-label', `Audience inbox, ${total} ${total === 1 ? 'item' : 'items'}`);
+  const list = drawer.querySelector('ul');
+  list.replaceChildren();
+  for (const [kind, count] of ambientSignalCounts) {
+    const [emoji, label] = SIGNALS[kind];
+    const item = document.createElement('li');
+    const name = document.createElement('span');
+    const value = document.createElement('strong');
+    name.textContent = `${emoji} ${label}`;
+    value.textContent = String(count);
+    item.append(name, value);
+    list.append(item);
+  }
+  if (ambientQuestionCount > 0) {
+    const item = document.createElement('li');
+    const name = document.createElement('span');
+    const value = document.createElement('strong');
+    name.textContent = '❓ New questions';
+    value.textContent = String(ambientQuestionCount);
+    item.append(name, value);
+    list.append(item);
+  }
+  drawer.hidden = total === 0 || !audienceHubOpen;
 }
 
 function renderAmbientReaction(emoji) {
@@ -103,36 +180,20 @@ function renderAmbientSignal(kind) {
   const signal = SIGNALS[kind];
   if (!signal) return;
   ambientSignalCounts.set(kind, (ambientSignalCounts.get(kind) ?? 0) + 1);
-  const notice = prepareAmbientLayer().shadowRoot.querySelector('.signal');
-  const parts = [...ambientSignalCounts.entries()].map(([key, count]) => {
-    const [emoji, label] = SIGNALS[key];
-    return `${emoji} ${label}${count > 1 ? ` ×${count}` : ''}`;
-  });
-  notice.textContent = parts.join(' · ');
-  notice.hidden = false;
-  clearTimeout(ambientSignalTimer);
-  ambientSignalTimer = setTimeout(() => {
-    ambientSignalCounts.clear();
-    notice.hidden = true;
-  }, 6500);
+  renderAudienceHub(true);
+  const lifetime = kind === 'hand' ? 60000 : 30000;
+  setTimeout(() => {
+    const remaining = Math.max(0, (ambientSignalCounts.get(kind) ?? 0) - 1);
+    if (remaining === 0) ambientSignalCounts.delete(kind);
+    else ambientSignalCounts.set(kind, remaining);
+    renderAudienceHub(false);
+  }, lifetime);
 }
 
 function renderAmbientQuestion(payload = {}) {
   if (payload.action && payload.action !== 'submitted') return;
   ambientQuestionCount += 1;
-  const notice = prepareAmbientLayer().shadowRoot.querySelector('.question');
-  notice.replaceChildren();
-  const title = document.createElement('div');
-  title.textContent = `❓ ${ambientQuestionCount === 1 ? 'New audience question' : `${ambientQuestionCount} new audience questions`}`;
-  const detail = document.createElement('small');
-  detail.textContent = 'Review or moderate it on the PulseDeck Remote.';
-  notice.append(title, detail);
-  notice.hidden = false;
-  clearTimeout(ambientQuestionTimer);
-  ambientQuestionTimer = setTimeout(() => {
-    ambientQuestionCount = 0;
-    notice.hidden = true;
-  }, 8500);
+  renderAudienceHub(true);
 }
 
 function renderAmbientEvent(message) {
@@ -197,10 +258,101 @@ function hidePulseDeckOverlay() {
   host.setAttribute('aria-hidden', 'true');
 }
 
+const PANEL_POSITIONS = ['top-right', 'bottom-right', 'bottom-left', 'top-left'];
+
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+function currentGammaCard() {
+  const cardId = candidateCardId ?? activeCardId();
+  if (!cardId) return null;
+  return [...document.querySelectorAll('[data-card-id]')]
+    .find((card) => !card.closest('.preview-card-wrapper') &&
+      normalizeCardId(card.getAttribute('data-card-id')) === cardId) ?? null;
+}
+
+function meaningfulContentRects(card) {
+  if (!card) return [];
+  const rects = [];
+  const viewportArea = window.innerWidth * window.innerHeight;
+  const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      return node.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    },
+  });
+  while (walker.nextNode() && rects.length < 240) {
+    const range = document.createRange();
+    range.selectNodeContents(walker.currentNode);
+    for (const rect of range.getClientRects()) {
+      if (rect.width > 5 && rect.height > 5) rects.push(rect);
+    }
+  }
+  for (const media of card.querySelectorAll('img,svg,canvas,video,iframe,table')) {
+    const rect = media.getBoundingClientRect();
+    if (rect.width > 12 && rect.height > 12 && rect.width * rect.height < viewportArea * 0.8) rects.push(rect);
+  }
+  return rects;
+}
+
+function overlapArea(first, second) {
+  const width = Math.max(0, Math.min(first.right, second.right) - Math.max(first.left, second.left));
+  const height = Math.max(0, Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top));
+  return width * height;
+}
+
+function placementCandidates(mode, size = 'normal') {
+  const margin = 18;
+  const compact = mode === 'compact';
+  const widthFactor = compact
+    ? size === 'small' ? 0.22 : size === 'large' ? 0.34 : 0.27
+    : size === 'small' ? 0.26 : size === 'large' ? 0.4 : 0.32;
+  const width = compact
+    ? clamp(window.innerWidth * widthFactor, size === 'small' ? 280 : 300, size === 'large' ? 520 : 440)
+    : clamp(window.innerWidth * widthFactor, size === 'small' ? 300 : 340, size === 'large' ? 660 : 540);
+  const height = compact
+    ? clamp(window.innerHeight * (size === 'small' ? 0.32 : 0.38), size === 'small' ? 210 : 240, 360)
+    : clamp(window.innerHeight * 0.54, 360, 560);
+  const positions = {
+    'top-right': { left: window.innerWidth - width - margin, top: margin },
+    'bottom-right': { left: window.innerWidth - width - margin, top: window.innerHeight - height - margin },
+    'bottom-left': { left: margin, top: window.innerHeight - height - margin },
+    'top-left': { left: margin, top: margin },
+  };
+  return PANEL_POSITIONS.map((name) => ({
+    name,
+    left: positions[name].left,
+    top: positions[name].top,
+    right: positions[name].left + width,
+    bottom: positions[name].top + height,
+    width,
+    height,
+  }));
+}
+
+function scorePlacement(candidate, contentRects) {
+  const overlap = contentRects.reduce((total, rect) => total + overlapArea(candidate, rect), 0);
+  return overlap / Math.max(1, candidate.width * candidate.height);
+}
+
+function placePulseDeckOverlay(host, mode = host.dataset.mode ?? 'side') {
+  if (!host || mode === 'focus' || window.innerWidth <= 900) return;
+  const contentRects = meaningfulContentRects(currentGammaCard());
+  const candidates = placementCandidates(mode, host.dataset.size);
+  const best = candidates.reduce((winner, candidate) =>
+    scorePlacement(candidate, contentRects) < scorePlacement(winner, contentRects) ? candidate : winner,
+  );
+  host.dataset.position = best.name;
+  host.dataset.adaptive = 'true';
+}
+
 function revealPulseDeckOverlay() {
   const host = document.getElementById(OVERLAY_ID);
   if (!host || !pendingOverlay) return;
   host.dataset.mode = pendingOverlay.displayMode ?? 'side';
+  host.dataset.minimized = 'false';
+  host.shadowRoot.querySelector('.minimize').textContent = '−';
+  placePulseDeckOverlay(host, host.dataset.mode);
   host.shadowRoot.querySelector('.label').textContent =
     `Live interaction · ${pendingOverlay.title ?? 'PulseDeck'}`;
   host.dataset.visible = 'true';
@@ -265,6 +417,7 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
           transform: translate3d(0, 0, 0) scale(1);
           transition: opacity 180ms ease, transform 180ms ease;
         }
+        :host([data-visible="false"]) { transition: none !important; }
         :host([data-mode="compact"]) {
           --pd-top: auto;
           --pd-right: 20px;
@@ -295,9 +448,19 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         :host([data-size="large"][data-mode="compact"]) { --pd-width: clamp(340px, 34vw, 520px); }
         :host([data-dock="left"]) { left: 20px !important; right: auto !important; }
         :host([data-presentation="true"][data-dock="left"]) { left: 1.4vw !important; right: auto !important; }
+        :host([data-adaptive="true"][data-mode="side"]) {
+          --pd-width: clamp(340px, 32vw, 540px); --pd-height: min(54vh, 560px); min-height: 360px !important;
+        }
+        :host([data-adaptive="true"][data-size="small"][data-mode="side"]) { --pd-width:clamp(300px,26vw,430px); }
+        :host([data-adaptive="true"][data-size="large"][data-mode="side"]) { --pd-width:clamp(380px,40vw,660px); }
+        :host([data-position="top-right"]) { top:18px !important; right:18px !important; bottom:auto !important; left:auto !important; }
+        :host([data-position="bottom-right"]) { top:auto !important; right:18px !important; bottom:18px !important; left:auto !important; }
+        :host([data-position="bottom-left"]) { top:auto !important; right:auto !important; bottom:18px !important; left:18px !important; }
+        :host([data-position="top-left"]) { top:18px !important; right:auto !important; bottom:auto !important; left:18px !important; }
         :host([data-minimized="true"]) {
           --pd-top: 76px; --pd-width: 280px; --pd-height: 38px;
-          bottom: auto !important; min-height: 38px !important;
+          top:76px !important; right:20px !important; bottom:auto !important; left:auto !important;
+          min-height: 38px !important;
         }
         .shell {
           box-sizing: border-box;
@@ -332,7 +495,7 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
             --pd-right: 3vw;
             --pd-width: 94vw;
             --pd-height: 52vh;
-            bottom: 12px !important;
+            top:auto !important; right:3vw !important; bottom:12px !important; left:auto !important;
             min-height: 320px !important;
           }
         }
@@ -344,7 +507,7 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         <div class="bar">
           <div class="label"></div>
           <div class="controls">
-            <button class="dock" type="button" title="Move panel to the other side" aria-label="Move panel to the other side">↔</button>
+            <button class="dock" type="button" title="Move panel" aria-label="Move panel">↔</button>
             <button class="size" type="button" title="Change panel size" aria-label="Change panel size">◲</button>
             <button class="minimize" type="button" title="Minimize panel" aria-label="Minimize panel">−</button>
           </div>
@@ -352,16 +515,17 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         <iframe title="PulseDeck live interaction" allow="clipboard-read; clipboard-write" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>`;
     document.documentElement.append(host);
-    host.dataset.dock = sessionStorage.getItem('pulsedeckGammaDock') === 'left' ? 'left' : 'right';
     host.dataset.size = sessionStorage.getItem('pulsedeckGammaSize') ?? 'normal';
     host.dataset.minimized = 'false';
     shadow.querySelector('.dock').addEventListener('click', () => {
-      host.dataset.dock = host.dataset.dock === 'left' ? 'right' : 'left';
-      sessionStorage.setItem('pulsedeckGammaDock', host.dataset.dock);
+      const current = PANEL_POSITIONS.indexOf(host.dataset.position);
+      host.dataset.position = PANEL_POSITIONS[(current + 1) % PANEL_POSITIONS.length];
+      host.dataset.adaptive = 'true';
     });
     shadow.querySelector('.size').addEventListener('click', () => {
       host.dataset.size = host.dataset.size === 'normal' ? 'small' : host.dataset.size === 'small' ? 'large' : 'normal';
       sessionStorage.setItem('pulsedeckGammaSize', host.dataset.size);
+      placePulseDeckOverlay(host);
     });
     shadow.querySelector('.minimize').addEventListener('click', () => {
       const minimized = host.dataset.minimized !== 'true';
@@ -388,6 +552,11 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
   }
   return host;
 }
+
+window.addEventListener('resize', () => {
+  const host = document.getElementById(OVERLAY_ID);
+  if (host?.dataset.visible === 'true' && host.dataset.adaptive === 'true') placePulseDeckOverlay(host);
+});
 
 function showPulseDeckOverlay(result) {
   const host = preparePulseDeckOverlay(result.embedUrl, result.trustedOrigin);
