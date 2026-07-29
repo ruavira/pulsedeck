@@ -108,7 +108,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
 
   // Q&A clients refetch on the bump; the stage results poller picks up scrubbed
   // wordcloud payloads on its next poll (no 'results' nudge needed).
-  await broadcast(sessionId, 'qa', { bump: 1 });
+  await broadcast(sessionId, 'qa', { action: 'moderated', bump: 1 });
 
   return Response.json({ ok: true, word, archivedQuestions, cleanedResponses });
 }

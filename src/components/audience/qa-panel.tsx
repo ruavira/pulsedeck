@@ -117,7 +117,7 @@ export function QaPanel({
       } else {
         setNotice({ tone: 'ok', text: 'Question posted ✓' });
       }
-      broadcast('qa', { bump: Date.now() });
+      broadcast('qa', { action: 'submitted', bump: Date.now() });
       void fetchQuestions();
     } catch {
       setNotice({ tone: 'err', text: 'Connection problem — your question didn’t send. Try again.' });
