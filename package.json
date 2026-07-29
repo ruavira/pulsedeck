@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:gamma-sync": "node --test integrations/gamma-sync-extension/shared.test.mjs content/dfqi-gamma-sync.test.mjs",
+    "test:gamma-sync": "node --test integrations/gamma-sync-extension/shared.test.mjs integrations/gamma-sync-extension/sync-controller.test.mjs integrations/gamma-sync-extension/content-script.test.mjs content/dfqi-gamma-sync.test.mjs",
     "update:dfqi-gamma-sync": "node scripts/update-dfqi-gamma-sync-deck.mjs"
   },
   "dependencies": {

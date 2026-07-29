@@ -5,7 +5,7 @@
   color: #f2f5fa;
 }
 
-body { margin: 0; min-width: 340px; }
+body { margin: 0; min-width: 380px; }
 main { padding: 18px; }
 header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
 .mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; background: #7c5cff; font-weight: 900; }
@@ -19,11 +19,24 @@ button { width: 100%; margin-top: 10px; border: 0; border-radius: 10px; backgrou
 button:disabled { cursor: wait; opacity: .6; }
 button.secondary { background: #232b3d; }
 .fine { margin: 9px 1px 0; font-size: 11px; line-height: 1.45; }
-.status { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.readiness { display: flex; align-items: center; gap: 8px; border-radius: 10px; padding: 9px 10px; font-size: 13px; background: rgb(16 185 129 / 10%); }
+.readiness[data-state="warning"] { background: rgb(245 158 11 / 11%); }
+.readiness[data-state="paused"] { background: rgb(100 116 139 / 16%); }
 .dot { width: 9px; height: 9px; border-radius: 999px; background: #10b981; box-shadow: 0 0 12px #10b981; }
+.readiness[data-state="warning"] .dot { background: #f59e0b; box-shadow: 0 0 12px #f59e0b; }
+.readiness[data-state="paused"] .dot { background: #94a3b8; box-shadow: none; }
 .deck { margin: 12px 0 4px; font-weight: 800; }
 .muted, .card, .error, .message { font-size: 12px; line-height: 1.45; }
 .card { margin: 12px 0 0; padding: 9px 10px; border: 1px solid #30394d; border-radius: 9px; background: #131826; }
 .error { color: #fb7185; }
 .message { min-height: 18px; margin: 10px 0 0; color: #cbd5e1; }
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.secondary-actions { margin-top: 2px; }
+button.tertiary { border: 1px solid #30394d; background: transparent; color: #cbd5e1; }
+.health-list, .warning-list { display: grid; gap: 7px; margin: 12px 0 0; padding: 0; list-style: none; }
+.health-list li { display: grid; grid-template-columns: 8px 1fr; gap: 8px; align-items: start; color: #b8c0cf; font-size: 11px; line-height: 1.4; }
+.health-list strong { color: #edf2f7; }
+.health-dot { width: 7px; height: 7px; margin-top: 4px; border-radius: 999px; background: #10b981; }
+.health-list li.warn .health-dot { background: #f59e0b; }
+.health-list li.bad .health-dot { background: #fb7185; }
+.warning-list { border-left: 2px solid #f59e0b; padding-left: 10px; color: #fcd34d; font-size: 11px; line-height: 1.4; }

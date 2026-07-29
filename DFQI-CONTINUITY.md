@@ -44,16 +44,17 @@ contained in this handoff.
 
 ### In progress
 
-- User is merging Gamma Session 2 and Session 3 into the Session 1 destination
-  deck and finalizing the combined presentation.
-- Expected card-count checkpoints are 51 cards after Session 1, 107 after
-  adding Session 2, and 155 after adding Session 3.
+- Final live Chrome rehearsal of the v0.3 resilience extension.
+- The facilitator should freeze Gamma card order after the rehearsal.
 
-### Blocked pending user input
+### Resolved since this handoff
 
-- Final combined Gamma URL.
-- Confirmation that the final combined deck has 155 cards and its sequence is
-  frozen for the Wednesday rehearsal.
+- Final combined Gamma document identified with 204 canonical cards:
+  `DFQI-Part-1-Sessions-1-2-3-Signal-or-Noise-Metric-to-Chart-and-Ch-cy7x7cox38l68ru`.
+- All 21 activities were reconciled to their final combined-deck card IDs and
+  applied to the production PulseDeck deck on 29 July 2026.
+- Newly inserted content cards now close an active interaction safely without a
+  one-for-one PulseDeck placeholder.
 
 ## Protected Gamma pilot copies
 

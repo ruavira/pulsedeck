@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "PulseDeck Gamma Sync",
-  "version": "0.2.0",
-  "description": "Keeps PulseDeck aligned with Gamma and overlays live interactions on mapped activity cards.",
+  "version": "0.3.0",
+  "minimum_chrome_version": "102",
+  "description": "Reliably keeps PulseDeck aligned with Gamma and presents verified live interactions in place.",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://gamma.app/*",

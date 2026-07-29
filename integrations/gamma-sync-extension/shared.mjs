@@ -5,6 +5,17 @@ export const TRUSTED_PULSEDECK_ORIGINS = new Set([
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CARD_ID_RE = /^[a-z0-9_-]{6,80}$/i;
+const DISPLAY_MODES = new Set(['hidden', 'compact', 'side', 'focus']);
+
+export const INTERACTIVE_KINDS = new Set([
+  'poll',
+  'quiz',
+  'ranking',
+  'wordcloud',
+  'scale',
+  'open_text',
+  'qa',
+]);
 
 export function buildAutoEmbedUrl(origin, deckId, theme = 'teal') {
   if (!TRUSTED_PULSEDECK_ORIGINS.has(origin) || !UUID_RE.test(deckId)) {
@@ -58,8 +69,17 @@ export function gammaMappingKey(documentSlug, cardId) {
 }
 
 export function buildGammaMappings(deck) {
+  return buildGammaMappingReport(deck).mappings;
+}
+
+export function buildGammaMappingReport(deck) {
   const mappings = {};
   const slides = Array.isArray(deck?.slides) ? deck.slides : [];
+  const duplicates = [];
+  const invalidSlides = [];
+  const documents = new Set();
+  let activityCount = 0;
+
   slides.forEach((slide, index) => {
     const sync = slide?.settings?.gammaSync;
     if (
@@ -69,20 +89,90 @@ export function buildGammaMappings(deck) {
       !sync.documentSlug.trim() ||
       !CARD_ID_RE.test(sync.cardId)
     ) {
+      invalidSlides.push({
+        index,
+        title: typeof slide?.title === 'string' ? slide.title : `Slide ${index + 1}`,
+      });
       return;
     }
-    const key = gammaMappingKey(sync.documentSlug.trim(), sync.cardId);
+
+    const documentSlug = sync.documentSlug.trim();
+    const key = gammaMappingKey(documentSlug, sync.cardId);
+    if (mappings[key]) {
+      duplicates.push({ key, firstIndex: mappings[key].index, duplicateIndex: index });
+      return;
+    }
+
+    const kind = typeof slide.kind === 'string' ? slide.kind : 'content';
+    const requestedMode = typeof sync.displayMode === 'string' ? sync.displayMode : '';
+    const displayMode = DISPLAY_MODES.has(requestedMode)
+      ? requestedMode
+      : kind === 'content'
+        ? 'hidden'
+        : 'side';
+
+    documents.add(documentSlug);
+    if (INTERACTIVE_KINDS.has(kind)) activityCount += 1;
     mappings[key] = {
       index,
       title: typeof slide.title === 'string' ? slide.title : `Slide ${index + 1}`,
-      kind: typeof slide.kind === 'string' ? slide.kind : 'content',
+      kind,
+      displayMode,
+      documentSlug,
+      cardId: sync.cardId,
     };
   });
-  return mappings;
+
+  const mappingCount = Object.keys(mappings).length;
+  return {
+    mappings,
+    mappingCount,
+    slideCount: slides.length,
+    activityCount,
+    documents: [...documents].sort(),
+    duplicates,
+    invalidSlides,
+    complete: slides.length > 0 && mappingCount === slides.length && duplicates.length === 0,
+  };
 }
 
 export function mappedSlideForUrl(mappings, gammaUrl) {
   const location = parseGammaUrl(gammaUrl);
   if (!location) return null;
-  return mappings[gammaMappingKey(location.documentSlug, location.cardId)] ?? null;
+  const exact = mappings[gammaMappingKey(location.documentSlug, location.cardId)];
+  if (exact) return exact;
+
+  // Gamma preserves card IDs when documents are duplicated or merged. Permit a
+  // slug-independent match only when that card ID is globally unambiguous in
+  // the authenticated PulseDeck snapshot.
+  const aliases = Object.values(mappings).filter((entry) => entry.cardId === location.cardId);
+  return aliases.length === 1 ? aliases[0] : null;
+}
+
+export function summarizeGammaInventory(mappings, documentSlug, cardIds) {
+  const uniqueIds = [
+    ...new Set(
+      (Array.isArray(cardIds) ? cardIds : []).filter(
+        (cardId) => typeof cardId === 'string' && CARD_ID_RE.test(cardId),
+      ),
+    ),
+  ];
+  let mappedCount = 0;
+  let mappedActivityCount = 0;
+  for (const cardId of uniqueIds) {
+    const target = mappedSlideForUrl(
+      mappings,
+      `https://gamma.app/docs/${encodeURIComponent(documentSlug)}#card-${cardId}`,
+    );
+    if (!target) continue;
+    mappedCount += 1;
+    if (INTERACTIVE_KINDS.has(target.kind)) mappedActivityCount += 1;
+  }
+  return {
+    documentSlug,
+    cardCount: uniqueIds.length,
+    mappedCount,
+    mappedActivityCount,
+    safeNeutralCount: uniqueIds.length - mappedCount,
+  };
 }

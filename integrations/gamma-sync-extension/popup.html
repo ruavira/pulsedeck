@@ -24,13 +24,20 @@
       </section>
 
       <section id="connected" hidden>
-        <div class="status"><span class="dot"></span><strong>Connected</strong></div>
+        <div id="readiness" class="readiness" data-state="warning">
+          <span class="dot"></span><strong id="readiness-label">Checking readiness</strong>
+        </div>
         <p id="deck-title" class="deck"></p>
-        <p id="mapping-count" class="muted"></p>
         <p id="current-card" class="card"></p>
+        <ul id="health-list" class="health-list" aria-label="Preflight checks"></ul>
+        <ul id="warning-list" class="warning-list" hidden></ul>
         <p id="last-error" class="error" role="alert"></p>
         <div class="actions">
-          <button id="sync-now" type="button">Sync this card now</button>
+          <button id="sync-now" type="button">Force sync now</button>
+          <button id="pause-sync" class="secondary" type="button">Pause for mobile control</button>
+        </div>
+        <div class="actions secondary-actions">
+          <button id="copy-diagnostics" class="tertiary" type="button">Copy diagnostics</button>
           <button id="disconnect" class="secondary" type="button">Disconnect</button>
         </div>
       </section>

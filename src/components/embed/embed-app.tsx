@@ -10,7 +10,7 @@
 // renders from the single `results` broadcast path. Handoff is flicker-free: the
 // new poller's leading fetch is gap-free and consumers keep the last-known results.
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { RealtimePresenceState } from '@supabase/supabase-js';
 import { useEmbedSession } from '@/hooks/use-embed-session';
 import { useAggregatorElection } from '@/hooks/use-aggregator-election';
@@ -105,6 +105,41 @@ export function EmbedApp({
   // Degraded = the live results stream is unreliable. For the aggregator that's
   // repeated get_results failures; for a consumer it's a dropped channel.
   const degraded = active && (isAggregator ? pollerDegraded : !session.connected);
+
+  // Gamma Sync keeps this iframe warm between interactions. A narrow,
+  // public-safe handshake lets the parent reveal it only after the embed has
+  // observed the intended live slide, avoiding stale-result flashes.
+  useEffect(() => {
+    let parentOrigin: string | null = null;
+    try {
+      parentOrigin = new URL(document.referrer).origin;
+    } catch {
+      return;
+    }
+    if (parentOrigin !== 'https://gamma.app' || window.parent === window) return;
+    window.parent.postMessage(
+      {
+        type: 'PULSEDECK_EMBED_STATE',
+        ready: true,
+        deckId,
+        sessionId: session.sessionId,
+        currentSlideIndex: session.currentSlideIndex,
+        status: session.status,
+        phase: session.phase,
+        connected: session.connected,
+        degraded,
+      },
+      parentOrigin,
+    );
+  }, [
+    deckId,
+    degraded,
+    session.connected,
+    session.currentSlideIndex,
+    session.phase,
+    session.sessionId,
+    session.status,
+  ]);
 
   const themed = config.theme && config.theme !== 'ice' ? config.theme : undefined;
   const framed = config.preset !== 'gamma';

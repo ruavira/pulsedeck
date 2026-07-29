@@ -1,9 +1,12 @@
 # Automatic Gamma → PulseDeck sync
 
-The facilitator-side Chrome extension in
+The facilitator-side Chrome extension (v0.3.0) in
 `integrations/gamma-sync-extension/` keeps a live PulseDeck session aligned to
 the card currently shown in Gamma. Gamma remains the visual presentation surface;
-PulseDeck remains the authenticated interaction and results system.
+PulseDeck remains the authenticated interaction and results system. Version
+0.3 adds a latest-card-wins controller, bounded retry, authoritative
+reconciliation, a prewarmed verified overlay, single-tab ownership, and a
+presenter preflight.
 
 ## Why the controller is an extension
 
@@ -29,9 +32,15 @@ Every slide in the live PulseDeck deck may carry:
 ```
 
 The extension reads these mappings from the presenter-authenticated frozen
-session snapshot. Map every Gamma card—not only activity cards—so moving away
-from a poll immediately advances PulseDeck to a neutral content placeholder and
-closes the previous response surface.
+session snapshot. For a stable document, map every Gamma card—not only activity
+cards—so moving away from a poll advances PulseDeck to a neutral placeholder.
+For a merged document with newly inserted teaching cards, every activity must
+be mapped exactly; an additional content card becomes a safe neutral transition
+that closes the response surface and hides the panel.
+
+Gamma preserves some card IDs during duplication and merging. The extension may
+use a slug-independent card-ID match only when that ID is globally unambiguous
+inside the authenticated PulseDeck snapshot.
 
 ## Facilitator setup
 
@@ -40,15 +49,32 @@ closes the previous response surface.
 2. Start the mapped PulseDeck deck and copy its complete **Remote** URL.
 3. Open the extension while any mapped Gamma deck is active, paste the remote
    URL, and choose **Connect live session**.
-4. Present Gamma normally. The extension watches Gamma's `#card-{id}` navigation
-   signal (with a visible-card fallback) and sends authenticated index jumps to
-   PulseDeck. Polls, word clouds, scales, rankings, and open text auto-open using
-   PulseDeck's existing session rules. On join and activity cards, it also adds a
-   live right-side PulseDeck panel using the public `auto` embed; the panel is
-   removed again on ordinary content cards. No permanent iframe blocks are added
-   to the Gamma file.
-5. The extension badge reads `ON` when healthy, `–` for an unmapped Gamma card,
-   and `!` after an API/network error.
+4. Confirm that the popup reads **Ready to present**. Its preflight checks the
+   PulseDeck snapshot, live session, active Gamma document, mapped interactions,
+   and prewarmed panel.
+5. Present Gamma normally. The extension combines the `#card-{id}` route with
+   the most-visible `[data-card-id]`, settles transitions for 140 ms, and retains
+   only the newest requested card. Interactive kinds auto-open using PulseDeck's
+   existing session rules.
+6. The public `auto` embed remains mounted and realtime-connected while hidden.
+   On an activity it appears after reporting the expected PulseDeck slide, with
+   a backward-compatible load fallback. Runtime modes are `compact`, `side`,
+   `focus`, and `hidden`; nothing is permanently added to Gamma.
+7. The badge reads `ON` when healthy, `↻` while syncing, `Ⅱ` while paused for
+   mobile control, `–` for an unsupported location, and `!` after an unrecovered
+   failure.
+
+## Controller and fallback behavior
+
+- Rapid navigation aborts stale work; the final Gamma card wins.
+- Transient failures retry with bounded backoff.
+- An eight-second heartbeat reads authoritative PulseDeck state and repairs
+  mobile-remote or network drift.
+- **Force sync now** bypasses cached state and verifies the real session.
+- **Pause for mobile control** prevents Gamma and the phone remote from
+  competing. **Resume automatic sync** immediately restores Gamma authority.
+- Only the Gamma tab selected at connection time can drive the session.
+- **Copy diagnostics** exports redacted card/index/latency events only.
 
 ## Security and failure behavior
 
@@ -56,6 +82,8 @@ closes the previous response surface.
   `pulsedeck.app` origin are permitted.
 - The presenter key is never written to local persistent storage or logs.
 - Duplicate Gamma navigation events are idempotent and do not reopen a poll.
+- Duplicate mappings are rejected instead of silently overwriting each other.
+- Disconnect and owner-tab closure hide the panel and clear presenter access.
 - If sync stops, the existing PulseDeck phone remote remains the manual fallback.
 - Starting a new live session requires reconnecting with that session's remote URL.
 

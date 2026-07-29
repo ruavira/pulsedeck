@@ -11,6 +11,10 @@ import { buildGammaMappings, mappedSlideForUrl } from '../integrations/gamma-syn
 const credentialsPath = resolve('.pulsedeck-local/dfqi-gamma-sync.json');
 const outputPath = resolve('.pulsedeck-local/dfqi-gamma-sync-session.json');
 const credentials = JSON.parse(await readFile(credentialsPath, 'utf8'));
+const source = JSON.parse(
+  await readFile(new URL('../content/dfqi-gamma-sync.json', import.meta.url), 'utf8'),
+);
+const combinedSlug = source.combinedDeck.slug;
 
 async function request(path, init = {}) {
   const response = await fetch(`${credentials.origin}${path}`, {
@@ -35,25 +39,31 @@ assert.equal(first.currentSlideIndex, 0);
 assert.equal(first.deck.slides.length, 155);
 const mappings = buildGammaMappings(first.deck);
 assert.equal(Object.keys(mappings).length, 155);
+assert.equal(
+  Object.values(mappings).filter(
+    (mapping) => mapping.documentSlug === combinedSlug && mapping.kind !== 'content',
+  ).length,
+  21,
+);
 
 const checks = [
   {
-    gammaUrl: 'https://gamma.app/docs/DFQI-Part-1-Session-1-Signal-or-Noise-PulseDeck-Live-Pilot-cy7x7cox38l68ru#card-idf3wydu3lx2ojq',
+    gammaUrl: `https://gamma.app/docs/${combinedSlug}#card-idf3wydu3lx2ojq`,
     expectedIndex: 1,
     expectedPhase: 'open',
   },
   {
-    gammaUrl: 'https://gamma.app/docs/DFQI-Part-1-Session-1-Signal-or-Noise-PulseDeck-Live-Pilot-cy7x7cox38l68ru#card-9vjk5mcl3516gwc',
+    gammaUrl: `https://gamma.app/docs/${combinedSlug}#card-9vjk5mcl3516gwc`,
     expectedIndex: 2,
     expectedPhase: 'show',
   },
   {
-    gammaUrl: 'https://gamma.app/docs/DFQI-Part-1-Session-2-From-Metric-to-Chart-PulseDeck-Live-Pilot-dc0sfypwingbucz#card-vfcr4qibumwmsvg',
-    expectedIndex: 51,
-    expectedPhase: 'show',
+    gammaUrl: `https://gamma.app/docs/${combinedSlug}#card-ts76lu2rnhwph8l`,
+    expectedIndex: 56,
+    expectedPhase: 'open',
   },
   {
-    gammaUrl: 'https://gamma.app/docs/DFQI-Part-1-Session-3-From-Chart-to-Boardroom-PulseDeck-Live-Pilo-f7h6h98pib25r7f#card-tvnmrzgu0hytxmm',
+    gammaUrl: `https://gamma.app/docs/${combinedSlug}#card-c654uxg7jjo947o`,
     expectedIndex: 124,
     expectedPhase: 'open',
   },
