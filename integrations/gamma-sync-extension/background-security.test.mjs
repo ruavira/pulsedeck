@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const source = await readFile(new URL('./background.js', import.meta.url), 'utf8');
+const popupSource = await readFile(new URL('./popup.js', import.meta.url), 'utf8');
 
 test('stores only session-scoped controller access after pairing', () => {
   assert.match(source, /controllerToken/);
@@ -23,4 +24,9 @@ test('validates the live Gamma card before consuming a one-use credential', () =
   const redeemAt = source.indexOf('redeemPairingCode(pairingCode, origin)', source.indexOf('async function configureFromPairingCode'));
   assert.ok(validateAt > 0 && redeemAt > validateAt);
   assert.match(source, /Your pairing code was not used/);
+});
+
+test('treats a superseded duplicate startup sync as healthy', () => {
+  assert.match(popupSource, /!synced\?\.superseded/);
+  assert.match(popupSource, /Gamma synchronization is active/);
 });
