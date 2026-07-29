@@ -51,8 +51,9 @@ issue, commit, chat or screen share.
 
 - The mapping contract is part of `npm run test:gamma-sync`.
 - `npm run verify:gamma-sync-acceptance-api` validates production mapping,
-  72-hour expiry, superseding of older unused codes, one-use redemption, standby, takeover, mobile priority, recovery, release and
-  rehearsal cleanup without printing protected credentials.
+  72-hour expiry, superseding of older unused codes, one-use redemption,
+  standby, takeover, mobile priority, recovery, release and rehearsal cleanup
+  without printing protected credentials.
 - The first production API acceptance run passed on 2026-07-29.
 - `npm run update:gamma-sync-acceptance-kit` reconciles the permanent deck to
   the checked-in specification, preserves slide IDs and creates a fresh session.
