@@ -17,3 +17,10 @@ test('navigation uses IntersectionObserver instead of rescanning 204 card rectan
   assert.match(source, /new IntersectionObserver/);
   assert.doesNotMatch(source, /for \(const section of document\.querySelectorAll\('\[data-card-id\]'\)\)[\s\S]{0,500}getBoundingClientRect/);
 });
+
+test('extension reload invalidation is contained by the runtime message boundary', () => {
+  assert.match(source, /function runtimeContextAvailable/);
+  assert.match(source, /extension context invalidated/i);
+  assert.match(source, /function sendRuntimeMessage/);
+  assert.equal(source.match(/chrome\.runtime\.sendMessage/g)?.length, 1);
+});

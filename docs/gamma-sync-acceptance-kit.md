@@ -54,3 +54,5 @@ issue, commit, chat or screen share.
   one-use redemption, standby, takeover, mobile priority, recovery, release and
   rehearsal cleanup without printing protected credentials.
 - The first production API acceptance run passed on 2026-07-29.
+- `npm run update:gamma-sync-acceptance-kit` reconciles the permanent deck to
+  the checked-in specification, preserves slide IDs and creates a fresh session.
