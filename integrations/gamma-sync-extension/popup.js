@@ -218,12 +218,14 @@ async function connectWith(messageBody, button) {
       tabId: activeGammaTab.id,
       force: true,
     });
-    if (!synced?.ok && !synced?.controllerConflict) {
+    if (!synced?.ok && !synced?.controllerConflict && !synced?.superseded) {
       throw new Error(synced?.error ?? 'Connected, but the first card did not sync.');
     }
     await refresh();
     message.textContent = synced?.controllerConflict
       ? 'Securely paired in standby. Use Take Control when this presenter should become active.'
+      : synced?.superseded
+        ? 'Secure controller paired. Gamma synchronization is active.'
       : 'Secure controller paired, checked and synchronized.';
   } catch (error) {
     message.textContent = error?.message ?? 'Could not connect.';
