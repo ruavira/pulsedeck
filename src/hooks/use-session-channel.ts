@@ -20,7 +20,7 @@ interface Options {
   /** Called for stage-rebroadcast results events */
   onResults?: (payload: { slideId: string; results: Results }) => void;
   /** Q&A nudge — refetch questions */
-  onQaBump?: () => void;
+  onQaBump?: (payload?: { action?: string }) => void;
   /** Audience emoji reactions (stage) */
   onReact?: (payload: { emoji: string }) => void;
   /** Audience pace / comprehension signals + raise-hand (stage) */
@@ -76,7 +76,9 @@ export function useSessionChannel(sessionId: string | null, opts: Options = {}) 
       .on('broadcast', { event: 'results' }, ({ payload }) => {
         optsRef.current.onResults?.(payload as { slideId: string; results: Results });
       })
-      .on('broadcast', { event: 'qa' }, () => optsRef.current.onQaBump?.())
+      .on('broadcast', { event: 'qa' }, ({ payload }) => {
+        optsRef.current.onQaBump?.(payload as { action?: string });
+      })
       .on('broadcast', { event: 'react' }, ({ payload }) => {
         optsRef.current.onReact?.(payload as { emoji: string });
       })

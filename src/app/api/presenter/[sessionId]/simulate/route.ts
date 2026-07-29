@@ -355,7 +355,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
     }
   }
 
-  await broadcast(sessionId, 'qa', { bump: 1 });
+  await broadcast(sessionId, 'qa', { action: 'simulated', bump: 1 });
 
   return Response.json({
     ok: true,

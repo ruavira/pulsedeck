@@ -49,6 +49,9 @@ interface Options {
   presence?: PresenceIdentity;
   onPresenceSync?: (state: RealtimePresenceState) => void;
   onResults?: (payload: { slideId: string; results: Results }) => void;
+  onReact?: (payload: { emoji: string }) => void;
+  onSignal?: (payload: { kind: string }) => void;
+  onQaBump?: (payload?: { action?: string }) => void;
 }
 
 export interface EmbedSession {
@@ -83,11 +86,17 @@ export function useEmbedSession(deckId: string, opts: Options = {}): EmbedSessio
   // Q&A nudge: bump a counter on each `qa` broadcast so the embedded Q&A wall
   // refetches immediately rather than waiting for its own poll.
   const [qaBump, setQaBump] = useState(0);
-  const onQaBump = useCallback(() => setQaBump((n) => n + 1), []);
+  const externalOnQaBump = opts.onQaBump;
+  const onQaBump = useCallback((payload?: { action?: string }) => {
+    setQaBump((n) => n + 1);
+    externalOnQaBump?.(payload);
+  }, [externalOnQaBump]);
 
   const { state: channelState, connected, broadcast } = useSessionChannel(sessionId, {
     onResults: opts.onResults,
     onQaBump,
+    onReact: opts.onReact,
+    onSignal: opts.onSignal,
     presence: opts.presence,
     onPresenceSync: opts.onPresenceSync,
   });

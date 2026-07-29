@@ -61,11 +61,40 @@ export function EmbedApp({
     [],
   );
 
+  const postGammaAmbient = useCallback((event: 'reaction' | 'signal' | 'qa', payload: unknown) => {
+    let parentOrigin: string | null = null;
+    try {
+      parentOrigin = new URL(document.referrer).origin;
+    } catch {
+      return;
+    }
+    if (parentOrigin !== 'https://gamma.app' || window.parent === window) return;
+    window.parent.postMessage(
+      { type: 'PULSEDECK_AMBIENT_EVENT', event, payload },
+      parentOrigin,
+    );
+  }, []);
+  const onReact = useCallback(
+    (payload: { emoji: string }) => postGammaAmbient('reaction', payload),
+    [postGammaAmbient],
+  );
+  const onSignal = useCallback(
+    (payload: { kind: string }) => postGammaAmbient('signal', payload),
+    [postGammaAmbient],
+  );
+  const onQaBump = useCallback(
+    (payload?: { action?: string }) => postGammaAmbient('qa', payload ?? {}),
+    [postGammaAmbient],
+  );
+
   const presence = useMemo(() => ({ key: clientId, role: 'embed' }), [clientId]);
   const session = useEmbedSession(deckId, {
     presence,
     onPresenceSync: setPresenceState,
     onResults,
+    onReact,
+    onSignal,
+    onQaBump,
   });
 
   const currentSlide = session.currentSlide;
@@ -151,7 +180,7 @@ export function EmbedApp({
     <div
       data-theme={themed}
       style={style}
-      className={`flex min-h-[100dvh] flex-col justify-center text-fg ${config.compact ? 'p-2' : 'p-3'}`}
+      className={`flex min-h-[100dvh] flex-col justify-center bg-ink text-fg ${config.compact ? 'p-2' : 'p-3'}`}
     >
       <div
         className={

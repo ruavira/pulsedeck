@@ -53,7 +53,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   };
   await Promise.all([
     broadcast(sessionId, 'state', state),
-    broadcast(sessionId, 'qa', { bump: 1 }),
+    broadcast(sessionId, 'qa', { action: 'reset', bump: 1 }),
   ]);
   return Response.json({
     ok: true,

@@ -22,6 +22,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
     .eq('session_id', sessionId);
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
-  await broadcast(sessionId, 'qa', { bump: 1 });
+  await broadcast(sessionId, 'qa', { action: 'moderated', bump: 1 });
   return Response.json({ ok: true });
 }

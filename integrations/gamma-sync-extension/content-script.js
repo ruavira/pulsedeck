@@ -3,6 +3,7 @@
 // transitions and rapid key presses collapse to one authoritative destination.
 
 const OVERLAY_ID = 'pulsedeck-gamma-live-overlay';
+const AMBIENT_ID = 'pulsedeck-gamma-ambient-layer';
 const SETTLE_MS = 140;
 const HEARTBEAT_MS = 8000;
 const EMBED_CONFIRM_TIMEOUT_MS = 1600;
@@ -26,6 +27,119 @@ let cachedInventory = null;
 let runtimeContextActive = true;
 const visibleCards = new Map();
 const observedCards = new WeakSet();
+const ambientSignalCounts = new Map();
+let ambientSignalTimer = null;
+let ambientQuestionCount = 0;
+let ambientQuestionTimer = null;
+
+const REACTIONS = new Set(['👏', '❤️', '😂', '🤯', '👍']);
+const SIGNALS = {
+  got_it: ['👍', 'Got it'],
+  slow: ['🐢', 'Slow down'],
+  lost: ['🤔', "I'm lost"],
+  fast: ['⚡', 'Speed up'],
+  hand: ['✋', 'Hand raised'],
+};
+
+function prepareAmbientLayer() {
+  let host = document.getElementById(AMBIENT_ID);
+  if (host) return host;
+  host = document.createElement('div');
+  host.id = AMBIENT_ID;
+  host.setAttribute('aria-live', 'polite');
+  host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;pointer-events:none';
+  const shadow = host.attachShadow({ mode: 'open' });
+  shadow.innerHTML = `
+    <style>
+      :host { position: fixed !important; inset: 0 !important; pointer-events: none !important; }
+      .reaction {
+        position: fixed; bottom: 16px; left: var(--left); z-index: 3;
+        font: 42px/1 Apple Color Emoji, Segoe UI Emoji, sans-serif;
+        filter: drop-shadow(0 5px 8px rgba(15,23,42,.25));
+        animation: pd-reaction-float 2800ms ease-out forwards;
+      }
+      @keyframes pd-reaction-float {
+        0% { opacity: 0; transform: translate3d(0,0,0) scale(.65); }
+        12% { opacity: 1; transform: translate3d(0,-8vh,0) scale(1); }
+        100% { opacity: 0; transform: translate3d(var(--drift),-72vh,0) scale(1.18); }
+      }
+      .notice {
+        position: fixed; z-index: 4; box-sizing: border-box; max-width: min(440px, calc(100vw - 32px));
+        border: 1px solid rgba(15,118,110,.26); border-radius: 14px;
+        background: rgba(255,255,255,.97); color: #0f2940;
+        box-shadow: 0 12px 34px rgba(15,23,42,.2); backdrop-filter: blur(12px);
+        padding: 12px 16px; font: 700 15px/1.35 ui-sans-serif, system-ui, sans-serif;
+        animation: pd-notice-in 180ms ease-out;
+      }
+      .notice small { display:block; margin-top:3px; color:#56728a; font-weight:500; }
+      .question { top: 18px; left: 18px; }
+      .signal { bottom: 18px; left: 18px; }
+      @keyframes pd-notice-in { from { opacity:0; transform:translateY(-8px) scale(.98); } }
+      @media (prefers-reduced-motion: reduce) {
+        .reaction { display:none; }
+        .notice { animation:none; }
+      }
+    </style>
+    <div class="events"></div>
+    <div class="notice question" hidden></div>
+    <div class="notice signal" hidden></div>`;
+  document.documentElement.append(host);
+  return host;
+}
+
+function renderAmbientReaction(emoji) {
+  if (!REACTIONS.has(emoji) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const shadow = prepareAmbientLayer().shadowRoot;
+  const reaction = document.createElement('span');
+  reaction.className = 'reaction';
+  reaction.textContent = emoji;
+  reaction.style.setProperty('--left', `${12 + Math.random() * 76}%`);
+  reaction.style.setProperty('--drift', `${(Math.random() - 0.5) * 120}px`);
+  shadow.querySelector('.events').append(reaction);
+  setTimeout(() => reaction.remove(), 3000);
+}
+
+function renderAmbientSignal(kind) {
+  const signal = SIGNALS[kind];
+  if (!signal) return;
+  ambientSignalCounts.set(kind, (ambientSignalCounts.get(kind) ?? 0) + 1);
+  const notice = prepareAmbientLayer().shadowRoot.querySelector('.signal');
+  const parts = [...ambientSignalCounts.entries()].map(([key, count]) => {
+    const [emoji, label] = SIGNALS[key];
+    return `${emoji} ${label}${count > 1 ? ` ×${count}` : ''}`;
+  });
+  notice.textContent = parts.join(' · ');
+  notice.hidden = false;
+  clearTimeout(ambientSignalTimer);
+  ambientSignalTimer = setTimeout(() => {
+    ambientSignalCounts.clear();
+    notice.hidden = true;
+  }, 6500);
+}
+
+function renderAmbientQuestion(payload = {}) {
+  if (payload.action && payload.action !== 'submitted') return;
+  ambientQuestionCount += 1;
+  const notice = prepareAmbientLayer().shadowRoot.querySelector('.question');
+  notice.replaceChildren();
+  const title = document.createElement('div');
+  title.textContent = `❓ ${ambientQuestionCount === 1 ? 'New audience question' : `${ambientQuestionCount} new audience questions`}`;
+  const detail = document.createElement('small');
+  detail.textContent = 'Review or moderate it on the PulseDeck Remote.';
+  notice.append(title, detail);
+  notice.hidden = false;
+  clearTimeout(ambientQuestionTimer);
+  ambientQuestionTimer = setTimeout(() => {
+    ambientQuestionCount = 0;
+    notice.hidden = true;
+  }, 8500);
+}
+
+function renderAmbientEvent(message) {
+  if (message.event === 'reaction') renderAmbientReaction(message.payload?.emoji);
+  else if (message.event === 'signal') renderAmbientSignal(message.payload?.kind);
+  else if (message.event === 'qa') renderAmbientQuestion(message.payload);
+}
 
 function runtimeContextAvailable() {
   if (!runtimeContextActive) return false;
@@ -129,8 +243,8 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         :host {
           --pd-top: 76px;
           --pd-right: 20px;
-          --pd-width: clamp(360px, 45vw, 720px);
-          --pd-height: min(66vh, 650px);
+          --pd-width: clamp(340px, 36vw, 600px);
+          --pd-height: min(62vh, 610px);
           position: fixed !important;
           top: var(--pd-top) !important;
           right: var(--pd-right) !important;
@@ -154,10 +268,10 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         :host([data-mode="compact"]) {
           --pd-top: auto;
           --pd-right: 20px;
-          --pd-width: clamp(320px, 34vw, 520px);
-          --pd-height: min(46vh, 430px);
+          --pd-width: clamp(300px, 27vw, 440px);
+          --pd-height: min(38vh, 360px);
           bottom: 20px !important;
-          min-height: 280px !important;
+          min-height: 240px !important;
         }
         :host([data-mode="focus"]) {
           --pd-top: 4vh;
@@ -167,11 +281,23 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
           min-height: 0 !important;
         }
         :host([data-presentation="true"][data-mode="side"]) {
-          --pd-top: 4vh;
-          --pd-right: 2vw;
-          --pd-width: clamp(380px, 40vw, 660px);
-          --pd-height: 92vh;
+          --pd-top: 7vh;
+          --pd-right: 1.4vw;
+          --pd-width: clamp(340px, 32vw, 540px);
+          --pd-height: 86vh;
           min-height: 0 !important;
+        }
+        :host([data-size="small"][data-mode="side"]) { --pd-width: clamp(300px, 26vw, 430px); }
+        :host([data-size="small"][data-mode="compact"]) {
+          --pd-width: clamp(280px, 22vw, 360px); --pd-height: min(32vh, 310px); min-height: 210px !important;
+        }
+        :host([data-size="large"][data-mode="side"]) { --pd-width: clamp(380px, 40vw, 660px); }
+        :host([data-size="large"][data-mode="compact"]) { --pd-width: clamp(340px, 34vw, 520px); }
+        :host([data-dock="left"]) { left: 20px !important; right: auto !important; }
+        :host([data-presentation="true"][data-dock="left"]) { left: 1.4vw !important; right: auto !important; }
+        :host([data-minimized="true"]) {
+          --pd-top: 76px; --pd-width: 280px; --pd-height: 38px;
+          bottom: auto !important; min-height: 38px !important;
         }
         .shell {
           box-sizing: border-box;
@@ -179,17 +305,27 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
           border: 1px solid rgba(15,118,110,.28); border-radius: 20px;
           background: rgba(255,255,255,.985);
         }
-        .label {
-          box-sizing: border-box; height: 34px; padding: 8px 14px 6px;
-          overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+        .bar {
+          box-sizing: border-box; height: 38px; display:flex; align-items:center;
           color: #0f766e; background: #f0fdfa;
+        }
+        .label {
+          box-sizing: border-box; min-width:0; flex:1; padding: 8px 8px 6px 14px;
+          overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
           font: 700 12px/20px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           letter-spacing: .04em; text-transform: uppercase;
         }
+        .controls { display:flex; align-items:center; gap:2px; padding-right:7px; }
+        .controls button {
+          width:27px; height:27px; border:0; border-radius:7px; background:transparent; color:#0f766e;
+          cursor:pointer; font:700 15px/1 ui-sans-serif,system-ui,sans-serif;
+        }
+        .controls button:hover, .controls button:focus-visible { background:#ccfbf1; outline:none; }
         iframe {
-          display: block; width: 100%; height: calc(100% - 34px);
+          display: block; width: 100%; height: calc(100% - 38px);
           border: 0; background: transparent;
         }
+        :host([data-minimized="true"]) iframe { display:none; }
         @media (max-width: 900px) {
           :host(:not([data-mode="focus"])) {
             --pd-top: auto;
@@ -205,10 +341,34 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
         }
       </style>
       <div class="shell">
-        <div class="label"></div>
+        <div class="bar">
+          <div class="label"></div>
+          <div class="controls">
+            <button class="dock" type="button" title="Move panel to the other side" aria-label="Move panel to the other side">↔</button>
+            <button class="size" type="button" title="Change panel size" aria-label="Change panel size">◲</button>
+            <button class="minimize" type="button" title="Minimize panel" aria-label="Minimize panel">−</button>
+          </div>
+        </div>
         <iframe title="PulseDeck live interaction" allow="clipboard-read; clipboard-write" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>`;
     document.documentElement.append(host);
+    host.dataset.dock = sessionStorage.getItem('pulsedeckGammaDock') === 'left' ? 'left' : 'right';
+    host.dataset.size = sessionStorage.getItem('pulsedeckGammaSize') ?? 'normal';
+    host.dataset.minimized = 'false';
+    shadow.querySelector('.dock').addEventListener('click', () => {
+      host.dataset.dock = host.dataset.dock === 'left' ? 'right' : 'left';
+      sessionStorage.setItem('pulsedeckGammaDock', host.dataset.dock);
+    });
+    shadow.querySelector('.size').addEventListener('click', () => {
+      host.dataset.size = host.dataset.size === 'normal' ? 'small' : host.dataset.size === 'small' ? 'large' : 'normal';
+      sessionStorage.setItem('pulsedeckGammaSize', host.dataset.size);
+    });
+    shadow.querySelector('.minimize').addEventListener('click', () => {
+      const minimized = host.dataset.minimized !== 'true';
+      host.dataset.minimized = minimized ? 'true' : 'false';
+      shadow.querySelector('.minimize').textContent = minimized ? '+' : '−';
+      shadow.querySelector('.minimize').setAttribute('aria-label', minimized ? 'Expand panel' : 'Minimize panel');
+    });
     const iframe = shadow.querySelector('iframe');
     iframe.addEventListener('load', () => {
       iframeLoaded = true;
@@ -271,6 +431,10 @@ window.addEventListener('message', (event) => {
   const host = document.getElementById(OVERLAY_ID);
   const iframe = host?.shadowRoot?.querySelector('iframe');
   if (!iframe || event.source !== iframe.contentWindow || event.origin !== trustedPulseDeckOrigin) return;
+  if (event.data?.type === 'PULSEDECK_AMBIENT_EVENT') {
+    renderAmbientEvent(event.data);
+    return;
+  }
   if (!['PULSEDECK_EMBED_READY', 'PULSEDECK_EMBED_STATE'].includes(event.data?.type)) return;
 
   latestEmbedState = {
