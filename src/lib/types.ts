@@ -108,6 +108,8 @@ export interface SlideSettings {
     documentSlug: string;
     /** Gamma card id without the URL's leading `card-` prefix. */
     cardId: string;
+    /** Runtime panel treatment used by the Gamma Sync browser extension. */
+    displayMode?: 'hidden' | 'compact' | 'side' | 'focus';
   };
 }
 

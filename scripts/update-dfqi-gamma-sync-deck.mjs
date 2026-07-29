@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Repoints the existing combined deck to the protected Gamma pilot copies.
+// Repoints the existing combined deck to the protected Gamma pilot copies and
+// maps all activities to their final locations in the merged Gamma document.
 // Presenter credentials remain in the gitignored mode-0600 local file and are
 // never printed. Existing slide IDs and activity content are preserved.
 
@@ -18,6 +19,11 @@ const slugByCardId = new Map(
   source.sessions.flatMap((session) => session.cards.map((card) => [card.id, session.slug])),
 );
 assert.equal(slugByCardId.size, 155, 'Expected 155 unique Gamma card mappings');
+const combinedSlug = source.combinedDeck?.slug;
+const activityAliases = source.combinedDeck?.activityCardAliases ?? {};
+const combinedActivityIds = new Set(Object.values(activityAliases));
+assert.ok(combinedSlug, 'Missing final combined Gamma document slug');
+assert.equal(Object.keys(activityAliases).length, 21, 'Expected 21 combined-deck activity aliases');
 
 async function request(path, init = {}) {
   const response = await fetch(`${credentials.origin}${path}`, {
@@ -38,13 +44,18 @@ assert.equal(deck.slides.length, 155, 'Production deck slide count changed unexp
 
 const slides = deck.slides.map((slide) => {
   const cardId = slide.settings?.gammaSync?.cardId;
-  const documentSlug = slugByCardId.get(cardId);
+  const combinedCardId = activityAliases[cardId] ?? (combinedActivityIds.has(cardId) ? cardId : null);
+  const documentSlug = combinedCardId ? combinedSlug : slugByCardId.get(cardId);
   assert.ok(documentSlug, `Missing pilot slug for Gamma card ${cardId ?? '(none)'}`);
   return {
     ...slide,
     settings: {
       ...slide.settings,
-      gammaSync: { cardId, documentSlug },
+      gammaSync: {
+        cardId: combinedCardId ?? cardId,
+        documentSlug,
+        ...(combinedCardId ? { displayMode: 'side' } : {}),
+      },
     },
   };
 });
@@ -54,5 +65,5 @@ await request(`/api/decks/${credentials.deckId}`, {
   body: JSON.stringify({ title: deck.title, theme: deck.theme, slides }),
 });
 
-console.log(`Updated deck ${credentials.deckId}: 155 mappings now target the protected Gamma pilot copies.`);
+console.log(`Updated deck ${credentials.deckId}: 21 activities now target the final combined Gamma deck.`);
 console.log('Existing slide IDs and activities were preserved; no presenter key was printed.');

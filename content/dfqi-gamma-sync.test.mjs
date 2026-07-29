@@ -30,3 +30,14 @@ test('all activities target a real mapped card and have a prompt', () => {
     assert.ok(activity.body?.prompt?.trim(), `${id} has no prompt`);
   }
 });
+
+test('final combined Gamma deck maps every activity exactly once', () => {
+  const aliases = manifest.combinedDeck?.activityCardAliases ?? {};
+  const sourceIds = Object.keys(aliases);
+  const targetIds = Object.values(aliases);
+  assert.equal(manifest.combinedDeck?.observedCardCount, 204);
+  assert.equal(sourceIds.length, 21);
+  assert.equal(new Set(sourceIds).size, 21);
+  assert.equal(new Set(targetIds).size, 21);
+  assert.deepEqual(new Set(sourceIds), new Set(Object.keys(manifest.activities)));
+});

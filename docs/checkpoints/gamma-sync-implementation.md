@@ -58,3 +58,21 @@ Updated: 2026-07-28
 
 1. Preserve the implementation in version control after the staged-secret scan.
 2. Use the three protected pilot copies for the facilitator rehearsal.
+
+## Completed batch 4 — resilience and merged-deck integration
+
+Updated: 2026-07-29
+
+- Identified the final combined Gamma document with 204 canonical cards:
+  `DFQI-Part-1-Sessions-1-2-3-Signal-or-Noise-Metric-to-Chart-and-Ch-cy7x7cox38l68ru`.
+- Reconciled and applied all 21 activity card IDs to the existing production
+  PulseDeck deck while preserving every PulseDeck slide ID and activity.
+- Added safe neutralization for new teaching cards without a PulseDeck
+  placeholder.
+- Added latest-card-wins serialization, bounded retry, forced authoritative
+  reconciliation, single-tab ownership, pause/resume for mobile control, and
+  redacted diagnostics.
+- Added a persistent prewarmed iframe, four display modes, reduced-motion
+  handling, and a public-safe embed state handshake.
+- Added merged-deck inventory preflight and duplicate-mapping rejection.
+- Expanded the automated Gamma Sync suite from 8 to 17 tests.
