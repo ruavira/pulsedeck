@@ -1,6 +1,6 @@
 # Automatic Gamma → PulseDeck sync
 
-The facilitator-side Chrome extension (v0.4.0) in
+The facilitator-side Chrome extension (v0.4.1) in
 `integrations/gamma-sync-extension/` keeps a live PulseDeck session aligned to
 the card currently shown in Gamma. Gamma remains the visual presentation surface;
 PulseDeck remains the authenticated interaction and results system. Version

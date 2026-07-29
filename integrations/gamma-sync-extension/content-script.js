@@ -23,8 +23,49 @@ let revealFallbackTimer = null;
 let lastHashChangeAt = Date.now();
 let inventoryTimer = null;
 let cachedInventory = null;
+let runtimeContextActive = true;
 const visibleCards = new Map();
 const observedCards = new WeakSet();
+
+function runtimeContextAvailable() {
+  if (!runtimeContextActive) return false;
+  try {
+    if (!chrome.runtime?.id) {
+      runtimeContextActive = false;
+      return false;
+    }
+    return true;
+  } catch {
+    runtimeContextActive = false;
+    return false;
+  }
+}
+
+function isContextInvalidation(error) {
+  return /extension context invalidated/i.test(error?.message ?? '');
+}
+
+function deactivateInvalidatedContext() {
+  runtimeContextActive = false;
+  clearTimeout(settleTimer);
+  clearTimeout(retryTimer);
+  clearTimeout(inventoryTimer);
+  clearTimeout(revealFallbackTimer);
+  hidePulseDeckOverlay();
+}
+
+async function sendRuntimeMessage(message) {
+  if (!runtimeContextAvailable()) return { contextInvalidated: true };
+  try {
+    return await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    if (isContextInvalidation(error) || !runtimeContextAvailable()) {
+      deactivateInvalidatedContext();
+      return { contextInvalidated: true };
+    }
+    throw error;
+  }
+}
 
 function normalizeCardId(value) {
   if (typeof value !== 'string') return null;
@@ -55,16 +96,14 @@ function revealPulseDeckOverlay() {
 }
 
 function reportEmbedHealth(message = {}) {
-  void chrome.runtime
-    .sendMessage({
+  void sendRuntimeMessage({
       type: 'EMBED_HEALTH',
       ready: Boolean(message.ready ?? latestEmbedState?.ready),
       connected: Boolean(message.connected ?? latestEmbedState?.connected),
       degraded: Boolean(message.degraded ?? latestEmbedState?.degraded),
       currentSlideIndex:
         message.currentSlideIndex ?? latestEmbedState?.currentSlideIndex ?? null,
-    })
-    .catch(() => undefined);
+    }).catch(() => undefined);
 }
 
 function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
@@ -337,19 +376,25 @@ function gammaUrlForCard(cardId) {
 
 function scheduleRetry(cardId) {
   clearTimeout(retryTimer);
-  if (retryCount >= 4 || cardId !== candidateCardId) return;
+  if (!runtimeContextAvailable() || retryCount >= 4 || cardId !== candidateCardId) return;
   const delay = Math.min(6000, 750 * 2 ** retryCount);
   retryCount += 1;
   retryTimer = setTimeout(() => void reportNavigation(cardId), delay);
 }
 
 async function reportNavigation(cardId) {
-  if (document.visibilityState !== 'visible' || !cardId || cardId !== candidateCardId) return;
+  if (
+    !runtimeContextAvailable() ||
+    document.visibilityState !== 'visible' ||
+    !cardId ||
+    cardId !== candidateCardId
+  ) return;
   const gammaUrl = gammaUrlForCard(cardId);
   if (gammaUrl === lastConfirmedNavigation || gammaUrl === inFlightNavigation) return;
   inFlightNavigation = gammaUrl;
   try {
-    const result = await chrome.runtime.sendMessage({ type: 'GAMMA_NAVIGATED', gammaUrl });
+    const result = await sendRuntimeMessage({ type: 'GAMMA_NAVIGATED', gammaUrl });
+    if (result?.contextInvalidated) return;
     if (result?.ok) {
       lastConfirmedNavigation = gammaUrl;
       retryCount = 0;
@@ -379,7 +424,7 @@ function settleNavigation() {
 }
 
 function scheduleReport() {
-  if (scheduled) return;
+  if (!runtimeContextAvailable() || scheduled) return;
   scheduled = true;
   requestAnimationFrame(settleNavigation);
 }
@@ -409,8 +454,7 @@ setInterval(scheduleReport, 1000);
 setInterval(() => {
   if (document.visibilityState !== 'visible' || !candidateCardId || inFlightNavigation) return;
   const gammaUrl = gammaUrlForCard(candidateCardId);
-  void chrome.runtime
-    .sendMessage({ type: 'RECONCILE_GAMMA_URL', gammaUrl })
+  void sendRuntimeMessage({ type: 'RECONCILE_GAMMA_URL', gammaUrl })
     .then(renderPulseDeckSync)
     .catch(() => undefined);
 }, HEARTBEAT_MS);

@@ -12,6 +12,7 @@
     "update:dfqi-gamma-sync": "node scripts/update-dfqi-gamma-sync-deck.mjs",
     "pilot:dfqi-gamma-sync": "node scripts/pilot-dfqi-gamma-sync.mjs",
     "create:gamma-sync-acceptance-kit": "node scripts/create-gamma-sync-acceptance-kit.mjs",
+    "update:gamma-sync-acceptance-kit": "node scripts/update-gamma-sync-acceptance-kit.mjs",
     "verify:gamma-sync-acceptance-api": "node scripts/verify-gamma-sync-acceptance-api.mjs"
   },
   "dependencies": {

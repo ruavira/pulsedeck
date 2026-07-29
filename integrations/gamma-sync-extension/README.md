@@ -1,4 +1,4 @@
-# PulseDeck Gamma Sync 0.4
+# PulseDeck Gamma Sync 0.4.1
 
 ## Install or update
 
