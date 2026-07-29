@@ -96,4 +96,13 @@ Updated: 2026-07-29
   recommended indexes for new foreign keys.
 - Expanded the automated Gamma Sync suite to 23 tests; full deployment and live
   v0.4 browser acceptance are the remaining gates for this batch.
-\n\n## Completed batch 6 — durable one-use pairing\n\nUpdated: 2026-07-29\n\n- Extended unused Gamma pairing-code validity from 15 minutes to 72 hours.\n- Kept redemption strictly one-use and server-enforced.\n- Creating a new code now expires the previous unused code for that live session.\n- Added day/hour countdown labels and aligned the Remote, extension and acceptance tests.\n
+
+
+## Completed batch 6 — durable one-use pairing
+
+Updated: 2026-07-29
+
+- Extended unused Gamma pairing-code validity from 15 minutes to 72 hours.
+- Kept redemption strictly one-use and server-enforced.
+- Creating a new code now expires the previous unused code for that live session.
+- Added day/hour countdown labels and aligned the Remote, extension and acceptance tests.
