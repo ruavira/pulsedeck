@@ -6,7 +6,7 @@ import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
 export const runtime = 'nodejs';
 
 const PAIR_ALPHABET = '23456789ACDEFGHJKMNPQRSTUVWXYZ';
-const PAIRING_TTL_MINUTES = 15;
+const PAIRING_TTL_HOURS = 72;
 
 function makePairingCode(): string {
   // Rejection sampling avoids modulo bias while keeping the code easy to type.
@@ -27,9 +27,22 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   const deckId = await verifySessionKey(sessionId, req.headers.get('x-presenter-key'));
   if (!deckId) return unauthorized();
   const body = await req.json().catch(() => ({}));
+  const admin = getAdmin();
+  const now = new Date().toISOString();
+
+  // Keep one outstanding credential per live session. Redeemed rows remain as
+  // an audit trail; any earlier unused code stops working immediately.
+  const { error: expireError } = await admin
+    .from('gamma_pairing_codes')
+    .update({ expires_at: now })
+    .eq('session_id', sessionId)
+    .is('redeemed_at', null)
+    .gt('expires_at', now);
+  if (expireError) return Response.json({ error: expireError.message }, { status: 500 });
+
   const code = makePairingCode();
-  const expiresAt = new Date(Date.now() + PAIRING_TTL_MINUTES * 60_000).toISOString();
-  const { error } = await getAdmin().from('gamma_pairing_codes').insert({
+  const expiresAt = new Date(Date.now() + PAIRING_TTL_HOURS * 60 * 60_000).toISOString();
+  const { error } = await admin.from('gamma_pairing_codes').insert({
     session_id: sessionId,
     code_hash: hashGammaSecret(code.replace(/-/g, '')),
     label: sanitizeControllerLabel(body?.label),

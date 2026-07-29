@@ -1,6 +1,6 @@
 # Automatic Gamma → PulseDeck sync
 
-The facilitator-side Chrome extension (v0.4.1) in
+The facilitator-side Chrome extension (v0.6.1) in
 `integrations/gamma-sync-extension/` keeps a live PulseDeck session aligned to
 the card currently shown in Gamma. Gamma remains the visual presentation surface;
 PulseDeck remains the authenticated interaction and results system. Version
@@ -13,7 +13,7 @@ cleanup on top of the v0.3 controller and prewarmed overlay.
 
 Public PulseDeck embeds are intentionally read-only. Putting a presenter key in
 an iframe URL would let anyone with the Gamma link control the live room. The
-Remote now creates a 15-minute, one-use pairing code. PulseDeck exchanges it
+Remote now creates a 72-hour, one-use pairing code. PulseDeck exchanges it
 for a random session-scoped controller token, stores only its SHA-256 hash on
 the server, and keeps the token in `chrome.storage.session`. Gamma receives no
 credential. The private Remote URL remains a recovery option; the extension
@@ -94,8 +94,9 @@ inside the authenticated PulseDeck snapshot.
   `pulsedeck.app` origin are permitted.
 - The presenter key is never written to local persistent storage or logs; the
   scoped controller token disappears when the Chrome session ends.
-- Pairing codes are high-entropy, expire after 15 minutes, and can be redeemed
-  once. Generation uses rejection sampling to avoid modulo bias.
+- Pairing codes are high-entropy, expire after 72 hours, and can be redeemed
+  once. Creating a new code expires the previous unused code for that live
+  session. Generation uses rejection sampling to avoid modulo bias.
 - Controller and baseline endpoints return no-store, no-referrer and nosniff
   response headers. New tables use RLS and server-only policies.
 - Duplicate Gamma navigation events are idempotent and do not reopen a poll.

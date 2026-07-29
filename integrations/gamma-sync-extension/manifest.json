@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PulseDeck Gamma Sync",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "minimum_chrome_version": "102",
   "description": "Securely pairs, coordinates and keeps PulseDeck aligned with Gamma in editor and presentation modes.",
   "permissions": ["activeTab", "storage"],

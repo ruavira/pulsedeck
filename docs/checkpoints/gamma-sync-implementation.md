@@ -81,7 +81,7 @@ Updated: 2026-07-29
 
 Updated: 2026-07-29
 
-- Replaced routine Remote-URL entry with 15-minute, one-use pairing codes and
+- Replaced routine Remote-URL entry with 72-hour, one-use pairing codes and
   random session-scoped Chrome controller tokens.
 - Added atomic renewable presenter leases, standby/takeover, and a 30-second
   priority window for deliberate mobile Remote actions.
@@ -96,3 +96,13 @@ Updated: 2026-07-29
   recommended indexes for new foreign keys.
 - Expanded the automated Gamma Sync suite to 23 tests; full deployment and live
   v0.4 browser acceptance are the remaining gates for this batch.
+
+
+## Completed batch 6 — durable one-use pairing
+
+Updated: 2026-07-29
+
+- Extended unused Gamma pairing-code validity from 15 minutes to 72 hours.
+- Kept redemption strictly one-use and server-enforced.
+- Creating a new code now expires the previous unused code for that live session.
+- Added day/hour countdown labels and aligned the Remote, extension and acceptance tests.
