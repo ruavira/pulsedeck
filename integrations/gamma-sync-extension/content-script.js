@@ -68,7 +68,10 @@ function preparePulseDeckOverlay(embedUrl, trustedOrigin) {
     host.dataset.mode = 'side';
     host.setAttribute('aria-label', 'PulseDeck live interaction');
     host.setAttribute('aria-hidden', 'true');
-    host.style.cssText = 'all:initial;position:fixed;z-index:2147483646;pointer-events:none';
+    // Keep the host isolated without an inline `all` reset. Inline `all: initial`
+    // wins over the shadow stylesheet's :host rules and leaves a supposedly
+    // hidden overlay visible even after data-visible changes to false.
+    host.style.cssText = 'position:fixed;z-index:2147483646;pointer-events:none';
     const shadow = host.attachShadow({ mode: 'open' });
     shadow.innerHTML = `
       <style>
