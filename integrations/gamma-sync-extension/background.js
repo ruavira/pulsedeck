@@ -314,12 +314,19 @@ async function redeemPairingCode(pairingCode, origin = DEFAULT_PULSEDECK_ORIGIN)
   return { origin, ...body };
 }
 
-async function configureController(controllerAuth, owner) {
+function validateGammaOwner(owner) {
   if (!Number.isInteger(owner?.tabId) || !owner?.gammaUrl) {
     throw new Error('Open the mapped Gamma presentation before connecting.');
   }
   const gammaLocation = parseGammaUrl(owner.gammaUrl);
-  if (!gammaLocation) throw new Error('The active tab is not a supported Gamma presentation.');
+  if (!gammaLocation) {
+    throw new Error('Refresh the Gamma tab, select a card, then open Gamma Sync again. Your pairing code was not used.');
+  }
+  return gammaLocation;
+}
+
+async function configureController(controllerAuth, owner) {
+  const gammaLocation = validateGammaOwner(owner);
 
   if (!controllerAuth?.controllerToken || !controllerAuth?.sessionId || !controllerAuth?.origin) {
     throw new Error('PulseDeck did not return a valid scoped controller.');
@@ -412,11 +419,13 @@ async function configureController(controllerAuth, owner) {
 }
 
 async function configureFromRemoteUrl(remoteUrl, owner) {
+  validateGammaOwner(owner);
   const controller = await exchangeRemoteUrl(remoteUrl);
   return await configureController({ ...controller, pairingMode: 'remote-exchange' }, owner);
 }
 
 async function configureFromPairingCode(pairingCode, origin, owner) {
+  validateGammaOwner(owner);
   const controller = await redeemPairingCode(pairingCode, origin);
   return await configureController({ ...controller, pairingMode: 'pairing-code' }, owner);
 }
