@@ -9,6 +9,16 @@ interface PairingResult {
 }
 
 function countdownLabel(seconds: number): string {
+  if (seconds >= 86_400) {
+    const days = Math.floor(seconds / 86_400);
+    const hours = Math.floor((seconds % 86_400) / 3_600);
+    return `${days}d ${hours}h`;
+  }
+  if (seconds >= 3_600) {
+    const hours = Math.floor(seconds / 3_600);
+    const minutes = Math.floor((seconds % 3_600) / 60);
+    return `${hours}h ${minutes}m`;
+  }
   const minutes = Math.floor(seconds / 60);
   const remainder = String(seconds % 60).padStart(2, '0');
   return `${minutes}:${remainder}`;
@@ -41,7 +51,8 @@ export function GammaSyncCard({
         <Pill tone="accent">Secure pairing</Pill>
       </div>
       <p className="mt-1 text-sm leading-relaxed text-fg-dim">
-        Pair Chrome with a 15-minute, one-use code. Your full presenter key never enters the extension.
+        Pair Chrome with a 72-hour, one-use code. Creating a new code invalidates the previous unused code.
+        Your full presenter key never enters the extension.
       </p>
       {pairing && seconds > 0 ? (
         <div className="mt-3 rounded-2xl border border-cyan/35 bg-cyan/10 p-4 text-center">
