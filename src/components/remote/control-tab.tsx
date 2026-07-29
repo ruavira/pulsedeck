@@ -18,6 +18,7 @@ import {
 import { useResponseTotal } from './use-remote-polls';
 import { PanicBar } from './panic-bar';
 import { RehearsalCard } from './rehearsal-card';
+import { GammaSyncCard } from './gamma-sync-card';
 
 // ---------- giant contextual action button ----------
 
@@ -287,6 +288,8 @@ export function ControlTab({
   advance,
   updateSettings,
   simulate,
+  resetRehearsal,
+  createGammaPairing,
 }: {
   session: PresenterSession;
   state: SessionState;
@@ -295,6 +298,8 @@ export function ControlTab({
   advance: RemoteAdvance;
   updateSettings: RemoteUpdateSettings;
   simulate: (n: number) => Promise<number | null>;
+  resetRehearsal: () => Promise<number | null>;
+  createGammaPairing: () => Promise<{ code: string; expiresAt: string } | null>;
 }) {
   const slides = session.deck.slides;
   const idx = Math.max(0, Math.min(state.currentSlideIndex, slides.length - 1));
@@ -321,7 +326,8 @@ export function ControlTab({
             start the show — the stage follows instantly.
           </p>
         </Card>
-        <RehearsalCard busy={busy} simulate={simulate} />
+        <GammaSyncCard busy={busy} createPairingCode={createGammaPairing} />
+        <RehearsalCard busy={busy} simulate={simulate} resetRehearsal={resetRehearsal} />
         <BigAction
           label="Start the show"
           sub={`${slides.length} ${slides.length === 1 ? 'slide' : 'slides'} ready`}
@@ -405,7 +411,12 @@ export function ControlTab({
 
       <PanicBar state={state} busy={busy} advance={advance} updateSettings={updateSettings} />
 
-      {extrasOpen && <RehearsalCard busy={busy} simulate={simulate} />}
+      {extrasOpen && (
+        <>
+          <GammaSyncCard busy={busy} createPairingCode={createGammaPairing} />
+          <RehearsalCard busy={busy} simulate={simulate} resetRehearsal={resetRehearsal} />
+        </>
+      )}
     </div>
   );
 }

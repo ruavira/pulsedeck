@@ -12,3 +12,8 @@ test('overlay host does not inline-reset properties controlled by shadow CSS', (
   assert.match(source, /:host\s*\([^{]*\)|:host\s*\{/);
   assert.match(source, /:host\(\[data-visible="true"\]\)/);
 });
+
+test('navigation uses IntersectionObserver instead of rescanning 204 card rectangles', () => {
+  assert.match(source, /new IntersectionObserver/);
+  assert.doesNotMatch(source, /for \(const section of document\.querySelectorAll\('\[data-card-id\]'\)\)[\s\S]{0,500}getBoundingClientRect/);
+});

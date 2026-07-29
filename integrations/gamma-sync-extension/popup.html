@@ -14,13 +14,21 @@
           <h1>Gamma Sync</h1>
           <p>PulseDeck follows the card you present.</p>
         </div>
+        <span id="extension-version" class="version" aria-label="Extension version"></span>
       </header>
 
       <section id="disconnected">
-        <label for="remote-url">PulseDeck remote URL</label>
-        <input id="remote-url" type="password" autocomplete="off" placeholder="https://…/remote/…?key=…" />
-        <button id="connect" type="button">Connect live session</button>
-        <p class="fine">The presenter key stays only in this Chrome session and is never sent to Gamma.</p>
+        <label for="pairing-code">Secure pairing code</label>
+        <input id="pairing-code" type="text" inputmode="text" autocomplete="one-time-code" maxlength="11" placeholder="ABC-DEF-GHJ" aria-describedby="pairing-help" autofocus />
+        <button id="connect-pairing" type="button">Pair this Chrome</button>
+        <p id="pairing-help" class="fine">Create a five-minute code from the PulseDeck remote. The extension receives a session-scoped controller—not your presenter key.</p>
+        <details>
+          <summary>Advanced: use a private Remote URL</summary>
+          <label for="remote-url">PulseDeck Remote URL</label>
+          <input id="remote-url" type="password" autocomplete="off" placeholder="https://…/remote/…?key=…" />
+          <button id="connect" class="secondary" type="button">Exchange URL securely</button>
+          <p class="fine">The private key is exchanged immediately for a scoped controller and is not retained.</p>
+        </details>
       </section>
 
       <section id="connected" hidden>
@@ -36,6 +44,8 @@
           <button id="sync-now" type="button">Force sync now</button>
           <button id="pause-sync" class="secondary" type="button">Pause for mobile control</button>
         </div>
+        <button id="take-control" class="warning" type="button" hidden>Take control on this Chrome</button>
+        <button id="freeze-baseline" class="secondary" type="button" hidden>Freeze this Gamma version</button>
         <div class="actions secondary-actions">
           <button id="copy-diagnostics" class="tertiary" type="button">Copy diagnostics</button>
           <button id="disconnect" class="secondary" type="button">Disconnect</button>

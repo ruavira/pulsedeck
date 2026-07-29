@@ -5,8 +5,10 @@ import {
   buildGammaMappingReport,
   buildGammaMappings,
   gammaMappingKey,
+  fingerprintGammaCards,
   mappedSlideForUrl,
   parseGammaUrl,
+  parsePairingCode,
   parseRemoteUrl,
   summarizeGammaInventory,
 } from './shared.mjs';
@@ -41,6 +43,33 @@ test('rejects untrusted deployment origins', () => {
         `https://example.com/remote/123e4567-e89b-12d3-a456-426614174000?key=${exampleKey}`,
       ),
     /trusted PulseDeck deployment/,
+  );
+});
+
+test('normalizes a short-lived pairing code without retaining separators', () => {
+  assert.equal(parsePairingCode('abc-def-ghj'), 'ABCDEFGHJ');
+  assert.throws(() => parsePairingCode('123'), /9-character pairing code/);
+});
+
+test('fingerprints Gamma order and visible content deterministically', () => {
+  const baseline = fingerprintGammaCards([
+    { cardId: 'card-one', text: ' First   prompt ' },
+    { cardId: 'card-two', text: 'Second prompt' },
+  ]);
+  assert.match(baseline, /^[0-9a-f]{16}$/);
+  assert.equal(
+    baseline,
+    fingerprintGammaCards([
+      { cardId: 'card-one', text: 'First prompt' },
+      { cardId: 'card-two', text: 'Second prompt' },
+    ]),
+  );
+  assert.notEqual(
+    baseline,
+    fingerprintGammaCards([
+      { cardId: 'card-two', text: 'Second prompt' },
+      { cardId: 'card-one', text: 'First prompt' },
+    ]),
   );
 });
 
@@ -177,6 +206,7 @@ test('preflights exact activities, preserved ids, and safe neutral content', () 
       mappedCount: 2,
       mappedActivityCount: 1,
       safeNeutralCount: 1,
+      fingerprint: null,
     },
   );
 });

@@ -1,5 +1,10 @@
 import { getAdmin, broadcast } from '@/lib/supabase/admin';
-import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
+import {
+  claimGammaLease,
+  gammaLeaseIsActive,
+  holdGammaLeaseForRemote,
+} from '@/lib/server/gamma-sync-auth';
+import { verifyPresenterAccess, unauthorized } from '@/lib/server/presenter-auth';
 import { parseLmsConfig, pushSessionToLms } from '@/lib/server/lms-bridge';
 import type { Phase, SessionStatus, Slide } from '@/lib/types';
 
@@ -21,12 +26,29 @@ const AUTO_OPEN_KINDS = new Set(['poll', 'wordcloud', 'scale', 'ranking', 'open_
 // The single mutation point for live session state. Broadcasts `state` after commit.
 export async function POST(req: Request, ctx: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await ctx.params;
-  const key = req.headers.get('x-presenter-key');
-  const deckId = await verifySessionKey(sessionId, key);
-  if (!deckId) return unauthorized();
+  const access = await verifyPresenterAccess(sessionId, req);
+  if (!access) return unauthorized();
+  const deckId = access.deckId;
 
   const body = (await req.json().catch(() => ({}))) as AdvanceBody;
   const admin = getAdmin();
+
+  if (access.kind === 'gamma') {
+    const currentLease = await gammaLeaseIsActive(sessionId, access.controllerId, admin);
+    if (!currentLease.granted) {
+      return Response.json(
+        { error: 'controller_conflict', lease: currentLease },
+        { status: 409, headers: { 'cache-control': 'no-store, max-age=0' } },
+      );
+    }
+    const renewed = await claimGammaLease(sessionId, access.controllerId, false, admin);
+    if (!renewed.granted) {
+      return Response.json(
+        { error: 'controller_conflict', lease: renewed },
+        { status: 409, headers: { 'cache-control': 'no-store, max-age=0' } },
+      );
+    }
+  }
 
   const patch: Record<string, unknown> = {};
   if (typeof body.index === 'number') {
@@ -82,6 +104,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
     serverTime: new Date().toISOString(),
   };
   await broadcast(sessionId, 'state', state);
+
+  // Any presenter-key surface (phone remote, stage keyboard, add-in) takes a
+  // short, explicit priority window. Gamma observes the conflict and enters
+  // standby instead of fighting the human operator.
+  if (access.kind === 'presenter') {
+    await holdGammaLeaseForRemote(sessionId, admin);
+  }
 
   // LMS bridge auto-push: when the session ends and the deck has a webhook
   // configured with autoPush on, deliver results before returning (serverless

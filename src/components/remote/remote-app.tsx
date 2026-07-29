@@ -216,6 +216,40 @@ export function RemoteApp({
     [busy, presenterKey, sessionId],
   );
 
+  const createGammaPairing = useCallback(async (): Promise<{ code: string; expiresAt: string } | null> => {
+    if (busy || !presenterKey) return null;
+    setBusy('gamma-pair');
+    try {
+      return await presenterPost<{ code: string; expiresAt: string }>(
+        `/api/presenter/${sessionId}/gamma-pair`,
+        presenterKey,
+        { label: 'Chrome presenter' },
+      );
+    } catch {
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  }, [busy, presenterKey, sessionId]);
+
+  const resetRehearsal = useCallback(async (): Promise<number | null> => {
+    if (busy || !presenterKey) return null;
+    setBusy('reset-rehearsal');
+    try {
+      const result = await presenterPost<{ removedParticipants: number; state?: SessionState }>(
+        `/api/presenter/${sessionId}/rehearsal/reset`,
+        presenterKey,
+        {},
+      );
+      if (result.state) setState(result.state);
+      return result.removedParticipants;
+    } catch {
+      return null;
+    } finally {
+      setBusy(null);
+    }
+  }, [busy, presenterKey, sessionId, setState]);
+
   const handleKeySubmit = useCallback(
     (key: string) => {
       storeSessionKey(sessionId, key);
@@ -315,6 +349,8 @@ export function RemoteApp({
             advance={advance}
             updateSettings={updateSettings}
             simulate={simulate}
+            resetRehearsal={resetRehearsal}
+            createGammaPairing={createGammaPairing}
           />
         </div>
         <div role="tabpanel" id="panel-qa" aria-labelledby="tab-qa" hidden={tab !== 'qa'}>
