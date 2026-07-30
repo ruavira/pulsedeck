@@ -40,11 +40,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   if (expireError) return Response.json({ error: expireError.message }, { status: 500 });
 
   const code = makePairingCode();
+  // Postgres keeps a NOT NULL expiry column for compatibility. Infinity means
+  // this one-use credential remains valid until redeemed or superseded.
   const expiresAt = 'infinity';
   const { error } = await admin.from('gamma_pairing_codes').insert({
     session_id: sessionId,
     code_hash: hashGammaSecret(code.replace(/-/g, '')),
-    label: sanitizeControllerLabel(body?.label ?? 'Trusted Chrome presenter'),
+    label: sanitizeControllerLabel(body?.label),
     expires_at: expiresAt,
   });
   if (error) return Response.json({ error: error.message }, { status: 500 });
