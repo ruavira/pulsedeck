@@ -36,10 +36,11 @@ test('acceptance kit uses compact, side, and hidden transitions deliberately', (
   assert.deepEqual(modes, { hidden: 6, compact: 3, side: 3 });
 });
 
-test('Gamma pairing codes remain one-use credentials for 72 hours', () => {
-  assert.match(pairingRoute, /const PAIRING_TTL_HOURS = 72;/);
-  assert.match(pairingRoute, /PAIRING_TTL_HOURS \* 60 \* 60_000/);
+test('Gamma pairing codes remain one-use credentials until redeemed or superseded', () => {
+  assert.match(pairingRoute, /const expiresAt = 'infinity';/);
   assert.match(pairingRoute, /code_hash: hashGammaSecret/);
+  assert.match(pairingRoute, /neverExpires: true/);
+  assert.match(pairingRoute, /trustedDevice: true/);
 });
 
 test('creating a code supersedes the earlier unused code for the same session', () => {
@@ -51,10 +52,9 @@ test('creating a code supersedes the earlier unused code for the same session', 
   assert.match(pairingRoute, /\.gt\('expires_at', now\)/);
 });
 
-test('Remote and extension explain the 72-hour one-use behavior', () => {
-  assert.match(remoteCard, /72-hour, one-use code/);
-  assert.match(remoteCard, /invalidates the previous unused code/);
-  assert.match(remoteCard, /seconds >= 86_400/);
-  assert.match(extensionPopup, /72-hour, one-use code/);
+test('Remote and extension explain the trusted-presenter one-use behavior', () => {
+  assert.match(remoteCard, /one-use pairing code that does not expire/);
+  assert.match(remoteCard, /Never expires · one use only/);
+  assert.match(extensionPopup, /never-expiring, one-use code/);
   assert.match(extensionPopup, /invalidates the previous unused code/);
 });
