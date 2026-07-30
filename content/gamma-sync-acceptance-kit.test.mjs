@@ -17,6 +17,13 @@ const extensionPopup = await readFile(
   new URL('../integrations/gamma-sync-extension/popup.html', import.meta.url),
   'utf8',
 );
+const manifest = JSON.parse(
+  await readFile(new URL('../integrations/gamma-sync-extension/manifest.json', import.meta.url), 'utf8'),
+);
+const trustedBackground = await readFile(
+  new URL('../integrations/gamma-sync-extension/trusted-background.js', import.meta.url),
+  'utf8',
+);
 
 test('acceptance kit covers twelve unique Gamma cards and six interactions', () => {
   assert.equal(kit.cards.length, 12);
@@ -57,4 +64,14 @@ test('Remote and extension explain the trusted-presenter one-use behavior', () =
   assert.match(remoteCard, /Never expires · one use only/);
   assert.match(extensionPopup, /never-expiring, one-use code/);
   assert.match(extensionPopup, /invalidates the previous unused code/);
+});
+
+test('trusted presenter state persists while tab ownership and leases reset', () => {
+  assert.equal(manifest.version, '0.7.1');
+  assert.equal(manifest.background.service_worker, 'trusted-background.js');
+  assert.match(trustedBackground, /chrome\.storage\.local\.set/);
+  assert.match(trustedBackground, /chrome\.storage\.session\.set/);
+  assert.match(trustedBackground, /ownerTabId: null/);
+  assert.match(trustedBackground, /leaseState: 'released'/);
+  assert.match(trustedBackground, /FORGET_TRUSTED_PRESENTER/);
 });
