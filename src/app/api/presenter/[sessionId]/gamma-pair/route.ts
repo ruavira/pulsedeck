@@ -6,7 +6,6 @@ import { verifySessionKey, unauthorized } from '@/lib/server/presenter-auth';
 export const runtime = 'nodejs';
 
 const PAIR_ALPHABET = '23456789ACDEFGHJKMNPQRSTUVWXYZ';
-const PAIRING_TTL_HOURS = 72;
 
 function makePairingCode(): string {
   // Rejection sampling avoids modulo bias while keeping the code easy to type.
@@ -41,7 +40,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   if (expireError) return Response.json({ error: expireError.message }, { status: 500 });
 
   const code = makePairingCode();
-  const expiresAt = new Date(Date.now() + PAIRING_TTL_HOURS * 60 * 60_000).toISOString();
+  // Postgres keeps a NOT NULL expiry column for compatibility. Infinity means
+  // this one-use credential remains valid until redeemed or superseded.
+  const expiresAt = 'infinity';
   const { error } = await admin.from('gamma_pairing_codes').insert({
     session_id: sessionId,
     code_hash: hashGammaSecret(code.replace(/-/g, '')),
@@ -50,7 +51,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ sessionId: str
   });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json(
-    { code, expiresAt },
+    { code, expiresAt: null, neverExpires: true, trustedDevice: true },
     { headers: { 'cache-control': 'no-store, max-age=0' } },
   );
 }

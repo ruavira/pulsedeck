@@ -17,6 +17,13 @@ const extensionPopup = await readFile(
   new URL('../integrations/gamma-sync-extension/popup.html', import.meta.url),
   'utf8',
 );
+const manifest = JSON.parse(
+  await readFile(new URL('../integrations/gamma-sync-extension/manifest.json', import.meta.url), 'utf8'),
+);
+const trustedBackground = await readFile(
+  new URL('../integrations/gamma-sync-extension/trusted-background.js', import.meta.url),
+  'utf8',
+);
 
 test('acceptance kit covers twelve unique Gamma cards and six interactions', () => {
   assert.equal(kit.cards.length, 12);
@@ -36,10 +43,11 @@ test('acceptance kit uses compact, side, and hidden transitions deliberately', (
   assert.deepEqual(modes, { hidden: 6, compact: 3, side: 3 });
 });
 
-test('Gamma pairing codes remain one-use credentials for 72 hours', () => {
-  assert.match(pairingRoute, /const PAIRING_TTL_HOURS = 72;/);
-  assert.match(pairingRoute, /PAIRING_TTL_HOURS \* 60 \* 60_000/);
+test('Gamma pairing codes remain one-use credentials until redeemed or superseded', () => {
+  assert.match(pairingRoute, /const expiresAt = 'infinity';/);
   assert.match(pairingRoute, /code_hash: hashGammaSecret/);
+  assert.match(pairingRoute, /neverExpires: true/);
+  assert.match(pairingRoute, /trustedDevice: true/);
 });
 
 test('creating a code supersedes the earlier unused code for the same session', () => {
@@ -51,10 +59,19 @@ test('creating a code supersedes the earlier unused code for the same session', 
   assert.match(pairingRoute, /\.gt\('expires_at', now\)/);
 });
 
-test('Remote and extension explain the 72-hour one-use behavior', () => {
-  assert.match(remoteCard, /72-hour, one-use code/);
-  assert.match(remoteCard, /invalidates the previous unused code/);
-  assert.match(remoteCard, /seconds >= 86_400/);
-  assert.match(extensionPopup, /72-hour, one-use code/);
+test('Remote and extension explain the trusted-presenter one-use behavior', () => {
+  assert.match(remoteCard, /one-use pairing code that does not expire/);
+  assert.match(remoteCard, /Never expires · one use only/);
+  assert.match(extensionPopup, /never-expiring, one-use code/);
   assert.match(extensionPopup, /invalidates the previous unused code/);
+});
+
+test('trusted presenter state persists while tab ownership and leases reset', () => {
+  assert.equal(manifest.version, '0.7.1');
+  assert.equal(manifest.background.service_worker, 'trusted-background.js');
+  assert.match(trustedBackground, /chrome\.storage\.local\.set/);
+  assert.match(trustedBackground, /chrome\.storage\.session\.set/);
+  assert.match(trustedBackground, /ownerTabId: null/);
+  assert.match(trustedBackground, /leaseState: 'released'/);
+  assert.match(trustedBackground, /FORGET_TRUSTED_PRESENTER/);
 });
