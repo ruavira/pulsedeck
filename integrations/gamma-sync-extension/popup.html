@@ -18,10 +18,10 @@
       </header>
 
       <section id="disconnected">
-        <label for="pairing-code">Secure pairing code</label>
+        <label for="pairing-code">Trusted presenter code</label>
         <input id="pairing-code" type="text" inputmode="text" autocomplete="one-time-code" maxlength="11" placeholder="ABC-DEF-GHJ" aria-describedby="pairing-help" autofocus />
-        <button id="connect-pairing" type="button">Pair this Chrome</button>
-        <p id="pairing-help" class="fine">Create a 72-hour, one-use code from the PulseDeck remote. Creating a new code invalidates the previous unused code. The extension receives a session-scoped controller—not your presenter key.</p>
+        <button id="connect-pairing" type="button">Trust this Chrome</button>
+        <p id="pairing-help" class="fine">Create a never-expiring, one-use code from the PulseDeck remote. Redeeming it gives this Chrome a revocable, session-scoped controller—not your presenter key. Creating a new unused code invalidates the previous unused code.</p>
         <details>
           <summary>Advanced: use a private Remote URL</summary>
           <label for="remote-url">PulseDeck Remote URL</label>
