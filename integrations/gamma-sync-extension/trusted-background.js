@@ -1,3 +1,5 @@
+import './background.js';
+
 const CONNECTION_KEY = 'pulseDeckGammaSyncConnection';
 const TRUSTED_KEY = 'pulseDeckGammaSyncTrustedConnection';
 
@@ -31,10 +33,9 @@ async function persistTrustedConnection(connection) {
   if (trusted) await chrome.storage.local.set({ [TRUSTED_KEY]: trusted });
 }
 
-// Restore the trusted credential before the normal background controller starts.
-// This uses supported storage APIs instead of replacing Chrome's API methods.
-await restoreTrustedConnection();
-
+// Manifest V3 event listeners must be registered synchronously during worker
+// startup. The original controller is imported above, then these trusted-device
+// listeners are registered before any asynchronous storage restoration begins.
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName !== 'session') return;
   const connection = changes[CONNECTION_KEY]?.newValue;
@@ -69,4 +70,5 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return undefined;
 });
 
-await import('./background.js');
+// Restore a previously trusted credential without delaying event registration.
+void restoreTrustedConnection();
