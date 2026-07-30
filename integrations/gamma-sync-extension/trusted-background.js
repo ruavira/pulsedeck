@@ -49,8 +49,6 @@ sessionArea.set = async function patchedSet(items) {
   return result;
 };
 
-// Runtime cleanup releases the lease and clears only transient state. The
-// trusted credential remains until the presenter explicitly forgets the device.
 sessionArea.remove = async function patchedRemove(keys) {
   return await sessionRemove(keys);
 };
